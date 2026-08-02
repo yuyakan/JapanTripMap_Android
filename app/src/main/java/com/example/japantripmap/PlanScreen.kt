@@ -104,10 +104,12 @@ private fun PlanListScreen(
     var showCreate by remember { mutableStateOf(false) }
 
     Scaffold(
+        containerColor = AppTheme.Background,
         topBar = {
             TopAppBar(
+                modifier = Modifier.drawBottomHairline(),
                 title = { Text("マイプラン", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFF3E9)),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.TopBar),
             )
         },
         floatingActionButton = {
@@ -165,7 +167,7 @@ private fun PlanRow(plan: TravelPlan, onClick: () -> Unit, onDelete: () -> Unit)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(12.dp))
+            .appCard(corner = 12.dp)
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -194,8 +196,10 @@ private fun PlanDetailScreen(
     var editingBlock by remember { mutableStateOf<TimeBlock?>(null) }
 
     Scaffold(
+        containerColor = AppTheme.Background,
         topBar = {
             TopAppBar(
+                modifier = Modifier.drawBottomHairline(),
                 title = { Text(plan.title, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -218,7 +222,7 @@ private fun PlanDetailScreen(
                         Icon(Icons.Filled.Edit, contentDescription = "編集", tint = PlanAccent)
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFF3E9)),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.TopBar),
             )
         },
         floatingActionButton = {
@@ -405,7 +409,7 @@ private fun PlanItemRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(12.dp))
+            .appCard(corner = 12.dp)
             .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -669,7 +673,7 @@ private fun DayControlCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(12.dp))
+            .appCard(corner = 12.dp)
             .padding(14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

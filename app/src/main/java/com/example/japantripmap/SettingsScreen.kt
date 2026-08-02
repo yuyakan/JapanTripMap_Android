@@ -135,7 +135,7 @@ fun SettingsScreen(
                         color = Color.Gray,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color(0xFFF2F2F2))
+                            .background(Color(0xFFF7F7F9))
                             .padding(horizontal = 16.dp, vertical = 6.dp),
                     )
                 }

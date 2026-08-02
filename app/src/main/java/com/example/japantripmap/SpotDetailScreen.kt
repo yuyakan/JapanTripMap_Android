@@ -56,6 +56,8 @@ data class SpotDetail(
     val icon: ImageVector,
     val description: String,
     val planCategory: PlanItemCategory,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     /** ヒーローに出す写真の drawable リソース名（拡張子なし）。null なら写真なし。 */
     val photoResName: String? = null,
     /** バッジ（カテゴリ/タイプ）ラベル。null なら非表示。 */
@@ -72,8 +74,7 @@ data class SpotDetail(
 
 /**
  * 汎用の単体詳細画面。iOS 版 AttractionDetailView / GourmetDetailView / OnsenDetailView 等を統合移植。
- * ヒーローヘッダー → アクション（プランに追加＋SNS検索） → 説明 → 基本情報。
- * 地図ピンは地図 SDK 導入後に追加予定（今は Google マップを外部起動で代替）。
+ * ヒーローヘッダー → アクション（プランに追加＋SNS検索） → 地図 → 説明 → 基本情報。
  */
 @Composable
 fun SpotDetailScreen(
@@ -114,7 +115,7 @@ fun SpotDetailScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFF6F6F9))
+                    .background(AppTheme.Background)
                     .padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
@@ -122,7 +123,7 @@ fun SpotDetailScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.White, RoundedCornerShape(16.dp))
+                        .appCard()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
@@ -132,6 +133,13 @@ fun SpotDetailScreen(
                         query = detail.title,
                         tabelogArea = if (detail.tabelogKeyword != null) detail.prefecture.slug else null,
                         tabelogKeyword = detail.tabelogKeyword ?: detail.title,
+                    )
+                }
+
+                detail.mapPlace()?.let { place ->
+                    PlacesMapSection(
+                        title = "地図",
+                        places = listOf(place),
                     )
                 }
 
@@ -313,7 +321,7 @@ private fun DetailCard(content: @Composable androidx.compose.foundation.layout.C
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(16.dp))
+            .appCard()
             .padding(16.dp),
         content = content,
     )

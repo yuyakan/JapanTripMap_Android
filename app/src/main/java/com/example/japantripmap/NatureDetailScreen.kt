@@ -86,15 +86,17 @@ fun NatureDetailScreen(
     }
 
     Scaffold(
+        containerColor = AppTheme.Background,
         topBar = {
             TopAppBar(
+                modifier = Modifier.drawBottomHairline(),
                 title = { Text("${prefecture.displayName}の自然", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFEAF5EE)),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.TopBar),
             )
         },
     ) { padding ->
@@ -119,6 +121,20 @@ fun NatureDetailScreen(
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
+            item {
+                PlacesMapSection(
+                    title = "${prefecture.displayName}の自然地図",
+                    places = spots.map { s ->
+                        MapPlace(
+                            id = s.name,
+                            title = s.name,
+                            subtitle = s.description,
+                            latitude = s.latitude,
+                            longitude = s.longitude,
+                        )
+                    },
+                )
+            }
             items(spots.size) { i ->
                 val s = spots[i]
                 NatureCard(
@@ -140,6 +156,8 @@ fun NatureDetailScreen(
                                 icon = Icons.Filled.Park,
                                 description = s.description,
                                 planCategory = PlanItemCategory.NATURE,
+                                latitude = s.latitude,
+                                longitude = s.longitude,
                                 badge = natureLabel(s.type),
                                 popularity = s.popularity,
                                 infoRows = listOf("種別" to natureLabel(s.type)),
@@ -158,8 +176,7 @@ private fun NatureCard(spot: NatureSpot, onAdd: () -> Unit, onClick: () -> Unit)
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
+            .appCard()
             .clickable(onClick = onClick)
             .padding(14.dp),
     ) {

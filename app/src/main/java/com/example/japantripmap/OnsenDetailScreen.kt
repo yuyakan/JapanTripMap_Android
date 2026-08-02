@@ -91,15 +91,17 @@ fun OnsenDetailScreen(
     }
 
     Scaffold(
+        containerColor = AppTheme.Background,
         topBar = {
             TopAppBar(
+                modifier = Modifier.drawBottomHairline(),
                 title = { Text("${prefecture.displayName}の温泉", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFFFFF3E9)),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.TopBar),
             )
         },
     ) { padding ->
@@ -124,6 +126,20 @@ fun OnsenDetailScreen(
                     modifier = Modifier.padding(top = 2.dp),
                 )
             }
+            item {
+                PlacesMapSection(
+                    title = "${prefecture.displayName}の温泉地図",
+                    places = onsens.map { o ->
+                        MapPlace(
+                            id = o.name,
+                            title = o.name,
+                            subtitle = o.description,
+                            latitude = o.latitude,
+                            longitude = o.longitude,
+                        )
+                    },
+                )
+            }
             items(onsens.size) { i ->
                 val o = onsens[i]
                 OnsenCard(
@@ -145,6 +161,8 @@ fun OnsenDetailScreen(
                                 icon = Icons.Filled.Hotel,
                                 description = o.description,
                                 planCategory = PlanItemCategory.ONSEN,
+                                latitude = o.latitude,
+                                longitude = o.longitude,
                                 badge = onsenLabel(o.type),
                                 popularity = o.popularity,
                                 infoRows = listOf("泉質タイプ" to onsenLabel(o.type)),
@@ -163,8 +181,7 @@ private fun OnsenCard(onsen: Onsen, onAdd: () -> Unit, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
+            .appCard()
             .clickable(onClick = onClick)
             .padding(14.dp),
     ) {

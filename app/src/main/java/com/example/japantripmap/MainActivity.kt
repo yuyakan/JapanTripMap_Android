@@ -3,10 +3,9 @@ package com.example.japantripmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Hotel
@@ -18,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,14 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.foundation.layout.navigationBarsPadding
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             MaterialTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
+                Surface(modifier = Modifier.fillMaxSize(), color = AppTheme.Background) {
                     AppRoot()
                 }
             }
@@ -122,45 +120,47 @@ private fun AppRoot() {
         null -> Unit
     }
 
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                MainTab.entries.forEach { tab ->
-                    NavigationBarItem(
-                        selected = selectedTab == tab,
-                        onClick = { selectedTab = tab },
-                        icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = TabAccent,
-                            selectedTextColor = TabAccent,
-                            indicatorColor = TabAccent.copy(alpha = 0.12f),
-                        ),
-                    )
-                }
-            }
-        },
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
                 MainTab.PREFECTURE -> JapanMapScreen(
+                    modifier = Modifier.fillMaxSize(),
                     viewModel = tourismViewModel,
                     onOpenTourism = { detail = Detail.Tourism(it) },
                 )
                 MainTab.ONSEN -> JapanMapScreen(
+                    modifier = Modifier.fillMaxSize(),
                     viewModel = onsenViewModel,
                     onOpenTourism = { detail = Detail.Onsen(it) },
                 )
                 MainTab.NATURE -> JapanMapScreen(
+                    modifier = Modifier.fillMaxSize(),
                     viewModel = natureViewModel,
                     onOpenTourism = { detail = Detail.Nature(it) },
                 )
                 MainTab.FESTIVAL -> FestivalScreen(onOpenSpot = { spotDetail = it })
                 MainTab.PLAN -> PlanScreen(store = planStore)
+            }
+        }
+
+        NavigationBar(
+            modifier = Modifier
+                .drawTopHairline()
+                .navigationBarsPadding(),
+            containerColor = AppTheme.Background,
+        ) {
+            MainTab.entries.forEach { tab ->
+                NavigationBarItem(
+                    selected = selectedTab == tab,
+                    onClick = { selectedTab = tab },
+                    icon = { Icon(tab.icon, contentDescription = tab.label) },
+                    label = { Text(tab.label) },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = TabAccent,
+                        selectedTextColor = TabAccent,
+                        indicatorColor = TabAccent.copy(alpha = 0.12f),
+                    ),
+                )
             }
         }
     }

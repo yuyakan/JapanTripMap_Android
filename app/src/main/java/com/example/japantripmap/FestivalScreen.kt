@@ -128,8 +128,21 @@ fun FestivalScreen(
                     fw.prefecture.displayName.contains(searchText, true))
         }
     }
+    val festivalPlaces = remember(filtered) {
+        filtered.take(20).mapNotNull { fw ->
+            val lat = fw.festival.latitude ?: return@mapNotNull null
+            val lng = fw.festival.longitude ?: return@mapNotNull null
+            MapPlace(
+                id = "${fw.prefecture.name}-${fw.festival.name}",
+                title = fw.festival.name,
+                subtitle = fw.prefecture.displayName,
+                latitude = lat,
+                longitude = lng,
+            )
+        }
+    }
 
-    Column(modifier = modifier.fillMaxSize().background(Color(0xFFF7F5FA))) {
+    Column(modifier = modifier.fillMaxSize().background(AppTheme.Background)) {
         // ヘッダー。
         Text(
             text = "全国の祭り・イベント",
@@ -210,6 +223,14 @@ fun FestivalScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (festivalPlaces.isNotEmpty()) {
+                item {
+                    PlacesMapSection(
+                        title = "全国の祭り地図",
+                        places = festivalPlaces,
+                    )
+                }
+            }
             items(filtered.size) { i ->
                 val fw = filtered[i]
                 FestivalCard(fw, onClick = {
@@ -221,6 +242,8 @@ fun FestivalScreen(
                             icon = Icons.Filled.Celebration,
                             description = fw.festival.description,
                             planCategory = PlanItemCategory.FESTIVAL,
+                            latitude = fw.festival.latitude,
+                            longitude = fw.festival.longitude,
                             badge = festLabel(fw.festival.category),
                             popularity = fw.festival.scale,
                             infoRows = listOf(
@@ -262,8 +285,7 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White)
+            .appCard()
             .clickable(onClick = onClick)
             .padding(14.dp),
     ) {
@@ -313,10 +335,10 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
                 f.features.forEach { feat ->
                     Box(
                         modifier = Modifier
-                            .background(Color(0xFFF0F0F0), RoundedCornerShape(4.dp))
+                            .background(Color(0xFFF2F2F5), RoundedCornerShape(6.dp))
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
-                        Text(feat, fontSize = 11.sp, color = Color(0xFF777777))
+                        Text(feat, fontSize = 11.sp, color = AppTheme.TextSecondary)
                     }
                 }
             }
