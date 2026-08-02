@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -169,6 +171,7 @@ fun TourismDetailScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = AppTheme.TopBar,
                 ),
+                windowInsets = WindowInsets(0),
             )
         },
     ) { padding ->
@@ -176,20 +179,18 @@ fun TourismDetailScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            // 県名の大きなグラデーション見出し（中央寄せ）。
+            // 県名のグラデーション見出し（中央寄せ・コンパクト）。
             item {
                 Text(
                     text = prefecture.displayName,
-                    fontSize = 32.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     style = androidx.compose.ui.text.TextStyle(brush = HeaderGradient),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
 

@@ -1,6 +1,7 @@
 package com.example.japantripmap
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -11,19 +12,34 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.LocalFlorist
+import androidx.compose.material.icons.filled.MusicNote
+import androidx.compose.material.icons.filled.Park
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,8 +49,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -62,8 +83,29 @@ private val FESTIVAL_CATEGORY_LABELS = mapOf(
     "sakura" to "桜", "illumination" to "イルミ", "snow" to "雪",
 )
 
+/** カテゴリ -> アイコン（iOS 版 IntegratedFestivalCategory.icon の SF Symbol 相当）。 */
+private val FESTIVAL_CATEGORY_ICONS: Map<String, ImageVector> = mapOf(
+    "summer" to Icons.Filled.WbSunny,
+    "fireworks" to Icons.Filled.Celebration,
+    "traditional" to Icons.Filled.AccountBalance,
+    "dance" to Icons.Filled.MusicNote,
+    "food" to Icons.Filled.Restaurant,
+    "seasonal" to Icons.Filled.Park,
+    "religious" to Icons.Filled.AccountBalance,
+    "spring" to Icons.Filled.Park,
+    "autumn" to Icons.Filled.Park,
+    "winter" to Icons.Filled.AcUnit,
+    "sakura" to Icons.Filled.LocalFlorist,
+    "illumination" to Icons.Filled.AutoAwesome,
+    "snow" to Icons.Filled.AcUnit,
+)
+
 private fun festColor(c: String) = FESTIVAL_CATEGORY_COLORS[c] ?: Color.Gray
 private fun festLabel(c: String) = FESTIVAL_CATEGORY_LABELS[c] ?: c
+private fun festIcon(c: String) = FESTIVAL_CATEGORY_ICONS[c] ?: Icons.Filled.Celebration
+
+/** ヘッダー土台のブランドグラデーション（iOS の brandGradient オレンジ→コーラル相当）。 */
+private val BrandGradient = Brush.horizontalGradient(listOf(Color(0xFFFF9500), Color(0xFFFF3B30)))
 
 /**
  * 祭りの月表記（例: "8月", "7-8月", "4-5月"）に、指定月（"1"〜"12"）が含まれるか。
@@ -97,7 +139,7 @@ private val ALL_FESTIVALS: List<FestivalWithPref> by lazy {
 
 /**
  * 祭り・イベントタブ。iOS 版 AllFestivalsComparisonView を移植。
- * 全国の祭りをカテゴリで絞り込みつつ一覧表示する。
+ * 全国の祭りをカテゴリ・月・規模で絞り込みつつ 2 列グリッドで表示する。
  */
 @Composable
 fun FestivalScreen(
@@ -128,118 +170,96 @@ fun FestivalScreen(
                     fw.prefecture.displayName.contains(searchText, true))
         }
     }
-    val festivalPlaces = remember(filtered) {
-        filtered.take(20).mapNotNull { fw ->
-            val lat = fw.festival.latitude ?: return@mapNotNull null
-            val lng = fw.festival.longitude ?: return@mapNotNull null
-            MapPlace(
-                id = "${fw.prefecture.name}-${fw.festival.name}",
-                title = fw.festival.name,
-                subtitle = fw.prefecture.displayName,
-                latitude = lat,
-                longitude = lng,
-            )
-        }
-    }
 
     Column(modifier = modifier.fillMaxSize().background(AppTheme.Background)) {
-        // ヘッダー。
-        Text(
-            text = "全国の祭り・イベント",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 4.dp),
-        )
-        Text(
-            text = "${filtered.size} 件",
-            fontSize = 13.sp,
-            color = Color.Gray,
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
-        )
-
-        // キーワード検索。
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = { searchText = it },
-            placeholder = { Text("祭り名・県名で検索", fontSize = 14.sp) },
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-            singleLine = true,
+        // ── ブランドグラデーション土台のヘッダー（タイトル＋白カプセル検索バー） ──
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 2.dp),
-        )
+                .background(BrandGradient)
+                .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
+        ) {
+            Text(
+                text = "全国の祭り・イベント",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
+            Text(
+                text = "${filtered.size} 件",
+                fontSize = 13.sp,
+                color = Color.White.copy(alpha = 0.9f),
+                modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
+            )
+            SearchBar(
+                value = searchText,
+                onValueChange = { searchText = it },
+            )
+        }
 
-        // カテゴリフィルタ（横スクロール）。
+        // ── カテゴリフィルタ（横スクロール・アイコン付き丸ボタン） ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 4.dp),
+                .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            FilterChip("すべて", selectedCategory == null, Color(0xFF666666)) { selectedCategory = null }
+            FilterButton("すべて", selectedCategory == null, Color(0xFF8A8A8E)) { selectedCategory = null }
             categories.forEach { cat ->
-                FilterChip(festLabel(cat), selectedCategory == cat, festColor(cat)) {
+                FilterButton(festLabel(cat), selectedCategory == cat, festColor(cat), icon = festIcon(cat)) {
                     selectedCategory = if (selectedCategory == cat) null else cat
                 }
             }
         }
 
-        // 月フィルタ（横スクロール）。
+        // ── 規模フィルタ＋月フィルタ（横スクロール） ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 2.dp),
+                .padding(start = 12.dp, end = 12.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            FilterChip("全期間", selectedMonth == null, Color(0xFF666666)) { selectedMonth = null }
+            listOf(3, 4, 5).forEach { s ->
+                FilterButton("★$s 以上", minScale == s, Color(0xFFFFA000), icon = Icons.Filled.Star) {
+                    minScale = if (minScale == s) null else s
+                }
+            }
+            // 区切り。
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 2.dp)
+                    .height(20.dp)
+                    .width(1.dp)
+                    .background(AppTheme.Hairline),
+            )
+            FilterButton("全期間", selectedMonth == null, Color(0xFF4285F4)) { selectedMonth = null }
             (1..12).forEach { m ->
                 val key = m.toString()
-                FilterChip("${m}月", selectedMonth == key, Color(0xFF4285F4)) {
+                FilterButton("${m}月", selectedMonth == key, Color(0xFF4285F4)) {
                     selectedMonth = if (selectedMonth == key) null else key
                 }
             }
         }
 
-        // 規模フィルタ。
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 12.dp, vertical = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            FilterChip("規模すべて", minScale == null, Color(0xFF666666)) { minScale = null }
-            listOf(3, 4, 5).forEach { s ->
-                FilterChip("★$s 以上", minScale == s, Color(0xFFFFA000)) {
-                    minScale = if (minScale == s) null else s
-                }
-            }
-        }
-
-        LazyColumn(
+        // ── 2 列グリッドのリッチカード ──
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (festivalPlaces.isNotEmpty()) {
-                item {
-                    PlacesMapSection(
-                        title = "全国の祭り地図",
-                        places = festivalPlaces,
-                    )
-                }
-            }
-            items(filtered.size) { i ->
-                val fw = filtered[i]
+            items(filtered) { fw ->
                 FestivalCard(fw, onClick = {
                     onOpenSpot(
                         SpotDetail(
                             title = fw.festival.name,
                             prefecture = fw.prefecture,
                             accent = festColor(fw.festival.category),
-                            icon = Icons.Filled.Celebration,
+                            icon = festIcon(fw.festival.category),
                             description = fw.festival.description,
                             planCategory = PlanItemCategory.FESTIVAL,
                             latitude = fw.festival.latitude,
@@ -260,24 +280,86 @@ fun FestivalScreen(
     }
 }
 
+/** iOS 版の白カプセル型検索バー（虫眼鏡＋クリアボタン）。 */
 @Composable
-private fun FilterChip(label: String, selected: Boolean, color: Color, onClick: () -> Unit) {
-    Box(
+private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(percent = 50))
+            .background(Color.White)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.Filled.Search,
+            contentDescription = null,
+            tint = Color(0xFFFF6B2C),
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Box(modifier = Modifier.weight(1f)) {
+            if (value.isEmpty()) {
+                Text("祭り名・県名で検索", fontSize = 15.sp, color = Color(0xFFB0B0B5))
+            }
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                textStyle = TextStyle(fontSize = 15.sp, color = AppTheme.TextPrimary),
+                cursorBrush = SolidColor(Color(0xFFFF6B2C)),
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        if (value.isNotEmpty()) {
+            Icon(
+                Icons.Filled.Cancel,
+                contentDescription = "クリア",
+                tint = Color(0xFFC7C7CC),
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { onValueChange("") },
+            )
+        }
+    }
+}
+
+/** アイコン付き丸フィルタボタン（iOS 版 FilterButton 相当）。 */
+@Composable
+private fun FilterButton(
+    label: String,
+    selected: Boolean,
+    color: Color,
+    icon: ImageVector? = null,
+    onClick: () -> Unit,
+) {
+    Row(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp))
-            .background(if (selected) color else color.copy(alpha = 0.12f))
+            .background(if (selected) color else Color(0xFFF2F2F5))
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        if (icon != null) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = if (selected) Color.White else color,
+                modifier = Modifier.size(14.dp),
+            )
+            Spacer(modifier = Modifier.width(6.dp))
+        }
         Text(
             text = label,
             fontSize = 13.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (selected) Color.White else color,
+            fontWeight = FontWeight.Medium,
+            color = if (selected) Color.White else AppTheme.TextPrimary,
         )
     }
 }
 
+/** iOS 版 IntegratedFestivalCard 相当の 2 列グリッド用リッチカード。 */
 @Composable
 private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
     val f = item.festival
@@ -285,60 +367,117 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .appCard()
+            .heightIn(min = 240.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(AppTheme.CardSurface)
+            .border(1.dp, accent.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
             .clickable(onClick = onClick)
-            .padding(14.dp),
+            .padding(12.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(f.name, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.width(8.dp))
+        // ── ヘッダー: 丸アイコン + カテゴリ名/★ + 県バッジ ──
+        Row(verticalAlignment = Alignment.Top) {
             Box(
                 modifier = Modifier
-                    .background(accent.copy(alpha = 0.14f), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(Brush.linearGradient(listOf(accent.copy(alpha = 0.85f), accent))),
+                contentAlignment = Alignment.Center,
             ) {
-                Text(festLabel(f.category), fontSize = 11.sp, color = accent)
+                Icon(festIcon(f.category), null, tint = Color.White, modifier = Modifier.size(15.dp))
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                repeat(f.scale) {
-                    Icon(Icons.Filled.Star, null, tint = Color(0xFFFFC107), modifier = Modifier.size(11.dp))
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(festLabel(f.category), fontSize = 11.sp, fontWeight = FontWeight.Medium, color = accent)
+                Row {
+                    repeat(5) { i ->
+                        Icon(
+                            Icons.Filled.Star,
+                            null,
+                            tint = if (i < f.scale) Color(0xFFFFA000) else Color(0xFFE0E0E0),
+                            modifier = Modifier.size(9.dp),
+                        )
+                    }
                 }
             }
+            // 県バッジ。
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(percent = 50))
+                    .background(Color(0xFFEFEFF2))
+                    .padding(horizontal = 8.dp, vertical = 3.dp),
+            ) {
+                Text(
+                    item.prefecture.displayName,
+                    fontSize = 10.sp,
+                    color = AppTheme.TextSecondary,
+                    maxLines = 1,
+                )
+            }
         }
-        // 県・場所・時期。
-        Row(modifier = Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Place, null, tint = accent, modifier = Modifier.size(13.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                "${item.prefecture.displayName}・${f.location}",
-                fontSize = 12.sp,
-                color = Color(0xFF666666),
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text("${f.month}・${f.duration}", fontSize = 12.sp, color = Color.Gray)
-        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // ── 祭り名 ──
         Text(
-            text = f.description,
-            fontSize = 13.sp,
-            color = Color(0xFF555555),
-            modifier = Modifier.padding(top = 6.dp),
+            f.name,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = AppTheme.TextPrimary,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
         )
-        // 特徴タグ。
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // ── 説明 ──
+        Text(
+            f.description,
+            fontSize = 11.sp,
+            color = AppTheme.TextSecondary,
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // ── 詳細情報: 時期 / 期間 / 場所 ──
+        Row(modifier = Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Celebration, null, tint = Color(0xFF4285F4), modifier = Modifier.size(11.dp))
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(f.month, fontSize = 10.sp, color = Color(0xFF4285F4), maxLines = 1)
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(Icons.Filled.Schedule, null, tint = Color(0xFF3D9E66), modifier = Modifier.size(11.dp))
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(f.duration, fontSize = 10.sp, color = Color(0xFF3D9E66), maxLines = 1)
+        }
+        Row(modifier = Modifier.padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Place, null, tint = Color(0xFFD6454D), modifier = Modifier.size(11.dp))
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                f.location,
+                fontSize = 10.sp,
+                color = Color(0xFFD6454D),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+
+        // ── 特徴タグ（横スクロール、最大 3 件） ──
         if (f.features.isNotEmpty()) {
             Row(
                 modifier = Modifier
                     .padding(top = 8.dp)
                     .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                f.features.forEach { feat ->
+                f.features.take(3).forEach { feat ->
                     Box(
                         modifier = Modifier
-                            .background(Color(0xFFF2F2F5), RoundedCornerShape(6.dp))
+                            .clip(RoundedCornerShape(percent = 50))
+                            .background(accent.copy(alpha = 0.15f))
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
-                        Text(feat, fontSize = 11.sp, color = AppTheme.TextSecondary)
+                        Text(feat, fontSize = 9.sp, color = accent, maxLines = 1)
                     }
                 }
             }
