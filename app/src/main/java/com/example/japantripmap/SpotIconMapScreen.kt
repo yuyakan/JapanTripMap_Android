@@ -169,13 +169,13 @@ private fun SpotMarker(
     ) {
         Box(
             modifier = Modifier
-                .size(20.dp)
+                .size(16.dp)
                 .shadow(2.dp, CircleShape, spotColor = Color(0x33000000))
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(accent.copy(alpha = 0.85f), accent))),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(11.dp))
+            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(9.dp))
         }
     }
 }
