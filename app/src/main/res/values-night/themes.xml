@@ -1,0 +1,4 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Compose を使うので ActionBar なしのベーステーマにする（ダーク用） -->
+    <style name="Theme.JapanTripMap" parent="android:Theme.Material.NoActionBar" />
+</resources>
