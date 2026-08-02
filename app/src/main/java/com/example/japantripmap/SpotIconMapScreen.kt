@@ -3,23 +3,16 @@ package com.example.japantripmap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Forest
@@ -115,10 +108,11 @@ fun SpotIconMapScreen(
             modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
         )
 
-        // 地図（正方形）。県ポリゴン + マーカー。
+        // 地図（正方形）。県ポリゴン + マーカー。残り領域の中央に置く。
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(1f)
                 .aspectRatio(1f)
                 .padding(horizontal = 8.dp)
                 .clipToBounds(),
@@ -152,20 +146,6 @@ fun SpotIconMapScreen(
                 )
             }
         }
-
-        // 地図の下に一覧（アイコン + 名前 + 県）。
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(spots) { spot ->
-                SpotListRow(spot = spot, onClick = { onOpenSpot(spot) })
-            }
-        }
     }
 }
 
@@ -196,34 +176,6 @@ private fun SpotMarker(
             contentAlignment = Alignment.Center,
         ) {
             Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
-        }
-    }
-}
-
-/** 地図下の一覧 1 行。 */
-@Composable
-private fun SpotListRow(spot: IconSpot, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .appCard(corner = 12.dp)
-            .clickable(onClick = onClick)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(34.dp)
-                .clip(CircleShape)
-                .background(Brush.linearGradient(listOf(spot.accent.copy(alpha = 0.85f), spot.accent))),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(spot.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
-        }
-        Spacer(modifier = Modifier.width(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(spot.name, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-            Text(spot.prefecture.displayName, fontSize = 12.sp, color = AppTheme.TextSecondary)
         }
     }
 }
