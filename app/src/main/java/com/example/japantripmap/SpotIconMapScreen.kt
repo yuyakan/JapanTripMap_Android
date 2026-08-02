@@ -169,13 +169,13 @@ private fun SpotMarker(
     ) {
         Box(
             modifier = Modifier
-                .size(24.dp)
-                .shadow(3.dp, CircleShape, spotColor = Color(0x33000000))
+                .size(20.dp)
+                .shadow(2.dp, CircleShape, spotColor = Color(0x33000000))
                 .clip(CircleShape)
                 .background(Brush.linearGradient(listOf(accent.copy(alpha = 0.85f), accent))),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(13.dp))
+            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(11.dp))
         }
     }
 }
@@ -256,12 +256,15 @@ private val ONSEN_MAP_LABELS = mapOf(
     "resort" to "リゾート", "mountain" to "山あい", "seaside" to "海辺", "ski" to "スキー",
 )
 
-/** 自然タイプ -> 表示色 / アイコン（iOS 版 NatureSpotType）。 */
+/**
+ * 自然タイプ -> 表示色 / アイコン（iOS 版 NatureSpotType.color の明るいシステム色に合わせる）。
+ * 夜景=yellow, 星空=indigo, 海=sea(明るい水色), キャンプ=systemGreen。
+ */
 private val NATURE_MAP_COLORS = mapOf(
-    "night_view" to Color(0xFFD9A521),
-    "starry_sky" to Color(0xFF5C50A6),
-    "sea" to Color(0xFF2194A8),
-    "camping" to Color(0xFF3D9E66),
+    "night_view" to Color(0xFFFFCC00),
+    "starry_sky" to Color(0xFF5856D6),
+    "sea" to Color(0xFF89DAFF),
+    "camping" to Color(0xFF34C759),
 )
 
 private val NATURE_MAP_LABELS = mapOf(
