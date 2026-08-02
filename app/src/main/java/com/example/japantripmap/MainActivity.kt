@@ -128,15 +128,17 @@ private fun AppRoot() {
                     viewModel = tourismViewModel,
                     onOpenTourism = { detail = Detail.Tourism(it) },
                 )
-                MainTab.ONSEN -> JapanMapScreen(
+                MainTab.ONSEN -> SpotIconMapScreen(
                     modifier = Modifier.fillMaxSize(),
-                    viewModel = onsenViewModel,
-                    onOpenTourism = { detail = Detail.Onsen(it) },
+                    title = "全国の温泉地",
+                    spots = remember { onsenIconSpots() },
+                    onOpenSpot = { spotDetail = it.toSpotDetail() },
                 )
-                MainTab.NATURE -> JapanMapScreen(
+                MainTab.NATURE -> SpotIconMapScreen(
                     modifier = Modifier.fillMaxSize(),
-                    viewModel = natureViewModel,
-                    onOpenTourism = { detail = Detail.Nature(it) },
+                    title = "全国の自然スポット",
+                    spots = remember { natureIconSpots() },
+                    onOpenSpot = { spotDetail = it.toSpotDetail() },
                 )
                 MainTab.FESTIVAL -> FestivalScreen(onOpenSpot = { spotDetail = it })
                 MainTab.PLAN -> PlanScreen(store = planStore)
