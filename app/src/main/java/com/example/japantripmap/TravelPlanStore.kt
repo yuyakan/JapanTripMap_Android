@@ -46,6 +46,17 @@ class TravelPlanStore(app: Application) : AndroidViewModel(app) {
         persist()
     }
 
+    /** プランの並び順を入れ替える（一覧の並び替え用）。iOS 版 movePlans 相当。 */
+    fun movePlan(fromIndex: Int, toIndex: Int) {
+        if (fromIndex == toIndex) return
+        val list = plans.toMutableList()
+        if (fromIndex !in list.indices || toIndex !in list.indices) return
+        val moved = list.removeAt(fromIndex)
+        list.add(toIndex, moved)
+        plans = list
+        persist()
+    }
+
     /** 指定プランに項目を追加する。 */
     fun addItem(planId: String, item: PlanItem) {
         plans = plans.map { plan ->
