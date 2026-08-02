@@ -26,23 +26,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.CardGiftcard
-import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DirectionsTransit
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.Forest
-import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Luggage
-import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.RemoveCircleOutline
-import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Spa
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -54,6 +45,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -68,68 +60,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/**
- * マイプラン機能の共通デザインテーマ。iOS 版 PlanTheme を移植。
- * ブランドカラー（オレンジ→コーラル）と共通スタイルを一元管理する。
- */
-private object PlanTheme {
-    /** メインのオレンジ（iOS: selectedColor2 #FF5100 相当）。 */
-    val Primary = Color(0xFFFF5100)
-    /** アクセントのコーラル（iOS: selectedColor #FF5F73 相当）。 */
-    val Accent = Color(0xFFFF5F73)
-
-    /** ブランドの基調グラデーション（オレンジ→コーラル）。 */
-    val brandGradient = Brush.linearGradient(colors = listOf(Primary, Accent))
-
-    /** やわらかい背景グラデーション。 */
-    val backgroundGradient = Brush.verticalGradient(
-        colors = listOf(
-            Primary.copy(alpha = 0.06f),
-            Accent.copy(alpha = 0.04f),
-            Color(0xFFF7F7FA),
-        ),
-    )
-
-    val cardCorner = 20.dp
-}
-
-/** iOS 互換のブランドアクセント（旧 PlanAccent。詳細画面等で流用）。 */
+/** iOS 互換のブランドアクセント（旧 PlanAccent。詳細画面等で流用）。テーマ本体は PlanTheme.kt。 */
 private val PlanAccent = PlanTheme.Primary
-
-/** カテゴリ -> 色。iOS 版 PlanTheme.color(for:) を移植。 */
-private fun planCategoryColor(c: PlanItemCategory): Color = when (c) {
-    PlanItemCategory.ATTRACTION -> Color(0xFF4C8CFA)
-    PlanItemCategory.GOURMET -> Color(0xFFF27326)
-    PlanItemCategory.ONSEN -> Color(0xFFF25973)
-    PlanItemCategory.FESTIVAL -> Color(0xFFB366F2)
-    PlanItemCategory.NATURE -> Color(0xFF40B373)
-    PlanItemCategory.SOUVENIR -> Color(0xFFE68C33)
-    PlanItemCategory.HOTEL -> Color(0xFF7380D9)
-    PlanItemCategory.TRANSPORT -> Color(0xFF4CA6B3)
-    PlanItemCategory.OTHER -> Color(0xFF8C8C99)
-}
-
-/** カテゴリ -> アイコン。iOS 版 PlanItemCategory.icon（SF Symbol）を Material で近似。 */
-private fun planCategoryIcon(c: PlanItemCategory): ImageVector = when (c) {
-    PlanItemCategory.ATTRACTION -> Icons.Filled.Place
-    PlanItemCategory.GOURMET -> Icons.Filled.Restaurant
-    PlanItemCategory.ONSEN -> Icons.Filled.Spa
-    PlanItemCategory.FESTIVAL -> Icons.Filled.Celebration
-    PlanItemCategory.NATURE -> Icons.Filled.Forest
-    PlanItemCategory.SOUVENIR -> Icons.Filled.CardGiftcard
-    PlanItemCategory.HOTEL -> Icons.Filled.Hotel
-    PlanItemCategory.TRANSPORT -> Icons.Filled.DirectionsTransit
-    PlanItemCategory.OTHER -> Icons.Filled.EditNote
-}
 
 /**
  * マイプランタブ。プラン一覧 ⇄ プラン詳細を切り替える。
@@ -408,27 +347,6 @@ private fun PlanCard(
                 }
             }
         }
-    }
-}
-
-/** ブランドグラデーションの主要ボタン。iOS 版 PlanPrimaryButtonStyle を移植。 */
-@Composable
-private fun PlanPrimaryButton(text: String, icon: ImageVector? = null, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .shadow(8.dp, RoundedCornerShape(16.dp), spotColor = PlanTheme.Primary.copy(alpha = 0.3f))
-            .clip(RoundedCornerShape(16.dp))
-            .background(PlanTheme.brandGradient)
-            .clickable(onClick = onClick)
-            .padding(vertical = 14.dp, horizontal = 24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        if (icon != null) {
-            Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-        Text(text, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
     }
 }
 
@@ -837,7 +755,8 @@ private fun BlockAssignButton(blocks: List<TimeBlock>, currentBlockId: String?, 
     }
 }
 
-/** 時間ブロックの時刻・見出しを編集するダイアログ。 */
+/** 時間ブロックの時刻・見出しを編集するシート。 */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimeBlockEditDialog(
     block: TimeBlock,
@@ -849,39 +768,59 @@ private fun TimeBlockEditDialog(
     var minute by remember { mutableStateOf(block.startMinute ?: 0) }
     var title by remember { mutableStateOf(block.title) }
 
-    AlertDialog(
+    val sheetState = rememberModalBottomSheetState()
+
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("時間ブロック") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                // 時刻（時・分のステッパー）。
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("開始時刻", fontSize = 14.sp)
-                    Spacer(modifier = Modifier.weight(1f))
-                    StepperField(value = hour, range = 0..23, onChange = { hour = it }, suffix = "時")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    StepperField(value = minute, range = 0..59, step = 5, onChange = { minute = it }, suffix = "分")
-                }
-                OutlinedTextField(
-                    value = title,
-                    onValueChange = { title = it },
-                    label = { Text("見出し（任意・例: 午前）") },
-                    singleLine = true,
-                )
+        sheetState = sheetState,
+        containerColor = Color.White,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text("時間ブロック", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+
+            // 時刻（時・分のステッパー）。
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(PlanTheme.Surface2)
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("開始時刻", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.weight(1f))
+                StepperField(value = hour, range = 0..23, onChange = { hour = it }, suffix = "時")
+                Spacer(modifier = Modifier.width(8.dp))
+                StepperField(value = minute, range = 0..59, step = 5, onChange = { minute = it }, suffix = "分")
             }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onSave(block.copy(startHour = hour, startMinute = minute, title = title))
-            }) { Text("保存") }
-        },
-        dismissButton = {
-            Row {
-                TextButton(onClick = onDelete) { Text("削除", color = Color(0xFFE53935)) }
-                TextButton(onClick = onDismiss) { Text("キャンセル") }
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text("見出し（任意・例: 午前）") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            PlanPrimaryButton(
+                text = "保存",
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { onSave(block.copy(startHour = hour, startMinute = minute, title = title)) },
+            )
+            TextButton(
+                onClick = onDelete,
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = null, tint = Color(0xFFE53935), modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("このブロックを削除", color = Color(0xFFE53935))
             }
-        },
-    )
+        }
+    }
 }
 
 /** 数値の＋/−ステッパー。 */
@@ -958,7 +897,15 @@ private fun DayControlCard(
             Spacer(modifier = Modifier.width(8.dp))
             Text("日程ごとに分ける", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.weight(1f))
-            Switch(checked = dayMode, onCheckedChange = onToggle)
+            Switch(
+                checked = dayMode,
+                onCheckedChange = onToggle,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Color.White,
+                    checkedTrackColor = PlanTheme.Primary,
+                    checkedBorderColor = PlanTheme.Primary,
+                ),
+            )
         }
         if (dayMode) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0x11000000))
@@ -1062,7 +1009,8 @@ private fun EditPlanSheet(
     }
 }
 
-/** 宿泊/交通/メモを手動追加するダイアログ。iOS 版 CustomPlanItemEditor を簡略移植。 */
+/** 宿泊/交通/メモを手動追加するシート。iOS 版 CustomPlanItemEditor を簡略移植（テーマ付きボトムシート）。 */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddCustomItemDialog(
     onDismiss: () -> Unit,
@@ -1072,53 +1020,71 @@ private fun AddCustomItemDialog(
     var name by remember { mutableStateOf("") }
     var detail by remember { mutableStateOf("") }
     val customCategories = listOf(PlanItemCategory.HOTEL, PlanItemCategory.TRANSPORT, PlanItemCategory.OTHER)
+    val sheetState = rememberModalBottomSheetState()
 
-    AlertDialog(
+    ModalBottomSheet(
         onDismissRequest = onDismiss,
-        title = { Text("項目を追加") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // 種別選択（チップ）。
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    customCategories.forEach { c ->
-                        val selected = category == c
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(
-                                    if (selected) planCategoryColor(c) else planCategoryColor(c).copy(alpha = 0.12f),
-                                )
-                                .clickable { category = c }
-                                .padding(horizontal = 14.dp, vertical = 6.dp),
-                        ) {
-                            Text(
-                                c.label,
-                                fontSize = 13.sp,
-                                color = if (selected) Color.White else planCategoryColor(c),
-                            )
-                        }
+        sheetState = sheetState,
+        containerColor = Color.White,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Text("項目を追加", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+
+            // 種別選択（アイコン付きチップ）。
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                customCategories.forEach { c ->
+                    val selected = category == c
+                    val color = planCategoryColor(c)
+                    Row(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(if (selected) color else color.copy(alpha = 0.12f))
+                            .clickable { category = c }
+                            .padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            planCategoryIcon(c),
+                            contentDescription = null,
+                            tint = if (selected) Color.White else color,
+                            modifier = Modifier.size(15.dp),
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            c.label,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if (selected) Color.White else color,
+                        )
                     }
                 }
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("タイトル") },
-                    singleLine = true,
-                )
-                OutlinedTextField(
-                    value = detail,
-                    onValueChange = { detail = it },
-                    label = { Text("メモ（任意）") },
-                )
             }
-        },
-        confirmButton = {
-            TextButton(
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("タイトル") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = detail,
+                onValueChange = { detail = it },
+                label = { Text("メモ（任意）") },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            PlanPrimaryButton(
+                text = "追加",
+                icon = Icons.Filled.Add,
+                enabled = name.isNotBlank(),
+                modifier = Modifier.fillMaxWidth(),
                 onClick = { if (name.isNotBlank()) onAdd(category, name, detail) },
-            ) { Text("追加") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("キャンセル") }
-        },
-    )
+            )
+        }
+    }
 }
