@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.navigationBarsPadding
 
@@ -73,18 +74,20 @@ private fun AppRoot() {
     // 個別スポット詳細（一覧詳細のさらに上に重ねる）。null なら非表示。
     var spotDetail by remember { mutableStateOf<SpotDetail?>(null) }
 
-    // タブごとに別インスタンス（対象県・重みを独立管理）。
+    // 都道府県ルーレット（全国モード）。
     val tourismViewModel: RouletteViewModel = viewModel(
         key = "tourism",
         factory = RouletteViewModel.factory(RouletteMode.TOURISM),
     )
-    val onsenViewModel: RouletteViewModel = viewModel(
-        key = "onsen",
-        factory = RouletteViewModel.factory(RouletteMode.ONSEN),
+    // 温泉・自然はスポット単位ルーレット（設定・重みを端末に永続化）。
+    val application = LocalContext.current.applicationContext as android.app.Application
+    val onsenViewModel: SpotRouletteViewModel = viewModel(
+        key = "onsen_spot",
+        factory = SpotRouletteViewModel.factory(application, SpotKind.ONSEN),
     )
-    val natureViewModel: RouletteViewModel = viewModel(
-        key = "nature",
-        factory = RouletteViewModel.factory(RouletteMode.NATURE),
+    val natureViewModel: SpotRouletteViewModel = viewModel(
+        key = "nature_spot",
+        factory = SpotRouletteViewModel.factory(application, SpotKind.NATURE),
     )
     val planStore: TravelPlanStore = viewModel()
 
@@ -128,16 +131,14 @@ private fun AppRoot() {
                     viewModel = tourismViewModel,
                     onOpenTourism = { detail = Detail.Tourism(it) },
                 )
-                MainTab.ONSEN -> SpotIconMapScreen(
+                MainTab.ONSEN -> SpotRouletteScreen(
                     modifier = Modifier.fillMaxSize(),
-                    title = "全国の温泉地",
-                    spots = remember { onsenIconSpots() },
+                    viewModel = onsenViewModel,
                     onOpenSpot = { spotDetail = it.toSpotDetail() },
                 )
-                MainTab.NATURE -> SpotIconMapScreen(
+                MainTab.NATURE -> SpotRouletteScreen(
                     modifier = Modifier.fillMaxSize(),
-                    title = "全国の自然スポット",
-                    spots = remember { natureIconSpots() },
+                    viewModel = natureViewModel,
                     onOpenSpot = { spotDetail = it.toSpotDetail() },
                 )
                 MainTab.FESTIVAL -> FestivalScreen(onOpenSpot = { spotDetail = it })

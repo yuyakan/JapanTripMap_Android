@@ -103,10 +103,9 @@ fun PlacesMapSection(
         )
     }
 
+    // 外枠（カード）は付けず、地図は左右16dpの均等スペース＋角丸で大きめに表示する。
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .appCard(),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         if (title != null) {
@@ -118,16 +117,12 @@ fun PlacesMapSection(
             )
         }
 
+        // 地図は左右8dpの均等マージン・高さ 280dp・角丸14dp。見切れないよう親内に収める。
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(220.dp)
-                .padding(
-                    start = 16.dp,
-                    end = 16.dp,
-                    top = if (title == null) 14.dp else 0.dp,
-                    bottom = if (showSelectedPlace) 0.dp else 14.dp,
-                )
+                .padding(horizontal = 8.dp)
+                .height(280.dp)
                 .clip(RoundedCornerShape(14.dp)),
         ) {
             GoogleMap(
