@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,13 +18,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.ExpandMore
@@ -37,13 +37,8 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +47,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -130,7 +126,6 @@ private const val INITIAL_GRID_COUNT = 4
  * グラデーション県名 → 観光地図 + 横スクロール観光カード → ご当地グルメ（2列リッチカード）
  * → 温泉 → お土産 → フォトギャラリー をリスト表示する。
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TourismDetailScreen(
     prefecture: Prefecture,
@@ -159,31 +154,16 @@ fun TourismDetailScreen(
         )
     }
 
-    Scaffold(
-        containerColor = AppTheme.Background,
-        topBar = {
-            TopAppBar(
-                modifier = Modifier.drawBottomHairline(),
-                title = { },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = AppTheme.TopBar,
-                ),
-                windowInsets = WindowInsets(0),
-            )
-        },
-    ) { padding ->
+    // ヘッダーは持たず、戻るボタンを左上にフローティングで重ねる（iOS 版 TourismDetailView 準拠）。
+    Box(modifier = Modifier.fillMaxSize().background(AppTheme.Background)) {
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
+            // 戻るボタン + 県名の分だけ上部に余白を確保する（ステータスバー + フローティング分）。
+            item { Spacer(modifier = Modifier.statusBarsPadding().height(44.dp)) }
+
             // 県名のグラデーション見出し（中央寄せ・コンパクト）。
             item {
                 Text(
@@ -438,6 +418,38 @@ fun TourismDetailScreen(
             // 最下部の余白。
             item { Spacer(modifier = Modifier.height(24.dp)) }
         }
+
+        // 戻るボタン（左上フローティング・白い角丸ピル）。iOS 版のフローティング戻るボタンを再現。
+        FloatingBackButton(
+            onBack = onBack,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(start = 16.dp, top = 10.dp),
+        )
+    }
+}
+
+/** 左上に浮かぶ白い角丸ピルの戻るボタン（chevron + 「戻る」）。 */
+@Composable
+private fun FloatingBackButton(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier
+            .shadow(3.dp, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .clickable(onClick = onBack)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            Icons.AutoMirrored.Filled.ArrowBackIos,
+            contentDescription = "戻る",
+            tint = Color.Black,
+            modifier = Modifier.size(14.dp),
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text("戻る", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color.Black)
     }
 }
 
