@@ -70,7 +70,18 @@ data class PlanItem(
     val dayNumber: Int? = null,
     /** 所属する時間ブロックの id。null はブロック未割当。 */
     val timeBlockId: String? = null,
-)
+    /** カスタム項目（宿泊/交通/メモ）の緯度。null なら位置なし。iOS 版 customLatitude 相当。 */
+    val latitude: Double? = null,
+    /** カスタム項目の経度。 */
+    val longitude: Double? = null,
+    /** 検索で選んだ施設名（表示・マップ起動ラベル用）。iOS 版 customPlaceName 相当。 */
+    val placeName: String? = null,
+    /** 逆ジオ/検索由来の住所（表示・コピー用）。iOS 版 customAddress 相当。 */
+    val address: String? = null,
+) {
+    /** カスタム項目に位置が設定されているか。 */
+    val hasCoordinate: Boolean get() = latitude != null && longitude != null
+}
 
 /**
  * 1 つの旅行プラン（旅のしおり）。順序を持つ PlanItem のリストを保持する。
@@ -120,4 +131,11 @@ data class TravelPlan(
         if (noBlock.isNotEmpty() || blocks.isEmpty()) result.add(null to noBlock)
         return result
     }
+
+    /**
+     * 指定日の項目を「訪問順」に一列で返す（iOS 版 orderedItems(forDay:) 相当）。
+     * 時間ブロックを開始時刻順に並べ、各ブロック内は手動並び、時刻なし・未割当は末尾。
+     * 詳細リスト（blockSections）と同じ順序なので、地図の経路もリスト表示と一致する。
+     */
+    fun orderedItems(day: Int): List<PlanItem> = blockSections(day).flatMap { it.second }
 }

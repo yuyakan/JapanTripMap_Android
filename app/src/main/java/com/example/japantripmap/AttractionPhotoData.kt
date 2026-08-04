@@ -2,8 +2,12 @@ package com.example.japantripmap
 
 /**
  * 観光スポットの日本語名 -> drawable リソース名（拡張子なし）の対応表。
- * iOS 版 AttractionPhoto（Assets.xcassets/Attractions の CC0 実写画像）を移植。
- * 画像は res/drawable/attraction_*.jpg。クレジット不要（全て CC0）。
+ * iOS 版 AttractionPhoto（Assets.xcassets/Attractions の実写画像）を移植。
+ * 画像は res/drawable/attraction_*.jpg。
+ *
+ * 一部は CC0 / パブリックドメインだが、CC BY ライセンスの作品も含まれる。
+ * CC BY は帰属表示が必須なので、[PHOTO_CREDITS_TEXT] にまとめて表示している
+ * （マイプランタブ末尾の「フォトクレジット」導線 → [PhotoCreditsScreen]）。
  */
 val ATTRACTION_PHOTOS: Map<String, String> = mapOf(
     "お台場" to "attraction_odaiba",

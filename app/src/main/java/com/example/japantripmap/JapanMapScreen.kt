@@ -38,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -120,6 +121,12 @@ fun JapanMapScreen(
                 Spacer(modifier = Modifier.height(48.dp))
             }
 
+            // 温泉・自然タブが常に確保しているタイプチップ行（22dp）と同じ高さを都道府県でも確保し、
+            // ヘッダー高さを揃えて 3 タブで地図の縦位置を一致させる。
+            if (!isBusy && !viewModel.showResultModal) {
+                Spacer(modifier = Modifier.height(22.dp))
+            }
+
             // 地図＋県名を縦方向中央に寄せる。
             Spacer(modifier = Modifier.weight(1f))
 
@@ -131,9 +138,13 @@ fun JapanMapScreen(
                     // スピン中・停止中・結果表示中はタップ無効（iOS 版と同じ）。
                     if (!isBusy && !viewModel.showResultModal) onOpenTourism(pref)
                 },
+                // 温泉・自然タブの SpotMap と同じサイズ指定（横 8dp パディング＋clipToBounds）に
+                // 揃えて、3 タブで日本地図の描画位置・大きさを一致させる。
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .padding(horizontal = 8.dp)
+                    .clipToBounds(),
             )
 
             // スピン中／停止中に選択県名を大きく表示。

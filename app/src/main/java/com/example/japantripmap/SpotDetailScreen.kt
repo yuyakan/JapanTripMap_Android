@@ -22,7 +22,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.EditLocation
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
@@ -73,17 +75,65 @@ data class SpotDetail(
 )
 
 /**
+ * プラン経由で詳細を開いたときの文脈。iOS 版 PlanLocatableDetailView の位置編集機能に対応。
+ * この項目（planItem）が属するプラン planId を持ち、グルメ・お土産に「位置を追加」機能を付ける。
+ */
+data class SpotPlanContext(
+    val planId: String,
+    val planItem: PlanItem,
+)
+
+/**
  * 汎用の単体詳細画面。iOS 版 AttractionDetailView / GourmetDetailView / OnsenDetailView 等を統合移植。
  * ヒーローヘッダー → アクション（プランに追加＋SNS検索） → 地図 → 説明 → 基本情報。
+ *
+ * planContext が渡され、かつグルメ・お土産（元データに座標を持たない）の場合は、
+ * iOS 版と同じく右下に「位置を追加」ボタンを出し、設定した位置を地図カードとして表示する。
  */
 @Composable
 fun SpotDetailScreen(
     detail: SpotDetail,
     store: TravelPlanStore,
     onClose: () -> Unit,
+    planContext: SpotPlanContext? = null,
 ) {
     val context = LocalContext.current
     var showAddDialog by remember { mutableStateOf(false) }
+
+    // プラン経由 かつ 元データに座標が無いカテゴリ（グルメ・お土産）でのみ位置編集を許可する。
+    // iOS 版 allowsLocation（allowsUserCoordinate && !isCustom）に対応。
+    val allowsLocation = planContext != null &&
+        detail.planCategory in setOf(PlanItemCategory.GOURMET, PlanItemCategory.SOUVENIR)
+    // store から最新の項目を追う（位置の保存後に地図カードへ即反映するため）。
+    val plans = store.plans
+    val currentItem = remember(plans, planContext?.planItem?.id) {
+        planContext?.let { ctx ->
+            store.plan(ctx.planId)?.items?.firstOrNull { it.id == ctx.planItem.id } ?: ctx.planItem
+        }
+    }
+    var showLocationPicker by remember { mutableStateOf(false) }
+
+    // 位置ピッカー表示中は最前面に全画面で出す（ボトムシートと違い確実に前面へ）。
+    if (showLocationPicker && currentItem != null && planContext != null) {
+        LocationPickerScreen(
+            initialLat = currentItem.latitude,
+            initialLng = currentItem.longitude,
+            onCancel = { showLocationPicker = false },
+            onPick = { lat, lng, resolvedAddress ->
+                store.updateItem(
+                    planContext.planId,
+                    currentItem.copy(
+                        latitude = lat,
+                        longitude = lng,
+                        placeName = null, // 手動ピンでは施設名を持たない（住所を主表示に使う）
+                        address = resolvedAddress,
+                    ),
+                )
+                showLocationPicker = false
+            },
+        )
+        return
+    }
 
     if (showAddDialog) {
         AddToPlanDialog(
@@ -141,6 +191,12 @@ fun SpotDetailScreen(
                         title = "地図",
                         places = listOf(place),
                     )
+                }
+
+                // プランで位置を設定したグルメ・お土産は、その位置を地図カードで表示する
+                // （iOS 版 PlanItemPlaceMap 相当）。
+                if (allowsLocation && currentItem?.hasCoordinate == true) {
+                    PlanItemLocationCard(item = currentItem, accent = detail.accent)
                 }
 
                 // 説明カード。
@@ -210,6 +266,29 @@ fun SpotDetailScreen(
             contentAlignment = Alignment.Center,
         ) {
             Icon(Icons.Filled.Close, contentDescription = "閉じる", tint = detail.accent, modifier = Modifier.size(18.dp))
+        }
+
+        // 位置を追加/変更ボタン（右下フローティング・グルメ/お土産のみ）。
+        // iOS 版 PlanLocatableDetailView の circleButton（56pt）に対応。
+        if (allowsLocation) {
+            val hasLocation = currentItem?.hasCoordinate == true
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp)
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(detail.accent)
+                    .clickable { showLocationPicker = true },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    if (hasLocation) Icons.Filled.EditLocation else Icons.Filled.AddLocationAlt,
+                    contentDescription = if (hasLocation) "位置を変更" else "位置を追加",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
         }
     }
 }

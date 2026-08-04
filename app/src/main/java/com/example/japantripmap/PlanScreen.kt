@@ -1,8 +1,14 @@
 package com.example.japantripmap
 
+import android.content.ClipData
 import android.content.Intent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.draganddrop.dragAndDropSource
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,18 +30,18 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.RemoveCircleOutline
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -58,6 +64,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.DragAndDropTransferData
+import androidx.compose.ui.draganddrop.mimeTypes
+import androidx.compose.ui.draganddrop.toAndroidDragEvent
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -70,6 +82,52 @@ import androidx.compose.ui.unit.sp
 /** iOS 互換のブランドアクセント（旧 PlanAccent。詳細画面等で流用）。テーマ本体は PlanTheme.kt。 */
 private val PlanAccent = PlanTheme.Primary
 
+/** ドラッグ&ドロップで項目 id を運ぶための MIME タイプ。 */
+private const val PLAN_ITEM_MIME = "text/plain"
+
+/**
+ * 日程モードのドロップ先。ドロップされた項目を移動先の day / block に割り当て、
+ * targetItemId が指定されていればその直前へ並べ替える（null なら末尾）。
+ * onEnter/onExit でハイライト状態を更新する。
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private fun Modifier.planDropTarget(
+    store: TravelPlanStore,
+    planId: String,
+    day: Int?,
+    blockId: String?,
+    targetItemId: String?,
+    onHover: (Boolean) -> Unit,
+): Modifier = composed {
+    val callback = remember(planId, day, blockId, targetItemId) {
+        object : DragAndDropTarget {
+            override fun onDrop(event: DragAndDropEvent): Boolean {
+                val dropped = event.toAndroidDragEvent().clipData
+                    ?.takeIf { it.itemCount > 0 }
+                    ?.getItemAt(0)?.text?.toString()
+                    ?: return false
+                if (dropped == targetItemId) return false
+                // 割当（日 → ブロック）を先に更新してから並べ替える。
+                store.assignItemToDay(planId, dropped, day)
+                if (day != null) store.assignItemToBlock(planId, dropped, blockId)
+                store.moveItemBefore(planId, dropped, targetItemId)
+                onHover(false)
+                return true
+            }
+
+            override fun onEntered(event: DragAndDropEvent) { onHover(true) }
+            override fun onExited(event: DragAndDropEvent) { onHover(false) }
+            override fun onEnded(event: DragAndDropEvent) { onHover(false) }
+        }
+    }
+    dragAndDropTarget(
+        shouldStartDragAndDrop = { event ->
+            event.mimeTypes().contains(PLAN_ITEM_MIME)
+        },
+        target = callback,
+    )
+}
+
 /**
  * マイプランタブ。プラン一覧 ⇄ プラン詳細を切り替える。
  * iOS 版 MyPlansView / PlanDetailView を移植（中核）。
@@ -77,18 +135,108 @@ private val PlanAccent = PlanTheme.Primary
 @Composable
 fun PlanScreen(store: TravelPlanStore) {
     var openPlanId by remember { mutableStateOf<String?>(null) }
+    // 項目タップで開く詳細（アプリ項目 = SpotDetail、カスタム項目 = PlanItem）。プラン詳細の上に重ねる。
+    var openedSpot by remember { mutableStateOf<SpotDetail?>(null) }
+    // グルメ・お土産で「位置を追加」を出すため、開いた元のプラン項目も保持する（それ以外は null）。
+    var openedSpotItem by remember { mutableStateOf<PlanItem?>(null) }
+    var openedCustom by remember { mutableStateOf<PlanItem?>(null) }
+    // カスタム項目の詳細から「編集」を押したときに開くエディタ対象。
+    var editingCustom by remember { mutableStateOf<PlanItem?>(null) }
+    // プラン全体の地図画面を表示中か。
+    var showMap by remember { mutableStateOf(false) }
+    // フォトクレジット画面を表示中か（プラン一覧末尾の控えめな導線から開く）。
+    var showPhotoCredits by remember { mutableStateOf(false) }
 
     val current = openPlanId?.let { store.plan(it) }
+
+    // 項目を開く共通処理（詳細リスト・地図ピンの両方から使う）。
+    val openItem: (PlanItem) -> Unit = { item ->
+        if (item.category in CUSTOM_PLAN_CATEGORIES) {
+            openedCustom = item
+        } else {
+            spotDetailForPlanItem(item)?.let {
+                openedSpot = it
+                openedSpotItem = item
+            }
+        }
+    }
+
+    // 最前面：カスタム項目の編集フォーム（詳細画面から「編集」を押したとき）。全画面なので単独表示。
+    val editing = editingCustom
+    if (editing != null && current != null) {
+        CustomPlanItemSheet(
+            editing = editing,
+            onDismiss = { editingCustom = null },
+            onSave = { updated ->
+                store.updateItem(current.id, updated)
+                editingCustom = null
+                openedCustom = updated
+            },
+        )
+        return
+    }
+
+    // 次前面：カスタム項目の詳細画面。
+    val customItem = openedCustom
+    if (customItem != null && current != null) {
+        // store の最新値を反映（編集後に開いたままでも更新されるように）。
+        val latest = current.items.firstOrNull { it.id == customItem.id } ?: customItem
+        CustomPlanItemScreen(
+            item = latest,
+            onEdit = { editingCustom = latest },
+            onClose = { openedCustom = null },
+        )
+        return
+    }
+
+    // 次前面：アプリ項目の共通詳細画面。
+    val spot = openedSpot
+    if (spot != null) {
+        // グルメ・お土産は「位置を追加」を出すため、現在のプランと元項目を文脈として渡す。
+        val planContext = openedSpotItem?.let { item ->
+            current?.let { SpotPlanContext(planId = it.id, planItem = item) }
+        }
+        SpotDetailScreen(
+            detail = spot,
+            store = store,
+            onClose = {
+                openedSpot = null
+                openedSpotItem = null
+            },
+            planContext = planContext,
+        )
+        return
+    }
+
+    // 次前面：プラン全体の地図画面（ピンタップで各項目の詳細へ）。
+    if (showMap && current != null) {
+        PlanMapScreen(
+            plan = current,
+            onOpenItem = openItem,
+            onClose = { showMap = false },
+        )
+        return
+    }
+
+    // フォトクレジット画面（プラン一覧の末尾リンクから開く全画面）。
+    if (showPhotoCredits) {
+        PhotoCreditsScreen(onBack = { showPhotoCredits = false })
+        return
+    }
+
     if (current != null) {
         PlanDetailScreen(
             plan = current,
             store = store,
             onBack = { openPlanId = null },
+            onOpenItem = openItem,
+            onOpenMap = { showMap = true },
         )
     } else {
         PlanListScreen(
             store = store,
             onOpenPlan = { openPlanId = it },
+            onOpenPhotoCredits = { showPhotoCredits = true },
         )
     }
 }
@@ -98,6 +246,7 @@ fun PlanScreen(store: TravelPlanStore) {
 private fun PlanListScreen(
     store: TravelPlanStore,
     onOpenPlan: (String) -> Unit,
+    onOpenPhotoCredits: () -> Unit,
 ) {
     var showCreate by remember { mutableStateOf(false) }
     // 並び替えモード（2 件以上のとき「編集」で切り替え）。
@@ -111,7 +260,17 @@ private fun PlanListScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("マイプラン", fontWeight = FontWeight.Bold) },
+                title = {},
+                navigationIcon = {
+                    // 左上：フォトクレジット画面への控えめな情報アイコン。
+                    IconButton(onClick = onOpenPhotoCredits) {
+                        Icon(
+                            Icons.Outlined.Info,
+                            contentDescription = "写真の帰属情報",
+                            tint = AppTheme.TextSecondary,
+                        )
+                    }
+                },
                 actions = {
                     // 並び替え・削除の「編集」トグル（プランがあるとき右上に表示）。
                     if (store.plans.isNotEmpty()) {
@@ -356,10 +515,16 @@ private fun PlanDetailScreen(
     plan: TravelPlan,
     store: TravelPlanStore,
     onBack: () -> Unit,
+    onOpenItem: (PlanItem) -> Unit,
+    onOpenMap: () -> Unit,
 ) {
     val context = LocalContext.current
     var showEdit by remember { mutableStateOf(false) }
+    // カスタム項目の追加シート表示中か。addCustomDay は追加先の Day（null=フラット/未割り当て）。
     var showAddCustom by remember { mutableStateOf(false) }
+    var addCustomDay by remember { mutableStateOf<Int?>(null) }
+    // 地図に載せられる項目（座標解決できるもの）が 1 つでもあれば地図ボタンを出す。
+    val hasMappable = remember(plan) { plan.items.any { coordinateForPlanItem(it) != null } }
     // 時刻・見出し編集中の時間ブロック。null なら非表示。
     var editingBlock by remember { mutableStateOf<TimeBlock?>(null) }
 
@@ -401,9 +566,25 @@ private fun PlanDetailScreen(
             )
         },
         floatingActionButton = {
-            // カスタム項目（宿泊/交通/メモ）を手動追加。
-            FloatingActionButton(onClick = { showAddCustom = true }, containerColor = PlanTheme.Primary) {
-                Icon(Icons.Filled.Add, contentDescription = "項目を追加", tint = Color.White)
+            // iOS 版 PlanDetailView と同じく、右下フローティングは「地図で見る」。
+            // カスタム項目の追加は各セクションの「＋」ボタンから行う。
+            if (hasMappable) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .shadow(10.dp, CircleShape, spotColor = PlanTheme.Primary.copy(alpha = 0.4f))
+                        .clip(CircleShape)
+                        .background(PlanTheme.brandGradient)
+                        .clickable(onClick = onOpenMap),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Filled.Map,
+                        contentDescription = "地図で見る",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         },
     ) { padding ->
@@ -456,12 +637,10 @@ private fun PlanDetailScreen(
                 // 日程モード：Day ごとに、実日は時間ブロックで細分化して表示。
                 plan.itemsByDay.forEach { (day, dayItems) ->
                     item(key = "dayheader_${day ?: "none"}") {
-                        Text(
-                            text = if (day != null) "Day $day" else "未割り当て",
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PlanAccent,
-                            modifier = Modifier.padding(top = 8.dp, bottom = 2.dp),
+                        DayHeaderDropZone(
+                            day = day,
+                            store = store,
+                            planId = plan.id,
                         )
                     }
 
@@ -473,19 +652,21 @@ private fun PlanDetailScreen(
                                     block = block,
                                     onEdit = { editingBlock = it },
                                     onDelete = { block?.let { store.removeTimeBlock(plan.id, it.id) } },
+                                    store = store,
+                                    planId = plan.id,
+                                    day = day,
                                 )
                             }
                             items(blockItems, key = { it.id }) { item ->
                                 PlanItemRow(
                                     item = item,
                                     onRemove = { store.removeItem(plan.id, item.id) },
+                                    onClick = { onOpenItem(item) },
                                     dayMode = true,
-                                    dayCount = plan.dayCount,
-                                    currentDay = item.dayNumber,
-                                    onAssignDay = { store.assignItemToDay(plan.id, item.id, it) },
-                                    timeBlocks = plan.timeBlocks.filter { it.dayNumber == day },
-                                    currentBlockId = item.timeBlockId,
-                                    onAssignBlock = { store.assignItemToBlock(plan.id, item.id, it) },
+                                    store = store,
+                                    planId = plan.id,
+                                    currentDay = day,
+                                    currentBlockId = block?.id,
                                 )
                             }
                         }
@@ -494,6 +675,10 @@ private fun PlanDetailScreen(
                             AddTimeBlockButton(onClick = {
                                 store.addTimeBlock(plan.id, day, startHour = 9, startMinute = 0)
                             })
+                        }
+                        // この日に宿泊・交通・メモを追加（追加後この Day に割り当てる）。
+                        item(key = "addcustom_$day") {
+                            AddCustomItemButton(onClick = { addCustomDay = day; showAddCustom = true })
                         }
                     } else {
                         // 未割り当て日：時間ブロックなしでフラット表示。
@@ -511,10 +696,12 @@ private fun PlanDetailScreen(
                                 PlanItemRow(
                                     item = item,
                                     onRemove = { store.removeItem(plan.id, item.id) },
+                                    onClick = { onOpenItem(item) },
                                     dayMode = true,
-                                    dayCount = plan.dayCount,
-                                    currentDay = item.dayNumber,
-                                    onAssignDay = { store.assignItemToDay(plan.id, item.id, it) },
+                                    store = store,
+                                    planId = plan.id,
+                                    currentDay = null,
+                                    currentBlockId = null,
                                 )
                             }
                         }
@@ -522,16 +709,30 @@ private fun PlanDetailScreen(
                 }
             } else if (plan.items.isEmpty()) {
                 item {
-                    Text(
-                        "まだ項目がありません。\n観光・温泉・自然の詳細画面から「プランに追加」、\nまたは右下の＋で宿泊・交通・メモを追加できます。",
-                        color = Color.Gray,
-                        modifier = Modifier.padding(top = 40.dp),
-                    )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(top = 32.dp),
+                    ) {
+                        Text(
+                            "まだ項目がありません。\n観光・温泉・自然の詳細画面から「プランに追加」、\nまたは下のボタンで宿泊・交通・メモを追加できます。",
+                            color = Color.Gray,
+                        )
+                        // ホテル・移動などのカスタム項目は項目が無くても追加できる。
+                        AddCustomItemButton(onClick = { addCustomDay = null; showAddCustom = true })
+                    }
                 }
             } else {
                 items(plan.items.size) { i ->
                     val it = plan.items[i]
-                    PlanItemRow(it, onRemove = { store.removeItem(plan.id, it.id) })
+                    PlanItemRow(
+                        item = it,
+                        onRemove = { store.removeItem(plan.id, it.id) },
+                        onClick = { onOpenItem(it) },
+                    )
+                }
+                // フラット表示の末尾にカスタム項目追加ボタン。
+                item {
+                    AddCustomItemButton(onClick = { addCustomDay = null; showAddCustom = true })
                 }
             }
         }
@@ -551,13 +752,11 @@ private fun PlanDetailScreen(
     }
 
     if (showAddCustom) {
-        AddCustomItemDialog(
+        CustomPlanItemSheet(
             onDismiss = { showAddCustom = false },
-            onAdd = { category, name, detail ->
-                store.addItem(
-                    plan.id,
-                    PlanItem(category = category, prefectureName = "", name = name, detail = detail),
-                )
+            onSave = { item ->
+                // 各 Day セクションの「＋」から追加した場合はその日に割り当てる。
+                store.addItem(plan.id, item.copy(dayNumber = addCustomDay))
                 showAddCustom = false
             },
         )
@@ -579,23 +778,90 @@ private fun PlanDetailScreen(
     }
 }
 
+/** Day 見出し。ここへドロップするとその日の末尾へ移動（時間ブロック割当は解除）。 */
+@Composable
+private fun DayHeaderDropZone(day: Int?, store: TravelPlanStore, planId: String) {
+    var hovered by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (hovered) PlanAccent.copy(alpha = 0.12f) else Color.Transparent)
+            .planDropTarget(
+                store = store,
+                planId = planId,
+                day = day,
+                blockId = null,
+                targetItemId = null,
+                onHover = { hovered = it },
+            )
+            .padding(vertical = 6.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = if (day != null) "Day $day" else "未割り当て",
+            fontSize = 15.sp,
+            fontWeight = FontWeight.Bold,
+            color = PlanAccent,
+        )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PlanItemRow(
     item: PlanItem,
     onRemove: () -> Unit,
+    onClick: () -> Unit = {},
     dayMode: Boolean = false,
-    dayCount: Int = 1,
+    // 日程モードのドロップ先解決に必要な文脈。
+    store: TravelPlanStore? = null,
+    planId: String? = null,
     currentDay: Int? = null,
-    onAssignDay: (Int?) -> Unit = {},
-    timeBlocks: List<TimeBlock> = emptyList(),
     currentBlockId: String? = null,
-    onAssignBlock: (String?) -> Unit = {},
 ) {
     val accent = planCategoryColor(item.category)
+    var hovered by remember { mutableStateOf(false) }
+
+    // 日程モードではカードを長押しドラッグの起点にし、id をプレーンテキストで運ぶ。
+    val dragModifier = if (dayMode) {
+        Modifier.dragAndDropSource {
+            detectDragGesturesAfterLongPress(
+                onDragStart = {
+                    startTransfer(
+                        DragAndDropTransferData(
+                            ClipData.newPlainText(item.id, item.id),
+                        ),
+                    )
+                },
+                onDrag = { _, _ -> },
+            )
+        }
+    } else {
+        Modifier
+    }
+
+    // 日程モードではこのカード自体もドロップ先（＝この項目の直前へ挿入）。
+    val dropModifier = if (dayMode && store != null && planId != null) {
+        Modifier.planDropTarget(
+            store = store,
+            planId = planId,
+            day = currentDay,
+            blockId = currentBlockId,
+            targetItemId = item.id,
+            onHover = { hovered = it },
+        )
+    } else {
+        Modifier
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .then(dropModifier)
+            .then(dragModifier)
             .appCard(corner = 14.dp)
+            .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -632,28 +898,53 @@ private fun PlanItemRow(
             if (item.detail.isNotBlank()) {
                 Text(item.detail, fontSize = 12.sp, color = Color(0xFF666666), modifier = Modifier.padding(top = 2.dp))
             }
-            // 実日で時間ブロックがあるとき、所属ブロックを選べる。
-            if (dayMode && currentDay != null && timeBlocks.isNotEmpty()) {
-                BlockAssignButton(
-                    blocks = timeBlocks,
-                    currentBlockId = currentBlockId,
-                    onAssignBlock = onAssignBlock,
+            // ドロップ先ハイライト（この項目の直前に入ることを示す）。
+            if (hovered) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp)
+                        .background(PlanAccent, RoundedCornerShape(1.dp)),
                 )
             }
-        }
-        // 日程モードでは「日を選ぶ」ドロップダウン。
-        if (dayMode) {
-            DayAssignButton(dayCount = dayCount, currentDay = currentDay, onAssignDay = onAssignDay)
         }
         IconButton(onClick = onRemove) {
             Icon(Icons.Filled.Delete, contentDescription = "削除", tint = Color(0xFFBBBBBB))
         }
+        // 日程モードではドラッグ用グリップを表示（iOS の line.3.horizontal 相当）。
+        if (dayMode) {
+            Icon(
+                Icons.Filled.DragHandle,
+                contentDescription = "ドラッグして移動",
+                tint = PlanAccent.copy(alpha = 0.6f),
+                modifier = Modifier.size(20.dp),
+            )
+        }
     }
 }
 
-/** 時間ブロックの見出し行（時刻＋タイトル）。タップで時刻編集、ゴミ箱で削除。 */
+/** 時間ブロックの見出し行（時刻＋タイトル）。タップで時刻編集、ゴミ箱で削除。ここへドロップするとこのブロックへ移動。 */
 @Composable
-private fun TimeBlockHeader(block: TimeBlock?, onEdit: (TimeBlock) -> Unit, onDelete: () -> Unit) {
+private fun TimeBlockHeader(
+    block: TimeBlock?,
+    onEdit: (TimeBlock) -> Unit,
+    onDelete: () -> Unit,
+    store: TravelPlanStore,
+    planId: String,
+    day: Int,
+) {
+    var hovered by remember { mutableStateOf(false) }
+    val dropMod = Modifier.planDropTarget(
+        store = store,
+        planId = planId,
+        day = day,
+        blockId = block?.id,
+        targetItemId = null,
+        onHover = { hovered = it },
+    )
+    val hoverBg = if (hovered) PlanAccent.copy(alpha = 0.12f) else Color.Transparent
+
     if (block == null) {
         // ブロック未割当セクションの見出し。
         Text(
@@ -661,7 +952,12 @@ private fun TimeBlockHeader(block: TimeBlock?, onEdit: (TimeBlock) -> Unit, onDe
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.Gray,
-            modifier = Modifier.padding(start = 4.dp, top = 6.dp, bottom = 2.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(hoverBg)
+                .then(dropMod)
+                .padding(start = 4.dp, top = 6.dp, bottom = 2.dp),
         )
         return
     }
@@ -669,6 +965,8 @@ private fun TimeBlockHeader(block: TimeBlock?, onEdit: (TimeBlock) -> Unit, onDe
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
+            .background(hoverBg)
+            .then(dropMod)
             .clickable { onEdit(block) }
             .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -717,41 +1015,29 @@ private fun AddTimeBlockButton(onClick: () -> Unit) {
     }
 }
 
-/** 項目を時間ブロックに割り当てるボタン＋ドロップダウン。 */
+/**
+ * 「宿泊・交通・メモを追加」ボタン（iOS 版 PlanDetailView.addCustomButton＝破線枠ボタン相当）。
+ * フラット表示・空状態・各 Day セクションで共用する。
+ */
 @Composable
-private fun BlockAssignButton(blocks: List<TimeBlock>, currentBlockId: String?, onAssignBlock: (String?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val sorted = blocks.sortedBy { it.sortKey }
-    val current = sorted.firstOrNull { it.id == currentBlockId }
-    Box(modifier = Modifier.padding(top = 4.dp)) {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(6.dp))
-                .background(PlanAccent.copy(alpha = 0.10f))
-                .clickable { expanded = true }
-                .padding(horizontal = 8.dp, vertical = 3.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = current?.let { it.timeLabel ?: it.title.ifBlank { "ブロック" } } ?: "時間帯を選択",
-                fontSize = 11.sp,
-                color = PlanAccent,
+private fun AddCustomItemButton(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .border(
+                width = 1.dp,
+                color = PlanAccent.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(12.dp),
             )
-            Icon(Icons.Filled.ArrowDropDown, contentDescription = null, tint = PlanAccent, modifier = Modifier.size(14.dp))
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            sorted.forEach { b ->
-                val label = (b.timeLabel ?: "時刻未設定") + (if (b.title.isNotBlank()) " ${b.title}" else "")
-                DropdownMenuItem(
-                    text = { Text(label) },
-                    onClick = { onAssignBlock(b.id); expanded = false },
-                )
-            }
-            DropdownMenuItem(
-                text = { Text("時間帯なし") },
-                onClick = { onAssignBlock(null); expanded = false },
-            )
-        }
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(Icons.Filled.Add, contentDescription = null, tint = PlanAccent, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("宿泊・交通・メモを追加", fontSize = 13.sp, color = PlanAccent, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -833,47 +1119,6 @@ private fun StepperField(value: Int, range: IntRange, step: Int = 1, onChange: (
         Text("%02d%s".format(value, suffix), fontSize = 15.sp, modifier = Modifier.width(48.dp), textAlign = TextAlign.Center)
         IconButton(onClick = { onChange((value + step).coerceIn(range)) }, modifier = Modifier.size(32.dp)) {
             Icon(Icons.Filled.AddCircleOutline, contentDescription = "増やす", tint = PlanAccent, modifier = Modifier.size(20.dp))
-        }
-    }
-}
-
-/** 項目をどの日に割り当てるか選ぶボタン＋ドロップダウン。 */
-@Composable
-private fun DayAssignButton(dayCount: Int, currentDay: Int?, onAssignDay: (Int?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(PlanAccent.copy(alpha = 0.12f))
-                .clickable { expanded = true }
-                .padding(horizontal = 10.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = currentDay?.let { "Day $it" } ?: "日を選択",
-                fontSize = 12.sp,
-                color = PlanAccent,
-                fontWeight = FontWeight.Medium,
-            )
-            Icon(
-                Icons.Filled.ArrowDropDown,
-                contentDescription = null,
-                tint = PlanAccent,
-                modifier = Modifier.size(16.dp),
-            )
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            (1..dayCount).forEach { d ->
-                DropdownMenuItem(
-                    text = { Text("Day $d") },
-                    onClick = { onAssignDay(d); expanded = false },
-                )
-            }
-            DropdownMenuItem(
-                text = { Text("未割り当て") },
-                onClick = { onAssignDay(null); expanded = false },
-            )
         }
     }
 }
@@ -1009,82 +1254,3 @@ private fun EditPlanSheet(
     }
 }
 
-/** 宿泊/交通/メモを手動追加するシート。iOS 版 CustomPlanItemEditor を簡略移植（テーマ付きボトムシート）。 */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun AddCustomItemDialog(
-    onDismiss: () -> Unit,
-    onAdd: (PlanItemCategory, String, String) -> Unit,
-) {
-    var category by remember { mutableStateOf(PlanItemCategory.HOTEL) }
-    var name by remember { mutableStateOf("") }
-    var detail by remember { mutableStateOf("") }
-    val customCategories = listOf(PlanItemCategory.HOTEL, PlanItemCategory.TRANSPORT, PlanItemCategory.OTHER)
-    val sheetState = rememberModalBottomSheetState()
-
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Color.White,
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text("項目を追加", fontSize = 17.sp, fontWeight = FontWeight.Bold)
-
-            // 種別選択（アイコン付きチップ）。
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                customCategories.forEach { c ->
-                    val selected = category == c
-                    val color = planCategoryColor(c)
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(if (selected) color else color.copy(alpha = 0.12f))
-                            .clickable { category = c }
-                            .padding(horizontal = 14.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(
-                            planCategoryIcon(c),
-                            contentDescription = null,
-                            tint = if (selected) Color.White else color,
-                            modifier = Modifier.size(15.dp),
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
-                        Text(
-                            c.label,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = if (selected) Color.White else color,
-                        )
-                    }
-                }
-            }
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("タイトル") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
-            OutlinedTextField(
-                value = detail,
-                onValueChange = { detail = it },
-                label = { Text("メモ（任意）") },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            PlanPrimaryButton(
-                text = "追加",
-                icon = Icons.Filled.Add,
-                enabled = name.isNotBlank(),
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { if (name.isNotBlank()) onAdd(category, name, detail) },
-            )
-        }
-    }
-}

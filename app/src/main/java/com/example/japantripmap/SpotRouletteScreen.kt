@@ -59,7 +59,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -129,13 +131,23 @@ fun SpotRouletteScreen(
                         ) { viewModel.isListView = !viewModel.isListView }
                     }
                     // iOS(自然): 現在表示中のタイプを右上に小さくチップ表示。
-                    if (viewModel.kind == SpotKind.NATURE) {
-                        DisplayTypeChips(
-                            types = viewModel.allTypes.filter { it.key in viewModel.selectedDisplayTypes },
-                            modifier = Modifier
-                                .align(Alignment.End)
-                                .padding(end = 16.dp, bottom = 4.dp),
-                        )
+                    // 都道府県タブの 22dp スペーサーと合わせ、3 タブで地図の縦位置を一致させるため
+                    // チップ行の高さ（22dp）は常に固定で確保し、自然タブのときだけ中身を描く
+                    // （温泉は空スロットで同じ高さを占有）。
+                    // チップ（アイコン＋10sp テキスト）は 22dp に収まるので、
+                    // bottom パディングは付けない（付けると実効高さが減ってチップが見切れる）。
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(22.dp)
+                            .padding(end = 16.dp),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        if (viewModel.kind == SpotKind.NATURE) {
+                            DisplayTypeChips(
+                                types = viewModel.allTypes.filter { it.key in viewModel.selectedDisplayTypes },
+                            )
+                        }
                     }
                 }
             } else {
@@ -271,7 +283,20 @@ private fun DisplayTypeChips(types: List<SpotTypeMeta>, modifier: Modifier = Mod
             ) {
                 Icon(meta.icon, contentDescription = null, tint = meta.color, modifier = Modifier.size(10.dp))
                 Spacer(modifier = Modifier.width(2.dp))
-                Text(meta.name, fontSize = 10.sp, color = meta.color)
+                // デフォルトの行の余白でテキストが下寄りに見えるのを防ぎ、
+                // アイコンと縦中央で揃えるため、フォントパディングを外し行を中央トリムする。
+                Text(
+                    meta.name,
+                    fontSize = 10.sp,
+                    color = meta.color,
+                    style = androidx.compose.ui.text.TextStyle(
+                        platformStyle = PlatformTextStyle(includeFontPadding = false),
+                        lineHeightStyle = LineHeightStyle(
+                            alignment = LineHeightStyle.Alignment.Center,
+                            trim = LineHeightStyle.Trim.Both,
+                        ),
+                    ),
+                )
             }
         }
     }

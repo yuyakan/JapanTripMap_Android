@@ -3,6 +3,7 @@ package com.example.japantripmap
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,14 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 起動時の白い中間画面を消す。super.onCreate より前に呼ぶ必要がある。
+        // iOS 版と同じく、システムスプラッシュ（ティール地＋アイコン）を約 2 秒
+        // 保持してから本体へ遷移する。
+        val splash = installSplashScreen()
+        val start = System.currentTimeMillis()
+        splash.setKeepOnScreenCondition {
+            System.currentTimeMillis() - start < SPLASH_DURATION_MS
+        }
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
@@ -41,6 +50,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    private companion object {
+        /** スプラッシュを表示し続ける時間（iOS 版の 2 秒に合わせる）。 */
+        const val SPLASH_DURATION_MS = 2000L
     }
 }
 

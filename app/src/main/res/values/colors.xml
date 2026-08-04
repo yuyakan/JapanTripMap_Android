@@ -7,4 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <!-- iOS 版 splashColor と同じ淡いティール。ランチャーアイコンの背景に使う。 -->
+    <color name="ic_launcher_background">#C6E7E5</color>
 </resources>

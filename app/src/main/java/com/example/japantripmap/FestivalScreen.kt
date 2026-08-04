@@ -100,9 +100,10 @@ private val FESTIVAL_CATEGORY_ICONS: Map<String, ImageVector> = mapOf(
     "snow" to Icons.Filled.AcUnit,
 )
 
-private fun festColor(c: String) = FESTIVAL_CATEGORY_COLORS[c] ?: Color.Gray
-private fun festLabel(c: String) = FESTIVAL_CATEGORY_LABELS[c] ?: c
-private fun festIcon(c: String) = FESTIVAL_CATEGORY_ICONS[c] ?: Icons.Filled.Celebration
+// プラン詳細のルーター（PlanItemDetail.kt）からも祭りの色/ラベル/アイコンを再構築するため internal。
+internal fun festColor(c: String) = FESTIVAL_CATEGORY_COLORS[c] ?: Color.Gray
+internal fun festLabel(c: String) = FESTIVAL_CATEGORY_LABELS[c] ?: c
+internal fun festIcon(c: String) = FESTIVAL_CATEGORY_ICONS[c] ?: Icons.Filled.Celebration
 
 /** ヘッダー土台のブランドグラデーション（iOS の brandGradient オレンジ→コーラル相当）。 */
 private val BrandGradient = Brush.horizontalGradient(listOf(Color(0xFFFF9500), Color(0xFFFF3B30)))
@@ -172,25 +173,13 @@ fun FestivalScreen(
     }
 
     Column(modifier = modifier.fillMaxSize().background(AppTheme.Background)) {
-        // ── ブランドグラデーション土台のヘッダー（タイトル＋白カプセル検索バー） ──
+        // ── ブランドグラデーション土台のヘッダー（白カプセル検索バー） ──
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(BrandGradient)
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
         ) {
-            Text(
-                text = "全国の祭り・イベント",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-            )
-            Text(
-                text = "${filtered.size} 件",
-                fontSize = 13.sp,
-                color = Color.White.copy(alpha = 0.9f),
-                modifier = Modifier.padding(top = 2.dp, bottom = 12.dp),
-            )
             SearchBar(
                 value = searchText,
                 onValueChange = { searchText = it },

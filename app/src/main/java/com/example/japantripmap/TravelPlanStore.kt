@@ -80,6 +80,35 @@ class TravelPlanStore(app: Application) : AndroidViewModel(app) {
         persist()
     }
 
+    /** 既存項目を id 一致で丸ごと置き換える（カスタム項目の編集用）。iOS 版 updateItem 相当。 */
+    fun updateItem(planId: String, item: PlanItem) {
+        updatePlanBy(planId) { plan ->
+            plan.copy(
+                items = plan.items.map { if (it.id == item.id) item else it },
+                updatedAt = System.currentTimeMillis(),
+            )
+        }
+    }
+
+    /**
+     * 項目を items 配列内で targetId の直前へ移動する（ドラッグ&ドロップの並べ替え用）。
+     * targetId が null / 見つからない場合は末尾へ移動する。日/ブロック跨ぎの移動時は
+     * 先に assignItemToDay / assignItemToBlock で割当を変えてから呼ぶ。
+     */
+    fun moveItemBefore(planId: String, itemId: String, targetId: String?) {
+        if (itemId == targetId) return
+        updatePlanBy(planId) { plan ->
+            val moving = plan.items.firstOrNull { it.id == itemId } ?: return@updatePlanBy plan
+            val rest = plan.items.filterNot { it.id == itemId }
+            val insertAt = targetId
+                ?.let { t -> rest.indexOfFirst { it.id == t } }
+                ?.takeIf { it >= 0 }
+                ?: rest.size
+            val reordered = rest.toMutableList().apply { add(insertAt, moving) }
+            plan.copy(items = reordered, updatedAt = System.currentTimeMillis())
+        }
+    }
+
     /** プランのタイトル・メモを更新する。 */
     fun updatePlan(planId: String, title: String, memo: String) {
         plans = plans.map { plan ->

@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.annotation.DrawableRes
 
 /**
- * 観光スポットの実写写真（CC0）へのアクセサ。
+ * 観光スポットの実写写真へのアクセサ。
  * iOS 版 AttractionPhoto.swift を移植。画像は res/drawable/attraction_*.jpg。
  * スポットの日本語名から drawable リソース ID を解決する。
+ *
+ * 写真は CC0 / パブリックドメインと CC BY が混在する。CC BY 作品の帰属は
+ * [PHOTO_CREDITS_TEXT] / [PhotoCreditsScreen] で表示している。
  */
 object AttractionPhoto {
 

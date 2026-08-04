@@ -115,8 +115,10 @@ private val ONSEN_TYPE_LABELS = mapOf(
     "resort" to "リゾート", "mountain" to "山あい", "seaside" to "海辺", "ski" to "スキー",
 )
 
-private fun categoryColor(cat: String) = CATEGORY_COLORS[cat] ?: Color.Gray
-private fun categoryLabel(cat: String) = CATEGORY_LABELS[cat] ?: cat
+// プラン詳細のルーター（PlanItemDetail.kt）からグルメ/お土産の色・ラベルを再構築するため internal。
+// onsen 系は OnsenDetailScreen.kt にも同名 private があるため衝突を避けて private のまま残す。
+internal fun categoryColor(cat: String) = CATEGORY_COLORS[cat] ?: Color.Gray
+internal fun categoryLabel(cat: String) = CATEGORY_LABELS[cat] ?: cat
 private fun onsenColor(t: String) = ONSEN_TYPE_COLORS[t] ?: Color.Gray
 private fun onsenLabel(t: String) = ONSEN_TYPE_LABELS[t] ?: t
 
