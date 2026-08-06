@@ -367,7 +367,8 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
             .clickable(onClick = onClick)
             .padding(12.dp),
     ) {
-        // ── ヘッダー: 丸アイコン + カテゴリ名/★ + 県バッジ ──
+        // ── ヘッダー: 丸アイコン + カテゴリ名/★ ──
+        // 県名は長いと横幅を食って崩れるので、ヘッダー行には入れず下段へ回す。
         Row(verticalAlignment = Alignment.Top) {
             Box(
                 modifier = Modifier
@@ -392,20 +393,24 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
                     }
                 }
             }
-            // 県バッジ。
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(percent = 50))
-                    .background(Color(0xFFEFEFF2))
-                    .padding(horizontal = 8.dp, vertical = 3.dp),
-            ) {
-                Text(
-                    item.prefecture.localizedName(),
-                    fontSize = 10.sp,
-                    color = AppTheme.TextSecondary,
-                    maxLines = 1,
-                )
-            }
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        // ── 県バッジ（ヘッダーの下に 1 段落として全幅を使える） ──
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(percent = 50))
+                .background(Color(0xFFEFEFF2))
+                .padding(horizontal = 8.dp, vertical = 3.dp),
+        ) {
+            Text(
+                item.prefecture.localizedName(),
+                fontSize = 10.sp,
+                color = AppTheme.TextSecondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
 
         Spacer(modifier = Modifier.height(10.dp))
