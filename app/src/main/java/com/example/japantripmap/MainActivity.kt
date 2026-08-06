@@ -28,6 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -173,7 +175,16 @@ private fun AppRoot() {
                     selected = selectedTab == tab,
                     onClick = { selectedTab = tab },
                     icon = { Icon(tab.icon, contentDescription = tabLabel) },
-                    label = { Text(tabLabel) },
+                    label = {
+                        // ラベルは常に 1 行。英語などで長くなっても折り返して崩れないようにする。
+                        Text(
+                            tabLabel,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = 11.sp,
+                        )
+                    },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = TabAccent,
                         selectedTextColor = TabAccent,

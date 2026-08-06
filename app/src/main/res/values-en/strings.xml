@@ -2,11 +2,11 @@
     <!-- app_name はローカライズしない（ブランド名） -->
 
     <!-- ボトムタブ -->
-    <string name="tab_prefecture">Prefectures</string>
-    <string name="tab_onsen">Hot Springs</string>
+    <string name="tab_prefecture">Map</string>
+    <string name="tab_onsen">Onsen</string>
     <string name="tab_nature">Nature</string>
-    <string name="tab_festival">Festivals</string>
-    <string name="tab_plan">My Plans</string>
+    <string name="tab_festival">Festival</string>
+    <string name="tab_plan">Plan</string>
     <string name="placeholder_preparing">%s (Coming Soon)</string>
 
     <!-- 共通 -->
