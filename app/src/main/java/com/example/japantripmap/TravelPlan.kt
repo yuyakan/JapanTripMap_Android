@@ -7,16 +7,19 @@ import java.util.UUID
  * プラン項目の種別。iOS 版 PlanItemCategory を移植（中核カテゴリのみ）。
  */
 @Serializable
-enum class PlanItemCategory(val label: String) {
-    ATTRACTION("観光スポット"),
-    GOURMET("グルメ"),
-    ONSEN("温泉"),
-    FESTIVAL("祭り"),
-    NATURE("自然"),
-    SOUVENIR("お土産"),
-    HOTEL("宿泊"),
-    TRANSPORT("交通"),
-    OTHER("メモ"),
+enum class PlanItemCategory(val labelRes: Int) {
+    ATTRACTION(R.string.plan_category_attraction),
+    GOURMET(R.string.plan_category_gourmet),
+    ONSEN(R.string.plan_category_onsen),
+    FESTIVAL(R.string.plan_category_festival),
+    NATURE(R.string.plan_category_nature),
+    SOUVENIR(R.string.plan_category_souvenir),
+    HOTEL(R.string.plan_category_hotel),
+    TRANSPORT(R.string.plan_category_transport),
+    OTHER(R.string.plan_category_memo);
+
+    /** Context から解決したラベル（非 Composable な場所用）。 */
+    fun label(context: android.content.Context): String = context.getString(labelRes)
 }
 
 /** プラン詳細の区切り方。iOS 版 PlanGroupingMode を移植。 */

@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -80,14 +81,14 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = { viewModel.selectAllPrefectures() }) {
-                Text("全選択", fontSize = 16.sp, color = accent)
+                Text(stringResource(R.string.common_select_all), fontSize = 16.sp, color = accent)
             }
             TextButton(onClick = { viewModel.deselectAllPrefectures() }) {
-                Text("全解除", fontSize = 16.sp, color = AccentRed)
+                Text(stringResource(R.string.common_deselect_all), fontSize = 16.sp, color = AccentRed)
             }
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = onDone) {
-                Text("完了", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
+                Text(stringResource(R.string.common_done), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
             }
         }
 
@@ -102,7 +103,7 @@ fun SettingsScreen(
                     Column(
                         modifier = Modifier.fillMaxWidth().appCard(corner = 16.dp).padding(14.dp),
                     ) {
-                        Text("表示設定", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextSecondary)
+                        Text(stringResource(R.string.settings_display), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextSecondary)
                         Spacer(modifier = Modifier.height(10.dp))
                         Row(
                             modifier = Modifier
@@ -120,7 +121,7 @@ fun SettingsScreen(
                                         .padding(horizontal = 14.dp, vertical = 7.dp),
                                 ) {
                                     Text(
-                                        text = viewModel.typeLabels[type] ?: type,
+                                        text = localizeTypeLabel(viewModel.typeLabels[type] ?: type),
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = if (selected) Color.White else accent,
@@ -141,8 +142,8 @@ fun SettingsScreen(
             grouped.forEach { (regionName, prefectures) ->
                 item(key = "region_$regionName") {
                     SectionHeader(
-                        title = regionName,
-                        countText = "${prefectures.size}県",
+                        title = localizeData(regionName),
+                        countText = stringResource(R.string.settings_prefecture_count, prefectures.size),
                         accent = accent,
                     )
                 }
@@ -174,8 +175,8 @@ private fun WeightSettingsRow(accent: Color, onClick: () -> Unit) {
         Icon(Icons.Filled.Scale, contentDescription = null, tint = accent, modifier = Modifier.size(22.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text("重み付け設定", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = AppTheme.TextPrimary)
-            Text("都道府県ごとの選択確率を調整", fontSize = 12.sp, color = AppTheme.TextSecondary)
+            Text(stringResource(R.string.settings_weight_title), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = AppTheme.TextPrimary)
+            Text(stringResource(R.string.settings_weight_subtitle), fontSize = 12.sp, color = AppTheme.TextSecondary)
         }
         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = AppTheme.TextSecondary, modifier = Modifier.size(18.dp))
     }
@@ -215,13 +216,13 @@ private fun PrefectureSettingRow(
     ) {
         Icon(
             imageVector = if (isEnabled) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
-            contentDescription = if (isEnabled) "対象" else "対象外",
+            contentDescription = stringResource(if (isEnabled) R.string.settings_target else R.string.settings_not_target),
             tint = if (isEnabled) accent else Color(0xFFC7C7CC),
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
-            text = prefecture.displayName,
+            text = prefecture.localizedName(),
             fontSize = 16.sp,
             fontWeight = FontWeight.SemiBold,
             color = if (isEnabled) AppTheme.TextPrimary else AppTheme.TextSecondary,
@@ -268,13 +269,13 @@ private fun WeightAdjustScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = { viewModel.resetWeights() }) {
-                Text("リセット", fontSize = 16.sp, color = AccentRed)
+                Text(stringResource(R.string.common_reset), fontSize = 16.sp, color = AccentRed)
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text("重み付け調整", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.settings_weight_adjust), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = onBack) {
-                Text("完了", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
+                Text(stringResource(R.string.common_done), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
             }
         }
         // 設定へ戻る導線。
@@ -283,9 +284,9 @@ private fun WeightAdjustScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = onBack, contentPadding = PaddingValues(0.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "設定へ戻る", tint = accent, modifier = Modifier.size(18.dp))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_back_to_settings), tint = accent, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("設定", fontSize = 14.sp, color = accent)
+                Text(stringResource(R.string.common_settings), fontSize = 14.sp, color = accent)
             }
         }
 
@@ -296,9 +297,9 @@ private fun WeightAdjustScreen(
         ) {
             item {
                 Column(modifier = Modifier.fillMaxWidth().appCard(corner = 16.dp).padding(14.dp)) {
-                    Text("重み付け設定", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.settings_weight_title), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     Text(
-                        "各都道府県の選択される確率を調整できます。数値が大きいほど選ばれやすくなります。",
+                        stringResource(R.string.settings_weight_desc),
                         fontSize = 12.sp,
                         color = AppTheme.TextSecondary,
                         modifier = Modifier.padding(top = 4.dp),
@@ -309,7 +310,7 @@ private fun WeightAdjustScreen(
             if (grouped.isEmpty()) {
                 item {
                     Text(
-                        "対象の都道府県がありません。設定で対象を追加してください。",
+                        stringResource(R.string.settings_no_target_prefecture),
                         fontSize = 13.sp,
                         color = AppTheme.TextSecondary,
                         modifier = Modifier.padding(8.dp),
@@ -319,7 +320,7 @@ private fun WeightAdjustScreen(
 
             grouped.forEach { (regionName, prefectures) ->
                 item(key = "wregion_$regionName") {
-                    SectionHeader(title = regionName, countText = "${prefectures.size}県", accent = accent)
+                    SectionHeader(title = localizeData(regionName), countText = stringResource(R.string.settings_prefecture_count, prefectures.size), accent = accent)
                 }
                 items(prefectures, key = { it.name }) { prefecture ->
                     WeightSliderRow(
@@ -361,12 +362,12 @@ private fun WeightSliderRow(
             .padding(horizontal = 14.dp, vertical = 12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(prefecture.displayName, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+            Text(prefecture.localizedName(), fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
             Badge(text = "%.1f%%".format(probability), color = accent)
         }
 
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 6.dp)) {
-            Text("重み: %.1f".format(weight), fontSize = 12.sp, color = AppTheme.TextSecondary)
+            Text(stringResource(R.string.settings_weight_value, weight), fontSize = 12.sp, color = AppTheme.TextSecondary)
             Spacer(modifier = Modifier.weight(1f))
             QuickButton("−", AccentRed, onDecrease)
             Spacer(modifier = Modifier.width(6.dp))

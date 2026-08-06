@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +73,12 @@ data class SpotDetail(
     val features: List<String> = emptyList(),
     /** 食べログ検索を出すか（グルメ用）。 */
     val tabelogKeyword: String? = null,
+    /**
+     * SNS 検索・プラン保存に使う元の名称（原則そのスポットの日本語名）。
+     * title は英語ロケールで英訳されるが、検索や食べログは日本語のほうが結果が良いので分ける。
+     * null なら title を使う。
+     */
+    val searchQuery: String? = null,
 )
 
 /**
@@ -147,7 +154,7 @@ fun SpotDetailScreen(
             onDismiss = { showAddDialog = false },
             onAdded = { planTitle ->
                 showAddDialog = false
-                Toast.makeText(context, "「$planTitle」に追加しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.added_to_plan, planTitle), Toast.LENGTH_SHORT).show()
             },
         )
     }
@@ -178,17 +185,17 @@ fun SpotDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     AddToPlanButton(detail.accent) { showAddDialog = true }
-                    Text("もっと調べる", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
+                    Text(stringResource(R.string.detail_more_search), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
                     SocialSearchButtons(
-                        query = detail.title,
+                        query = detail.searchQuery ?: detail.title,
                         tabelogArea = if (detail.tabelogKeyword != null) detail.prefecture.slug else null,
-                        tabelogKeyword = detail.tabelogKeyword ?: detail.title,
+                        tabelogKeyword = detail.tabelogKeyword ?: detail.searchQuery ?: detail.title,
                     )
                 }
 
                 detail.mapPlace()?.let { place ->
                     PlacesMapSection(
-                        title = "地図",
+                        title = stringResource(R.string.common_map),
                         places = listOf(place),
                     )
                 }
@@ -202,16 +209,16 @@ fun SpotDetailScreen(
                 // 説明カード。
                 if (detail.description.isNotBlank()) {
                     DetailCard {
-                        SectionHeader(Icons.Filled.LocationOn, "詳しい情報", detail.accent)
+                        SectionHeader(Icons.Filled.LocationOn, stringResource(R.string.detail_more_info), detail.accent)
                         Spacer(modifier = Modifier.height(10.dp))
-                        Text(detail.description, fontSize = 14.sp, color = Color(0xFF444444), lineHeight = 22.sp)
+                        Text(localizeData(detail.description), fontSize = 14.sp, color = Color(0xFF444444), lineHeight = 22.sp)
                     }
                 }
 
                 // 基本情報カード。
                 if (detail.infoRows.isNotEmpty()) {
                     DetailCard {
-                        SectionHeader(Icons.Filled.Star, "基本情報", detail.accent)
+                        SectionHeader(Icons.Filled.Star, stringResource(R.string.detail_basic_info), detail.accent)
                         Spacer(modifier = Modifier.height(6.dp))
                         detail.infoRows.forEachIndexed { i, (label, value) ->
                             if (i > 0) HorizontalDivider(color = Color(0x11000000))
@@ -221,9 +228,9 @@ fun SpotDetailScreen(
                                     .padding(vertical = 12.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Text(label, fontSize = 14.sp, color = Color.Gray)
+                                Text(localizeInfoLabel(label), fontSize = 14.sp, color = Color.Gray)
                                 Spacer(modifier = Modifier.weight(1f))
-                                Text(value, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                                Text(localizeData(value), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                             }
                         }
                     }
@@ -232,7 +239,7 @@ fun SpotDetailScreen(
                 // 特徴タグ（祭り）。
                 if (detail.features.isNotEmpty()) {
                     DetailCard {
-                        SectionHeader(Icons.Filled.Star, "特徴", detail.accent)
+                        SectionHeader(Icons.Filled.Star, stringResource(R.string.detail_features), detail.accent)
                         Spacer(modifier = Modifier.height(10.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             detail.features.forEach { feat ->
@@ -243,7 +250,7 @@ fun SpotDetailScreen(
                                             .background(detail.accent, CircleShape),
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text(feat, fontSize = 14.sp, color = Color(0xFF444444))
+                                    Text(localizeData(feat), fontSize = 14.sp, color = Color(0xFF444444))
                                 }
                             }
                         }
@@ -265,7 +272,7 @@ fun SpotDetailScreen(
                 .clickable(onClick = onClose),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Filled.Close, contentDescription = "閉じる", tint = detail.accent, modifier = Modifier.size(18.dp))
+            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = detail.accent, modifier = Modifier.size(18.dp))
         }
 
         // 位置を追加/変更ボタン（右下フローティング・グルメ/お土産のみ）。
@@ -284,7 +291,7 @@ fun SpotDetailScreen(
             ) {
                 Icon(
                     if (hasLocation) Icons.Filled.EditLocation else Icons.Filled.AddLocationAlt,
-                    contentDescription = if (hasLocation) "位置を変更" else "位置を追加",
+                    contentDescription = stringResource(if (hasLocation) R.string.detail_change_location else R.string.detail_add_location),
                     tint = Color.White,
                     modifier = Modifier.size(24.dp),
                 )
@@ -354,12 +361,12 @@ private fun HeroContent(detail: SpotDetail, showIconCircle: Boolean) {
                 Icon(detail.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(34.dp))
             }
         }
-        Text(detail.title, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
+        Text(localizeData(detail.title), fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.LocationOn, contentDescription = null, tint = Color.White.copy(alpha = 0.9f), modifier = Modifier.size(16.dp))
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                "${detail.prefecture.displayName}（${detail.prefecture.regionName}）",
+                "${detail.prefecture.localizedName()}（${detail.prefecture.localizedRegionName()}）",
                 fontSize = 14.sp,
                 color = Color.White.copy(alpha = 0.9f),
             )
@@ -374,7 +381,7 @@ private fun HeroContent(detail: SpotDetail, showIconCircle: Boolean) {
                             .background(Color.White.copy(alpha = 0.22f))
                             .padding(horizontal = 12.dp, vertical = 6.dp),
                     ) {
-                        Text(detail.badge, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Text(localizeTypeLabel(detail.badge), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                 }
@@ -436,6 +443,6 @@ private fun AddToPlanButton(accent: Color, onClick: () -> Unit) {
     ) {
         Icon(Icons.Filled.Add, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(8.dp))
-        Text("プランに追加", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+        Text(stringResource(R.string.common_add_to_plan), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
     }
 }

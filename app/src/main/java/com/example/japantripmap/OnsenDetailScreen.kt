@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,7 +61,8 @@ private val ONSEN_TYPE_LABELS = mapOf(
 )
 
 private fun onsenColor(t: String) = ONSEN_TYPE_COLORS[t] ?: Color.Gray
-private fun onsenLabel(t: String) = ONSEN_TYPE_LABELS[t] ?: t
+// ラベルは表示専用なのでロケールに応じて英訳して返す。
+private fun onsenLabel(t: String) = localizeTypeLabel(ONSEN_TYPE_LABELS[t] ?: t)
 
 /**
  * 温泉詳細画面。選ばれた県の温泉地一覧をカード表示する。
@@ -85,7 +87,7 @@ fun OnsenDetailScreen(
             onDismiss = { pendingItem = null },
             onAdded = { planTitle ->
                 pendingItem = null
-                Toast.makeText(context, "「$planTitle」に追加しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.added_to_plan, planTitle), Toast.LENGTH_SHORT).show()
             },
         )
     }
@@ -95,10 +97,10 @@ fun OnsenDetailScreen(
         topBar = {
             TopAppBar(
                 modifier = Modifier.drawBottomHairline(),
-                title = { Text("${prefecture.displayName}の温泉", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.onsen_prefecture_title, prefecture.localizedName()), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.TopBar),
@@ -114,13 +116,13 @@ fun OnsenDetailScreen(
         ) {
             item {
                 Text(
-                    text = "${prefecture.displayName}（${prefecture.regionName}）",
+                    text = "${prefecture.localizedName()}（${prefecture.localizedRegionName()}）",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFFED7321),
                 )
                 Text(
-                    text = "${onsens.size} つの温泉地",
+                    text = stringResource(R.string.onsen_count, onsens.size),
                     fontSize = 14.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 2.dp),
@@ -128,7 +130,7 @@ fun OnsenDetailScreen(
             }
             item {
                 PlacesMapSection(
-                    title = "${prefecture.displayName}の温泉地図",
+                    title = stringResource(R.string.onsen_prefecture_map, prefecture.localizedName()),
                     places = onsens.map { o ->
                         MapPlace(
                             id = o.name,
@@ -186,7 +188,7 @@ private fun OnsenCard(onsen: Onsen, onAdd: () -> Unit, onClick: () -> Unit) {
             .padding(14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(onsen.name, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            Text(localizeData(onsen.name), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.width(8.dp))
             Box(
                 modifier = Modifier
@@ -209,7 +211,7 @@ private fun OnsenCard(onsen: Onsen, onAdd: () -> Unit, onClick: () -> Unit) {
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
                 imageVector = Icons.Filled.AddCircle,
-                contentDescription = "プランに追加",
+                contentDescription = stringResource(R.string.common_add_to_plan),
                 tint = accent,
                 modifier = Modifier
                     .size(24.dp)
@@ -217,7 +219,7 @@ private fun OnsenCard(onsen: Onsen, onAdd: () -> Unit, onClick: () -> Unit) {
             )
         }
         Text(
-            text = onsen.description,
+            text = localizeData(onsen.description),
             fontSize = 13.sp,
             color = Color(0xFF555555),
             modifier = Modifier.padding(top = 6.dp),

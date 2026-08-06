@@ -35,7 +35,7 @@ class TravelPlanStore(app: Application) : AndroidViewModel(app) {
 
     /** 新しいプランを作成して返す。 */
     fun createPlan(title: String, memo: String = ""): TravelPlan {
-        val plan = TravelPlan(title = title.ifBlank { "無題のプラン" }, memo = memo)
+        val plan = TravelPlan(title = title.ifBlank { getApplication<Application>().getString(R.string.plan_untitled) }, memo = memo)
         plans = plans + plan
         persist()
         return plan
@@ -114,7 +114,7 @@ class TravelPlanStore(app: Application) : AndroidViewModel(app) {
         plans = plans.map { plan ->
             if (plan.id == planId) {
                 plan.copy(
-                    title = title.ifBlank { "無題のプラン" },
+                    title = title.ifBlank { getApplication<Application>().getString(R.string.plan_untitled) },
                     memo = memo,
                     updatedAt = System.currentTimeMillis(),
                 )

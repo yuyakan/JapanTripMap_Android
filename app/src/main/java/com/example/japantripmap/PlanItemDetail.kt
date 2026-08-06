@@ -66,6 +66,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -187,9 +188,9 @@ internal fun spotDetailForPlanItem(item: PlanItem): SpotDetail? {
                 badge = festLabel(f.category),
                 popularity = f.scale,
                 infoRows = listOf(
-                    "開催地" to "${pref.displayName}・${f.location}",
-                    "時期" to f.month,
-                    "期間" to f.duration,
+                    "開催地" to "${pref.localizedName()}・${localizeData(f.location)}",
+                    "時期" to localizeData(f.month),
+                    "期間" to localizeData(f.duration),
                 ),
                 features = f.features,
             )
@@ -301,7 +302,7 @@ fun CustomPlanItemScreen(
                     }
                     Text(item.name, fontSize = 28.sp, fontWeight = FontWeight.Black, color = Color.White)
                     Text(
-                        item.category.label,
+                        stringResource(item.category.labelRes),
                         fontSize = 14.sp,
                         color = Color.White.copy(alpha = 0.9f),
                         fontWeight = FontWeight.Medium,
@@ -322,7 +323,7 @@ fun CustomPlanItemScreen(
                     Column(
                         modifier = Modifier.fillMaxWidth().appCard().padding(16.dp),
                     ) {
-                        CustomSectionHeader(Icons.AutoMirrored.Filled.Notes, "メモ", accent)
+                        CustomSectionHeader(Icons.AutoMirrored.Filled.Notes, stringResource(R.string.plan_memo), accent)
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(item.detail, fontSize = 14.sp, color = Color(0xFF444444), lineHeight = 22.sp)
                     }
@@ -365,7 +366,7 @@ fun PlanItemLocationCard(item: PlanItem, accent: Color) {
         modifier = Modifier.fillMaxWidth().appCard().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        CustomSectionHeader(Icons.Filled.LocationOn, "場所", accent)
+        CustomSectionHeader(Icons.Filled.LocationOn, stringResource(R.string.plan_place), accent)
 
         if (!item.placeName.isNullOrBlank()) {
             Text(item.placeName, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = accent)
@@ -381,11 +382,11 @@ fun PlanItemLocationCard(item: PlanItem, accent: Color) {
                 IconButton(onClick = {
                     copyToClipboard(context, item.address)
                     addressCopied = true
-                    Toast.makeText(context, "住所をコピーしました", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.plan_address_copied), Toast.LENGTH_SHORT).show()
                 }) {
                     Icon(
                         if (addressCopied) Icons.Filled.Check else Icons.Filled.ContentCopy,
-                        contentDescription = "住所をコピー",
+                        contentDescription = stringResource(R.string.plan_copy_address),
                         tint = if (addressCopied) Color(0xFF34C759) else accent,
                         modifier = Modifier.size(18.dp),
                     )
@@ -421,7 +422,7 @@ fun PlanItemLocationCard(item: PlanItem, accent: Color) {
         ) {
             Icon(Icons.Filled.Map, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("マップで開く", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(stringResource(R.string.plan_open_in_map), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
     }
 }
@@ -506,11 +507,11 @@ fun CustomPlanItemSheet(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (editing == null) "項目を追加" else "項目を編集", fontWeight = FontWeight.Bold)
+                    Text(stringResource(if (editing == null) R.string.plan_item_add else R.string.plan_item_edit), fontWeight = FontWeight.Bold)
                 },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = "キャンセル")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_cancel))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -537,7 +538,7 @@ fun CustomPlanItemSheet(
                 modifier = Modifier.fillMaxWidth().appCard().padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Text("種類", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
+                Text(stringResource(R.string.plan_item_kind), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     customCategories.forEach { c ->
                         val selected = category == c
@@ -566,7 +567,7 @@ fun CustomPlanItemSheet(
                                 modifier = Modifier.size(20.dp),
                             )
                             Text(
-                                c.label,
+                                stringResource(c.labelRes),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = if (selected) color else Color.Gray,
@@ -581,11 +582,11 @@ fun CustomPlanItemSheet(
                 modifier = Modifier.fillMaxWidth().appCard().padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text("タイトル", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
+                Text(stringResource(R.string.plan_item_title), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text("例：〇〇ホテル") },
+                    placeholder = { Text(stringResource(R.string.plan_item_title_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -596,11 +597,11 @@ fun CustomPlanItemSheet(
                 modifier = Modifier.fillMaxWidth().appCard().padding(14.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text("メモ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
+                Text(stringResource(R.string.plan_memo), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
                 OutlinedTextField(
                     value = detail,
                     onValueChange = { detail = it },
-                    placeholder = { Text("メモ（任意）") },
+                    placeholder = { Text(stringResource(R.string.plan_memo_optional)) },
                     modifier = Modifier.fillMaxWidth().height(110.dp),
                 )
             }
@@ -626,8 +627,8 @@ fun CustomPlanItemSheet(
                     text = when {
                         !placeName.isNullOrBlank() -> placeName!!
                         !address.isNullOrBlank() -> address!!
-                        hasLoc -> "位置を設定済み"
-                        else -> "位置を追加（任意）"
+                        hasLoc -> stringResource(R.string.plan_location_set)
+                        else -> stringResource(R.string.plan_location_add_optional)
                     },
                     fontSize = 14.sp,
                     color = if (hasLoc) AppTheme.TextPrimary else Color.Gray,
@@ -643,7 +644,7 @@ fun CustomPlanItemSheet(
             }
 
             PlanPrimaryButton(
-                text = if (editing == null) "追加" else "保存",
+                text = stringResource(if (editing == null) R.string.plan_add else R.string.common_save),
                 icon = if (editing == null) Icons.Filled.Add else null,
                 enabled = name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
@@ -727,10 +728,10 @@ fun LocationPickerScreen(
         containerColor = AppTheme.Background,
         topBar = {
             TopAppBar(
-                title = { Text("位置を選ぶ", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.location_picker_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.TopBar),
@@ -773,7 +774,7 @@ fun LocationPickerScreen(
                             searched = false
                         }
                     },
-                    placeholder = { Text("地名・住所・駅名で検索") },
+                    placeholder = { Text(stringResource(R.string.location_search_hint)) },
                     singleLine = true,
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     trailingIcon = {
@@ -783,7 +784,7 @@ fun LocationPickerScreen(
                                 results = emptyList()
                                 searched = false
                             }) {
-                                Icon(Icons.Filled.Close, contentDescription = "クリア")
+                                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_clear))
                             }
                         }
                     },
@@ -796,9 +797,9 @@ fun LocationPickerScreen(
 
                 // 検索結果（複数ヒット時に候補として提示。タップでその地点へ移動）。
                 if (searching) {
-                    LocationSearchStatus("検索中…")
+                    LocationSearchStatus(stringResource(R.string.location_searching))
                 } else if (searched && results.isEmpty()) {
-                    LocationSearchStatus("見つかりませんでした")
+                    LocationSearchStatus(stringResource(R.string.location_not_found))
                 } else if (results.size > 1) {
                     Column(
                         modifier = Modifier
@@ -847,7 +848,7 @@ fun LocationPickerScreen(
                     .padding(16.dp),
             ) {
                 PlanPrimaryButton(
-                    text = if (resolving) "住所を取得中…" else "この地点を保存",
+                    text = stringResource(if (resolving) R.string.location_resolving else R.string.location_save_point),
                     enabled = !resolving,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {

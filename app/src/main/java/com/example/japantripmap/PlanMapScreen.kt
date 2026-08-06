@@ -39,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -132,7 +133,7 @@ fun PlanMapScreen(
                 title = { Text(plan.title, fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.Filled.Close, contentDescription = "閉じる")
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = AppTheme.TopBar),
@@ -142,7 +143,7 @@ fun PlanMapScreen(
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
             if (allMapped.isEmpty()) {
                 Text(
-                    "地図に表示できる場所がありません。\n観光・温泉・自然・祭りの項目、または位置を設定した宿泊・交通・メモが必要です。",
+                    stringResource(R.string.plan_map_empty),
                     color = Color.Gray,
                     modifier = Modifier.align(Alignment.Center).padding(32.dp),
                 )
@@ -198,7 +199,7 @@ fun PlanMapScreen(
                 val dayItems = plan.orderedItems(day).filter { coordinateForPlanItem(it) != null }
                 if (dayItems.size >= 2) {
                     PlanPrimaryButton(
-                        text = "Day $day の経路を見る",
+                        text = stringResource(R.string.plan_map_view_route, day),
                         icon = Icons.Filled.Directions,
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
@@ -223,7 +224,7 @@ private fun PlanMapPin(item: PlanItem, tint: Color, order: Int?) {
         ) {
             Icon(
                 planCategoryIcon(item.category),
-                contentDescription = item.name,
+                contentDescription = localizeData(item.name),
                 tint = Color.White,
                 modifier = Modifier.size(16.dp),
             )
@@ -257,9 +258,9 @@ private fun DayFilterBar(
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        DayChip(title = "全日", tint = PlanTheme.Primary, selected = selectedDay == null) { onSelect(null) }
+        DayChip(title = stringResource(R.string.plan_map_all_days), tint = PlanTheme.Primary, selected = selectedDay == null) { onSelect(null) }
         for (day in 1..maxOf(1, dayCount)) {
-            DayChip(title = "Day $day", tint = colorForDay(day), selected = selectedDay == day) { onSelect(day) }
+            DayChip(title = stringResource(R.string.plan_day_format, day), tint = colorForDay(day), selected = selectedDay == day) { onSelect(day) }
         }
     }
 }

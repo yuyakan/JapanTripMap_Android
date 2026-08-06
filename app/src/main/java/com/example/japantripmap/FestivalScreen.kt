@@ -52,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -102,7 +103,8 @@ private val FESTIVAL_CATEGORY_ICONS: Map<String, ImageVector> = mapOf(
 
 // プラン詳細のルーター（PlanItemDetail.kt）からも祭りの色/ラベル/アイコンを再構築するため internal。
 internal fun festColor(c: String) = FESTIVAL_CATEGORY_COLORS[c] ?: Color.Gray
-internal fun festLabel(c: String) = FESTIVAL_CATEGORY_LABELS[c] ?: c
+// ラベルは表示専用なのでロケールに応じて英訳して返す。
+internal fun festLabel(c: String) = localizeTypeLabel(FESTIVAL_CATEGORY_LABELS[c] ?: c)
 internal fun festIcon(c: String) = FESTIVAL_CATEGORY_ICONS[c] ?: Icons.Filled.Celebration
 
 /** ヘッダー土台のブランドグラデーション（iOS の brandGradient オレンジ→コーラル相当）。 */
@@ -167,8 +169,10 @@ fun FestivalScreen(
                 (minScale == null || f.scale >= minScale!!) &&
                 (searchText.isBlank() ||
                     f.name.contains(searchText, true) ||
+                    localizeData(f.name).contains(searchText, true) ||
                     f.description.contains(searchText, true) ||
-                    fw.prefecture.displayName.contains(searchText, true))
+                    fw.prefecture.displayName.contains(searchText, true) ||
+                    fw.prefecture.localizedName().contains(searchText, true))
         }
     }
 
@@ -194,7 +198,7 @@ fun FestivalScreen(
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            FilterButton("すべて", selectedCategory == null, Color(0xFF8A8A8E)) { selectedCategory = null }
+            FilterButton(stringResource(R.string.common_all), selectedCategory == null, Color(0xFF8A8A8E)) { selectedCategory = null }
             categories.forEach { cat ->
                 FilterButton(festLabel(cat), selectedCategory == cat, festColor(cat), icon = festIcon(cat)) {
                     selectedCategory = if (selectedCategory == cat) null else cat
@@ -212,7 +216,7 @@ fun FestivalScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             listOf(3, 4, 5).forEach { s ->
-                FilterButton("★$s 以上", minScale == s, Color(0xFFFFA000), icon = Icons.Filled.Star) {
+                FilterButton(stringResource(R.string.festival_min_rating, s.toString()), minScale == s, Color(0xFFFFA000), icon = Icons.Filled.Star) {
                     minScale = if (minScale == s) null else s
                 }
             }
@@ -224,10 +228,10 @@ fun FestivalScreen(
                     .width(1.dp)
                     .background(AppTheme.Hairline),
             )
-            FilterButton("全期間", selectedMonth == null, Color(0xFF4285F4)) { selectedMonth = null }
+            FilterButton(stringResource(R.string.festival_all_periods), selectedMonth == null, Color(0xFF4285F4)) { selectedMonth = null }
             (1..12).forEach { m ->
                 val key = m.toString()
-                FilterButton("${m}月", selectedMonth == key, Color(0xFF4285F4)) {
+                FilterButton(stringResource(R.string.festival_month, m), selectedMonth == key, Color(0xFF4285F4)) {
                     selectedMonth = if (selectedMonth == key) null else key
                 }
             }
@@ -256,9 +260,9 @@ fun FestivalScreen(
                             badge = festLabel(fw.festival.category),
                             popularity = fw.festival.scale,
                             infoRows = listOf(
-                                "開催地" to "${fw.prefecture.displayName}・${fw.festival.location}",
-                                "時期" to fw.festival.month,
-                                "期間" to fw.festival.duration,
+                                "開催地" to "${fw.prefecture.localizedName()}・${localizeData(fw.festival.location)}",
+                                "時期" to localizeData(fw.festival.month),
+                                "期間" to localizeData(fw.festival.duration),
                             ),
                             features = fw.festival.features,
                         ),
@@ -289,7 +293,7 @@ private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
         Spacer(modifier = Modifier.width(10.dp))
         Box(modifier = Modifier.weight(1f)) {
             if (value.isEmpty()) {
-                Text("祭り名・県名で検索", fontSize = 15.sp, color = Color(0xFFB0B0B5))
+                Text(stringResource(R.string.festival_search_hint), fontSize = 15.sp, color = Color(0xFFB0B0B5))
             }
             BasicTextField(
                 value = value,
@@ -303,7 +307,7 @@ private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
         if (value.isNotEmpty()) {
             Icon(
                 Icons.Filled.Cancel,
-                contentDescription = "クリア",
+                contentDescription = stringResource(R.string.common_clear),
                 tint = Color(0xFFC7C7CC),
                 modifier = Modifier
                     .size(20.dp)
@@ -396,7 +400,7 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
                     .padding(horizontal = 8.dp, vertical = 3.dp),
             ) {
                 Text(
-                    item.prefecture.displayName,
+                    item.prefecture.localizedName(),
                     fontSize = 10.sp,
                     color = AppTheme.TextSecondary,
                     maxLines = 1,
@@ -408,7 +412,7 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
 
         // ── 祭り名 ──
         Text(
-            f.name,
+            localizeData(f.name),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = AppTheme.TextPrimary,
@@ -420,7 +424,7 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
 
         // ── 説明 ──
         Text(
-            f.description,
+            localizeData(f.description),
             fontSize = 11.sp,
             color = AppTheme.TextSecondary,
             maxLines = 3,
@@ -433,17 +437,17 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
         Row(modifier = Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Celebration, null, tint = Color(0xFF4285F4), modifier = Modifier.size(11.dp))
             Spacer(modifier = Modifier.width(3.dp))
-            Text(f.month, fontSize = 10.sp, color = Color(0xFF4285F4), maxLines = 1)
+            Text(localizeData(f.month), fontSize = 10.sp, color = Color(0xFF4285F4), maxLines = 1)
             Spacer(modifier = Modifier.weight(1f))
             Icon(Icons.Filled.Schedule, null, tint = Color(0xFF3D9E66), modifier = Modifier.size(11.dp))
             Spacer(modifier = Modifier.width(3.dp))
-            Text(f.duration, fontSize = 10.sp, color = Color(0xFF3D9E66), maxLines = 1)
+            Text(localizeData(f.duration), fontSize = 10.sp, color = Color(0xFF3D9E66), maxLines = 1)
         }
         Row(modifier = Modifier.padding(top = 3.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.Place, null, tint = Color(0xFFD6454D), modifier = Modifier.size(11.dp))
             Spacer(modifier = Modifier.width(3.dp))
             Text(
-                f.location,
+                localizeData(f.location),
                 fontSize = 10.sp,
                 color = Color(0xFFD6454D),
                 maxLines = 1,
@@ -466,7 +470,7 @@ private fun FestivalCard(item: FestivalWithPref, onClick: () -> Unit) {
                             .background(accent.copy(alpha = 0.15f))
                             .padding(horizontal = 6.dp, vertical = 2.dp),
                     ) {
-                        Text(feat, fontSize = 9.sp, color = accent, maxLines = 1)
+                        Text(localizeData(feat), fontSize = 9.sp, color = accent, maxLines = 1)
                     }
                 }
             }

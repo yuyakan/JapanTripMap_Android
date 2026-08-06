@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +54,7 @@ fun AddToPlanDialog(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showNewPlanField by remember { mutableStateOf(store.plans.isEmpty()) }
     var newPlanTitle by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -65,7 +68,7 @@ fun AddToPlanDialog(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("プランに追加", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.plan_add_title), fontSize = 17.sp, fontWeight = FontWeight.Bold)
 
             // 追加対象のプレビュー。
             ItemPreviewCard(item)
@@ -77,7 +80,9 @@ fun AddToPlanDialog(
                 onTitleChange = { newPlanTitle = it },
                 onExpand = { showNewPlanField = true },
                 onCreate = {
-                    val fallback = if (item.prefectureName.isNotBlank()) "${item.prefectureName}の旅" else "無題のプラン"
+                    val fallback = if (item.prefectureName.isNotBlank())
+                        context.getString(R.string.plan_default_title, item.prefectureName)
+                    else context.getString(R.string.plan_untitled)
                     val name = newPlanTitle.trim().ifBlank { fallback }
                     val plan = store.createPlan(name)
                     store.addItem(plan.id, item)
@@ -114,10 +119,11 @@ private fun ItemPreviewCard(item: PlanItem) {
         CategoryAvatar(item.category, size = 44, iconSize = 22)
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(item.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+            Text(localizeData(item.name), fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+            val categoryLabel = stringResource(item.category.labelRes)
             val sub = buildString {
-                append(item.category.label)
-                if (item.prefectureName.isNotBlank()) append(" · ${item.prefectureName}")
+                append(categoryLabel)
+                if (item.prefectureName.isNotBlank()) append(" · ${localizeData(item.prefectureName)}")
             }
             Text(sub, fontSize = 12.sp, color = Color(0xFF8A8A8E), modifier = Modifier.padding(top = 2.dp))
         }
@@ -138,12 +144,12 @@ private fun NewPlanCard(
             OutlinedTextField(
                 value = title,
                 onValueChange = onTitleChange,
-                placeholder = { Text("例：夏の北海道旅") },
+                placeholder = { Text(stringResource(R.string.plan_title_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             PlanPrimaryButton(
-                text = "新規プランに追加",
+                text = stringResource(R.string.plan_add_new),
                 icon = Icons.Filled.AddCircleOutline,
                 modifier = Modifier.fillMaxWidth(),
                 onClick = onCreate,
@@ -151,7 +157,7 @@ private fun NewPlanCard(
         }
     } else {
         PlanPrimaryButton(
-            text = "新規プランに追加",
+            text = stringResource(R.string.plan_add_new),
             icon = Icons.Filled.AddCircleOutline,
             modifier = Modifier.fillMaxWidth(),
             onClick = onExpand,
@@ -167,7 +173,7 @@ private fun ExistingPlansCard(
     onSelect: (TravelPlan) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("既存のプランに追加", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
+        Text(stringResource(R.string.plan_add_existing), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
         store.plans.forEach { plan ->
             val contained = plan.items.any { it.name == item.name && it.category == item.category }
             Row(
@@ -191,11 +197,11 @@ private fun ExistingPlansCard(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(plan.title, fontSize = 15.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
-                    Text("${plan.items.size}件の項目", fontSize = 12.sp, color = Color(0xFF8A8A8E), modifier = Modifier.padding(top = 1.dp))
+                    Text(stringResource(R.string.plan_item_count, plan.items.size), fontSize = 12.sp, color = Color(0xFF8A8A8E), modifier = Modifier.padding(top = 1.dp))
                 }
                 Icon(
                     if (contained) Icons.Filled.CheckCircle else Icons.Filled.AddCircleOutline,
-                    contentDescription = if (contained) "追加済み" else "追加",
+                    contentDescription = stringResource(if (contained) R.string.plan_already_added else R.string.plan_add),
                     tint = if (contained) Color(0xFF34C759) else PlanTheme.Primary,
                     modifier = Modifier.size(24.dp),
                 )

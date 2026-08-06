@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -51,19 +52,19 @@ fun SocialSearchButtons(
     val context = LocalContext.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         if (showMap) {
-            SocialButton("Google マップで開く", Icons.Filled.Map, Color(0xFF34A853)) {
+            SocialButton(stringResource(R.string.social_open_google_maps), Icons.Filled.Map, Color(0xFF34A853)) {
                 ExternalLinks.openMap(context, query)
             }
         }
         if (tabelogArea != null) {
-            SocialButton("食べログでお店を探す", Icons.Filled.Restaurant, Color(0xFF2E9E8C)) {
+            SocialButton(stringResource(R.string.social_tabelog), Icons.Filled.Restaurant, Color(0xFF2E9E8C)) {
                 ExternalLinks.openTabelog(context, tabelogArea, tabelogKeyword)
             }
         }
-        SocialButton("YouTube で検索", Icons.Filled.PlayArrow, Color(0xFFFF0000)) {
+        SocialButton(stringResource(R.string.social_youtube), Icons.Filled.PlayArrow, Color(0xFFFF0000)) {
             ExternalLinks.openYouTube(context, query)
         }
-        SocialButton("Instagram で検索", Icons.Filled.CameraAlt, Color(0xFFE1306C)) {
+        SocialButton(stringResource(R.string.social_instagram), Icons.Filled.CameraAlt, Color(0xFFE1306C)) {
             ExternalLinks.openInstagram(context, query)
         }
     }

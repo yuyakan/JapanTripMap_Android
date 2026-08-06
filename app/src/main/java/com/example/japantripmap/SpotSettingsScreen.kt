@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,9 +51,9 @@ private val AccentRed = Color(0xFFE53935)
 private val AccentGray = Color(0xFF8A8A8E)
 
 /** 温泉設定のグルーピング方法。iOS 版 GroupingMode に対応（"地方別"/"タイプ別"）。 */
-private enum class SpotGrouping(val label: String, val icon: ImageVector) {
-    REGION("地方別", Icons.Filled.Map),
-    TYPE("タイプ別", Icons.Filled.Tag),
+private enum class SpotGrouping(val labelRes: Int, val icon: ImageVector) {
+    REGION(R.string.spot_settings_by_region, Icons.Filled.Map),
+    TYPE(R.string.spot_settings_by_type, Icons.Filled.Tag),
 }
 
 /**
@@ -94,14 +95,14 @@ fun SpotSettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = { viewModel.selectAll() }) {
-                Text("全選択", fontSize = 16.sp, color = accent)
+                Text(stringResource(R.string.common_select_all), fontSize = 16.sp, color = accent)
             }
             TextButton(onClick = { viewModel.deselectAll() }) {
-                Text("全解除", fontSize = 16.sp, color = AccentRed)
+                Text(stringResource(R.string.common_deselect_all), fontSize = 16.sp, color = AccentRed)
             }
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = onDone) {
-                Text("完了", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
+                Text(stringResource(R.string.common_done), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
             }
         }
 
@@ -115,7 +116,7 @@ fun SpotSettingsScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth().appCard(corner = 16.dp).padding(14.dp),
                 ) {
-                    Text("表示設定", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextSecondary)
+                    Text(stringResource(R.string.settings_display), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextSecondary)
                     Spacer(modifier = Modifier.height(10.dp))
                     if (viewModel.kind == SpotKind.ONSEN) {
                         // 地方別 / タイプ別 の切替。
@@ -134,7 +135,7 @@ fun SpotSettingsScreen(
                                 ) {
                                     Icon(mode.icon, contentDescription = null, tint = if (selected) Color.White else accent, modifier = Modifier.size(16.dp))
                                     Spacer(modifier = Modifier.width(6.dp))
-                                    Text(mode.label, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = if (selected) Color.White else accent)
+                                    Text(stringResource(mode.labelRes), fontSize = 14.sp, fontWeight = FontWeight.Medium, color = if (selected) Color.White else accent)
                                 }
                             }
                         }
@@ -157,7 +158,7 @@ fun SpotSettingsScreen(
                         icon = section.icon,
                         iconTint = section.iconTint,
                         title = section.title,
-                        countText = "${section.spots.size}箇所",
+                        countText = stringResource(R.string.spot_settings_count, section.spots.size),
                     )
                 }
                 items(section.spots, key = { it.id }) { spot ->
@@ -187,18 +188,18 @@ private fun buildSections(viewModel: SpotRouletteViewModel, grouping: SpotGroupi
         SpotKind.ONSEN -> when (grouping) {
             SpotGrouping.REGION ->
                 SpotRepository.groupedByRegion(viewModel.allSpots).map { (region, spots) ->
-                    SpotSection(region, null, null, spots)
+                    SpotSection(localizeData(region), null, null, spots)
                 }
             SpotGrouping.TYPE ->
                 SpotRepository.groupedByType(viewModel.kind, viewModel.allSpots).map { (meta, spots) ->
-                    SpotSection(meta.name, meta.icon, meta.color, spots)
+                    SpotSection(localizeTypeLabel(meta.name), meta.icon, meta.color, spots)
                 }
         }
         // 自然は iOS と同じくタイプ別固定。表示タイプで絞り込む。
         SpotKind.NATURE -> {
             val filtered = viewModel.allSpots.filter { it.typeKey in viewModel.selectedDisplayTypes }
             SpotRepository.groupedByType(viewModel.kind, filtered).map { (meta, spots) ->
-                SpotSection(meta.name, meta.icon, meta.color, spots)
+                SpotSection(localizeTypeLabel(meta.name), meta.icon, meta.color, spots)
             }
         }
     }
@@ -218,8 +219,8 @@ private fun WeightSettingsRow(accent: Color, onClick: () -> Unit) {
         Icon(Icons.Filled.Scale, contentDescription = null, tint = accent, modifier = Modifier.size(22.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text("重み付け設定", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = AppTheme.TextPrimary)
-            Text("スポットごとの選択確率を調整", fontSize = 12.sp, color = AppTheme.TextSecondary)
+            Text(stringResource(R.string.settings_weight_title), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = AppTheme.TextPrimary)
+            Text(stringResource(R.string.spot_settings_weight_subtitle), fontSize = 12.sp, color = AppTheme.TextSecondary)
         }
         Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = AppTheme.TextSecondary, modifier = Modifier.size(18.dp))
     }
@@ -257,8 +258,8 @@ private fun DisplayTypeGrid(viewModel: SpotRouletteViewModel) {
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(meta.name, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = if (selected) AppTheme.TextPrimary else AppTheme.TextSecondary)
-                            Text("${count}箇所", fontSize = 11.sp, color = AppTheme.TextSecondary)
+                            Text(localizeTypeLabel(meta.name), fontSize = 13.sp, fontWeight = FontWeight.Medium, color = if (selected) AppTheme.TextPrimary else AppTheme.TextSecondary)
+                            Text(stringResource(R.string.spot_settings_count, count), fontSize = 11.sp, color = AppTheme.TextSecondary)
                         }
                         Icon(
                             imageVector = if (selected) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
@@ -320,14 +321,14 @@ private fun SpotSettingRow(
         // iOS: 有効=checkmark.circle.fill, 無効=circle(グレー)。
         Icon(
             imageVector = if (isEnabled) Icons.Filled.CheckCircle else Icons.Outlined.Circle,
-            contentDescription = if (isEnabled) "対象" else "対象外",
+            contentDescription = stringResource(if (isEnabled) R.string.settings_target else R.string.settings_not_target),
             tint = if (isEnabled) checkColor else Color(0xFFC7C7CC),
             modifier = Modifier.size(24.dp),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                spot.name,
+                localizeData(spot.name),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = if (isEnabled) AppTheme.TextPrimary else AppTheme.TextSecondary,
@@ -335,7 +336,7 @@ private fun SpotSettingRow(
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 3.dp)) {
                 Icon(meta.icon, contentDescription = null, tint = meta.color, modifier = Modifier.size(12.dp))
                 Spacer(modifier = Modifier.width(3.dp))
-                Text(meta.name, fontSize = 11.sp, color = meta.color)
+                Text(localizeTypeLabel(meta.name), fontSize = 11.sp, color = meta.color)
                 Spacer(modifier = Modifier.width(8.dp))
                 repeat(spot.popularity) {
                     Icon(Icons.Filled.Star, contentDescription = null, tint = AccentOrange, modifier = Modifier.size(10.dp))
@@ -391,13 +392,13 @@ private fun SpotWeightSettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = { viewModel.resetWeights() }) {
-                Text("リセット", fontSize = 16.sp, color = AccentRed)
+                Text(stringResource(R.string.common_reset), fontSize = 16.sp, color = AccentRed)
             }
             Spacer(modifier = Modifier.weight(1f))
-            Text("重み付け調整", fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.settings_weight_adjust), fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.weight(1f))
             TextButton(onClick = onBack) {
-                Text("完了", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = AccentOrange)
+                Text(stringResource(R.string.common_done), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = AccentOrange)
             }
         }
         // 戻る導線（サブ画面のためボトムシートを閉じずに設定へ戻す）。
@@ -406,9 +407,9 @@ private fun SpotWeightSettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             TextButton(onClick = onBack, contentPadding = PaddingValues(0.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "設定へ戻る", tint = AccentOrange, modifier = Modifier.size(18.dp))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_back_to_settings), tint = AccentOrange, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("設定", fontSize = 14.sp, color = AccentOrange)
+                Text(stringResource(R.string.common_settings), fontSize = 14.sp, color = AccentOrange)
             }
         }
 
@@ -420,9 +421,9 @@ private fun SpotWeightSettingsScreen(
             // iOS: 冒頭の説明セクション。
             item {
                 Column(modifier = Modifier.fillMaxWidth().appCard(corner = 16.dp).padding(14.dp)) {
-                    Text("重み付け設定", fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.settings_weight_title), fontSize = 15.sp, fontWeight = FontWeight.Bold)
                     Text(
-                        "各スポットの選択される確率を調整できます。数値が大きいほど選ばれやすくなります。",
+                        stringResource(R.string.spot_settings_weight_desc),
                         fontSize = 12.sp,
                         color = AppTheme.TextSecondary,
                         modifier = Modifier.padding(top = 4.dp),
@@ -433,7 +434,7 @@ private fun SpotWeightSettingsScreen(
             if (sections.isEmpty()) {
                 item {
                     Text(
-                        "有効なスポットがありません。設定で対象を追加してください。",
+                        stringResource(R.string.spot_settings_no_target),
                         fontSize = 13.sp,
                         color = AppTheme.TextSecondary,
                         modifier = Modifier.padding(8.dp),
@@ -443,7 +444,7 @@ private fun SpotWeightSettingsScreen(
 
             sections.forEach { (meta, spots) ->
                 item(key = "wsec_${meta.key}") {
-                    SectionHeader(icon = meta.icon, iconTint = meta.color, title = meta.name, countText = "${spots.size}箇所")
+                    SectionHeader(icon = meta.icon, iconTint = meta.color, title = localizeTypeLabel(meta.name), countText = stringResource(R.string.spot_settings_count, spots.size))
                 }
                 items(spots, key = { it.id }) { spot ->
                     WeightSliderRow(
@@ -480,11 +481,11 @@ private fun WeightSliderRow(
         // 上段: 名前＋タイプ＋星（左）と 確率%（右）。iOS 同様。
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
-                Text(spot.name, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(localizeData(spot.name), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 3.dp)) {
                     Icon(meta.icon, contentDescription = null, tint = meta.color, modifier = Modifier.size(12.dp))
                     Spacer(modifier = Modifier.width(3.dp))
-                    Text(meta.name, fontSize = 11.sp, color = meta.color)
+                    Text(localizeTypeLabel(meta.name), fontSize = 11.sp, color = meta.color)
                     Spacer(modifier = Modifier.width(8.dp))
                     repeat(spot.popularity) {
                         Icon(Icons.Filled.Star, contentDescription = null, tint = AccentOrange, modifier = Modifier.size(10.dp))
@@ -496,7 +497,7 @@ private fun WeightSliderRow(
 
         // 中段: 「重み: N.N」（左）と ± ボタン（右）。iOS 同様。
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 6.dp)) {
-            Text("重み: %.1f".format(weight), fontSize = 12.sp, color = AppTheme.TextSecondary)
+            Text(stringResource(R.string.settings_weight_value, weight), fontSize = 12.sp, color = AppTheme.TextSecondary)
             Spacer(modifier = Modifier.weight(1f))
             QuickButton("−", AccentRed, onDecrease)
             Spacer(modifier = Modifier.width(6.dp))

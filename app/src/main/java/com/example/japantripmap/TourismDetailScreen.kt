@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -113,10 +114,11 @@ private val ONSEN_TYPE_LABELS = mapOf(
 
 // プラン詳細のルーター（PlanItemDetail.kt）からグルメ/お土産の色・ラベルを再構築するため internal。
 // onsen 系は OnsenDetailScreen.kt にも同名 private があるため衝突を避けて private のまま残す。
+// ラベルは表示専用なのでロケールに応じて英訳して返す（iOS のフル名称）。
 internal fun categoryColor(cat: String) = CATEGORY_COLORS[cat] ?: Color.Gray
-internal fun categoryLabel(cat: String) = CATEGORY_LABELS[cat] ?: cat
+internal fun categoryLabel(cat: String) = localizeTypeLabel(CATEGORY_LABELS[cat] ?: cat)
 private fun onsenColor(t: String) = ONSEN_TYPE_COLORS[t] ?: Color.Gray
-private fun onsenLabel(t: String) = ONSEN_TYPE_LABELS[t] ?: t
+private fun onsenLabel(t: String) = localizeTypeLabel(ONSEN_TYPE_LABELS[t] ?: t)
 
 /** 最初に見せる件数（iOS 版の Array(items.prefix(4)) に合わせる）。 */
 private const val INITIAL_GRID_COUNT = 4
@@ -138,6 +140,14 @@ fun TourismDetailScreen(
     val souvenirs = prefecture.souvenirs
     val onsens = prefecture.onsens
 
+    // LazyListScope（非 Composable）内では stringResource を呼べないため、
+    // セクション見出し類はここで先に解決しておく。
+    val gourmetTitle = stringResource(R.string.tourism_section_gourmet)
+    val gourmetSubtitle = stringResource(R.string.tourism_section_gourmet_subtitle, prefecture.localizedName())
+    val souvenirTitle = stringResource(R.string.tourism_section_souvenir)
+    val souvenirSubtitle = stringResource(R.string.tourism_section_souvenir_subtitle, prefecture.localizedName())
+    val loadMoreText = stringResource(R.string.tourism_load_more)
+
     val context = LocalContext.current
     // 「プランに追加」対象の項目。null なら未選択。
     var pendingItem by remember { mutableStateOf<PlanItem?>(null) }
@@ -149,7 +159,7 @@ fun TourismDetailScreen(
             onDismiss = { pendingItem = null },
             onAdded = { planTitle ->
                 pendingItem = null
-                Toast.makeText(context, "「$planTitle」に追加しました", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.added_to_plan, planTitle), Toast.LENGTH_SHORT).show()
             },
         )
     }
@@ -167,7 +177,7 @@ fun TourismDetailScreen(
             // 県名のグラデーション見出し（中央寄せ・コンパクト）。
             item {
                 Text(
-                    text = prefecture.displayName,
+                    text = prefecture.localizedName(),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
@@ -181,7 +191,7 @@ fun TourismDetailScreen(
                 item {
                     RichSectionHeader(
                         icon = Icons.Filled.Map,
-                        title = "観光マップ",
+                        title = stringResource(R.string.tourism_section_map),
                         accent = AttractionAccent,
                     )
                 }
@@ -231,10 +241,11 @@ fun TourismDetailScreen(
             if (gourmets.isNotEmpty()) {
                 richGridSection(
                     icon = Icons.Filled.Restaurant,
-                    title = "ご当地グルメ",
-                    subtitle = "${prefecture.displayName}の味覚",
+                    title = gourmetTitle,
+                    subtitle = gourmetSubtitle,
                     accent = GourmetAccent,
                     count = gourmets.size,
+                    loadMoreText = loadMoreText,
                 ) { index ->
                     val g = gourmets[index]
                     RichItemCard(
@@ -283,7 +294,7 @@ fun TourismDetailScreen(
                 item {
                     RichSectionHeader(
                         icon = Icons.Filled.Spa,
-                        title = "温泉情報",
+                        title = stringResource(R.string.tourism_section_onsen),
                         accent = OnsenAccent,
                     )
                 }
@@ -331,10 +342,11 @@ fun TourismDetailScreen(
             if (souvenirs.isNotEmpty()) {
                 richGridSection(
                     icon = Icons.Filled.CardGiftcard,
-                    title = "お土産",
-                    subtitle = "${prefecture.displayName}の思い出",
+                    title = souvenirTitle,
+                    subtitle = souvenirSubtitle,
                     accent = SouvenirAccent,
                     count = souvenirs.size,
+                    loadMoreText = loadMoreText,
                 ) { index ->
                     val s = souvenirs[index]
                     RichItemCard(
@@ -383,7 +395,7 @@ fun TourismDetailScreen(
                 item {
                     RichSectionHeader(
                         icon = Icons.Filled.PhotoLibrary,
-                        title = "スポット写真",
+                        title = stringResource(R.string.tourism_section_photos),
                         accent = AttractionAccent,
                     )
                 }
@@ -444,12 +456,12 @@ private fun FloatingBackButton(onBack: () -> Unit, modifier: Modifier = Modifier
     ) {
         Icon(
             Icons.AutoMirrored.Filled.ArrowBackIos,
-            contentDescription = "戻る",
+            contentDescription = stringResource(R.string.common_back),
             tint = Color.Black,
             modifier = Modifier.size(14.dp),
         )
         Spacer(modifier = Modifier.width(4.dp))
-        Text("戻る", fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+        Text(stringResource(R.string.common_back), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = Color.Black)
     }
 }
 
@@ -463,6 +475,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.richGridSection(
     subtitle: String,
     accent: Color,
     count: Int,
+    loadMoreText: String,
     card: @Composable (index: Int) -> Unit,
 ) {
     // showAll をこのセクション内で保持したいので、状態は item スコープ内で持つ。
@@ -494,7 +507,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.richGridSection(
             }
 
             if (!showAll && count > INITIAL_GRID_COUNT) {
-                LoadMoreButton(title = "もっと見る", accent = accent) { showAll = true }
+                LoadMoreButton(title = loadMoreText, accent = accent) { showAll = true }
             }
         }
     }
@@ -611,7 +624,7 @@ private fun AttractionMiniCard(name: String, description: String, onClick: () ->
             }
             Spacer(modifier = Modifier.width(6.dp))
             Text(
-                name,
+                localizeData(name),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 2,
@@ -619,7 +632,7 @@ private fun AttractionMiniCard(name: String, description: String, onClick: () ->
             )
         }
         Text(
-            description,
+            localizeData(description),
             fontSize = 12.sp,
             color = Color.Gray,
             maxLines = 3,
@@ -689,14 +702,14 @@ private fun RichItemCard(
 
         // タイトル + 説明
         Text(
-            name,
+            localizeData(name),
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            description,
+            localizeData(description),
             fontSize = 12.sp,
             color = Color.Gray,
             maxLines = 2,
@@ -708,12 +721,12 @@ private fun RichItemCard(
         // ボトム: 価格 / 時期 + カテゴリタグ
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (!price.isNullOrBlank()) {
-                Text("💰 $price", fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Text("💰 ${localizeData(price)}", fontSize = 12.sp, fontWeight = FontWeight.Medium)
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!season.isNullOrBlank()) {
                     Text(
-                        "📅 $season",
+                        "📅 ${localizeData(season)}",
                         fontSize = 11.sp,
                         color = Color.Gray,
                         maxLines = 1,
@@ -734,7 +747,7 @@ private fun RichItemCard(
                 Spacer(modifier = Modifier.width(6.dp))
                 Icon(
                     Icons.Filled.AddCircle,
-                    contentDescription = "プランに追加",
+                    contentDescription = stringResource(R.string.common_add_to_plan),
                     tint = accent,
                     modifier = Modifier
                         .size(22.dp)
@@ -766,7 +779,7 @@ private fun PhotoCard(spotName: String, resName: String, onClick: () -> Unit) {
                 .height(180.dp),
         )
         Text(
-            text = spotName,
+            text = localizeData(spotName),
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,

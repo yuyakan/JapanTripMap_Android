@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.navigationBarsPadding
 
@@ -59,12 +60,12 @@ class MainActivity : ComponentActivity() {
 }
 
 /** ボトムタブの定義。iOS 版 ContentView の 5 タブに対応。 */
-private enum class MainTab(val label: String, val icon: ImageVector) {
-    PREFECTURE("都道府県", Icons.Filled.Map),
-    ONSEN("温泉", Icons.Filled.Hotel),
-    NATURE("自然", Icons.Filled.Park),
-    FESTIVAL("祭り", Icons.Filled.Celebration),
-    PLAN("マイプラン", Icons.Filled.Luggage),
+private enum class MainTab(val labelRes: Int, val icon: ImageVector) {
+    PREFECTURE(R.string.tab_prefecture, Icons.Filled.Map),
+    ONSEN(R.string.tab_onsen, Icons.Filled.Hotel),
+    NATURE(R.string.tab_nature, Icons.Filled.Park),
+    FESTIVAL(R.string.tab_festival, Icons.Filled.Celebration),
+    PLAN(R.string.tab_plan, Icons.Filled.Luggage),
 }
 
 private val TabAccent = Color(0xFFFF9500)
@@ -167,11 +168,12 @@ private fun AppRoot() {
             containerColor = AppTheme.Background,
         ) {
             MainTab.entries.forEach { tab ->
+                val tabLabel = stringResource(tab.labelRes)
                 NavigationBarItem(
                     selected = selectedTab == tab,
                     onClick = { selectedTab = tab },
-                    icon = { Icon(tab.icon, contentDescription = tab.label) },
-                    label = { Text(tab.label) },
+                    icon = { Icon(tab.icon, contentDescription = tabLabel) },
+                    label = { Text(tabLabel) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = TabAccent,
                         selectedTextColor = TabAccent,
@@ -187,6 +189,6 @@ private fun AppRoot() {
 @Composable
 private fun PlaceholderTab(name: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-        Text("$name（準備中）", color = Color.Gray)
+        Text(stringResource(R.string.placeholder_preparing, name), color = Color.Gray)
     }
 }

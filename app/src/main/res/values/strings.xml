@@ -1,4 +1,246 @@
 <resources>
     <string name="app_name">JapanTripMap</string>
-    <string name="google_maps_key">AIzaSyCxY7M376cVbt9TZUOm_AnNeiP0McPyfBk</string>
+
+    <!-- ボトムタブ -->
+    <string name="tab_prefecture">都道府県</string>
+    <string name="tab_onsen">温泉</string>
+    <string name="tab_nature">自然</string>
+    <string name="tab_festival">祭り</string>
+    <string name="tab_plan">マイプラン</string>
+    <string name="placeholder_preparing">%s（準備中）</string>
+
+    <!-- 共通 -->
+    <string name="common_back">戻る</string>
+    <string name="common_close">閉じる</string>
+    <string name="common_done">完了</string>
+    <string name="common_cancel">キャンセル</string>
+    <string name="common_reset">リセット</string>
+    <string name="common_clear">クリア</string>
+    <string name="common_settings">設定</string>
+    <string name="common_select_all">全選択</string>
+    <string name="common_deselect_all">全解除</string>
+    <string name="common_save">保存</string>
+    <string name="common_all">すべて</string>
+    <string name="common_start">開始</string>
+    <string name="common_stop">停止</string>
+    <string name="common_retry">もう一度</string>
+    <string name="common_add_to_plan">プランに追加</string>
+    <string name="common_map">地図</string>
+
+    <!-- 温泉タイプ（iOS onsen_type.*） -->
+    <string name="onsen_type_scenic">絶景</string>
+    <string name="onsen_type_historical">歴史</string>
+    <string name="onsen_type_therapeutic">療養</string>
+    <string name="onsen_type_resort">リゾート</string>
+    <string name="onsen_type_mountain">山あい</string>
+    <string name="onsen_type_seaside">海辺</string>
+    <string name="onsen_type_ski">スキー</string>
+    <string name="onsen_type_fallback">療養</string>
+
+    <!-- 自然タイプ（iOS nature_type.*） -->
+    <string name="nature_type_night_view">夜景</string>
+    <string name="nature_type_starry_sky">星空</string>
+    <string name="nature_type_sea">海</string>
+    <string name="nature_type_camping">キャンプ</string>
+    <string name="nature_type_fallback">自然</string>
+
+    <!-- グルメカテゴリ（iOS food_category_*） -->
+    <string name="food_category_ramen">ラーメン</string>
+    <string name="food_category_seafood">海鮮</string>
+    <string name="food_category_meat">肉</string>
+    <string name="food_category_sweets">スイーツ</string>
+    <string name="food_category_local">郷土料理</string>
+    <string name="food_category_drinks">ドリンク</string>
+    <string name="food_category_vegetables">野菜・果物</string>
+
+    <!-- お土産カテゴリ（iOS souvenirCategory.*） -->
+    <string name="souvenir_category_food">食品</string>
+    <string name="souvenir_category_crafts">工芸品</string>
+    <string name="souvenir_category_textiles">織物</string>
+    <string name="souvenir_category_ceramics">陶磁器</string>
+    <string name="souvenir_category_regional">地域特産</string>
+
+    <!-- 祭りカテゴリ（iOS festival.*_tag） -->
+    <string name="festival_category_summer">夏祭り</string>
+    <string name="festival_category_fireworks">花火</string>
+    <string name="festival_category_traditional">伝統</string>
+    <string name="festival_category_dance">踊り</string>
+    <string name="festival_category_food">グルメ</string>
+    <string name="festival_category_seasonal">季節</string>
+    <string name="festival_category_religious">宗教</string>
+    <string name="festival_filter_spring">春</string>
+    <string name="festival_filter_autumn">秋</string>
+    <string name="festival_filter_winter">冬</string>
+    <string name="festival_filter_sakura">桜</string>
+    <string name="festival_filter_illumination">イルミ</string>
+    <string name="festival_filter_snow">雪</string>
+
+    <!-- プランのカテゴリ（iOS PlanItemCategory） -->
+    <string name="plan_category_attraction">観光スポット</string>
+    <string name="plan_category_gourmet">グルメ</string>
+    <string name="plan_category_onsen">温泉</string>
+    <string name="plan_category_festival">祭り</string>
+    <string name="plan_category_nature">自然</string>
+    <string name="plan_category_souvenir">お土産</string>
+    <string name="plan_category_hotel">宿泊</string>
+    <string name="plan_category_transport">交通</string>
+    <string name="plan_category_memo">メモ</string>
+
+    <!-- 観光詳細画面 -->
+    <string name="tourism_section_map">観光マップ</string>
+    <string name="tourism_section_gourmet">ご当地グルメ</string>
+    <string name="tourism_section_gourmet_subtitle">%sの味覚</string>
+    <string name="tourism_section_onsen">温泉情報</string>
+    <string name="tourism_section_souvenir">お土産</string>
+    <string name="tourism_section_souvenir_subtitle">%sの思い出</string>
+    <string name="tourism_section_photos">スポット写真</string>
+    <string name="tourism_load_more">もっと見る</string>
+    <string name="info_price_range">価格帯</string>
+    <string name="info_best_season">おすすめ時期</string>
+    <string name="info_category">カテゴリ</string>
+    <string name="info_onsen_quality">泉質タイプ</string>
+    <string name="added_to_plan">「%s」に追加しました</string>
+
+    <!-- スポット詳細画面 -->
+    <string name="detail_more_search">もっと調べる</string>
+    <string name="detail_more_info">詳しい情報</string>
+    <string name="detail_basic_info">基本情報</string>
+    <string name="detail_features">特徴</string>
+    <string name="detail_change_location">位置を変更</string>
+    <string name="detail_add_location">位置を追加</string>
+
+    <!-- SNS 検索 -->
+    <string name="social_open_google_maps">Google マップで開く</string>
+    <string name="social_tabelog">食べログでお店を探す</string>
+    <string name="social_youtube">YouTube で検索</string>
+    <string name="social_instagram">Instagram で検索</string>
+
+    <!-- 温泉・自然のスポット詳細一覧 -->
+    <string name="onsen_prefecture_title">%sの温泉</string>
+    <string name="onsen_prefecture_map">%sの温泉地図</string>
+    <string name="onsen_count">%d つの温泉地</string>
+    <string name="nature_prefecture_title">%sの自然</string>
+    <string name="nature_prefecture_map">%sの自然地図</string>
+    <string name="nature_count">%d つの自然スポット</string>
+    <string name="spot_type_kind">種別</string>
+
+    <!-- 都道府県ルーレット / マップ画面 -->
+    <string name="map_target_prefectures">対象: %d 都道府県</string>
+    <string name="map_weighting_enabled">重み付け: 有効</string>
+    <string name="map_onsen_count">%d つの温泉地</string>
+    <string name="map_nature_count">%d つの自然スポット</string>
+    <string name="map_result_onsen">温泉情報</string>
+    <string name="map_result_nature">自然スポット</string>
+    <string name="map_result_tourism">観光情報</string>
+
+    <!-- スポットルーレット画面 -->
+    <string name="spot_roulette_map_view">地図表示</string>
+    <string name="spot_roulette_list_view">リスト表示</string>
+    <string name="spot_roulette_count">%d 件</string>
+    <string name="spot_roulette_detail_info">詳細情報</string>
+
+    <!-- 祭り画面 -->
+    <string name="festival_min_rating">★%s 以上</string>
+    <string name="festival_all_periods">全期間</string>
+    <string name="festival_month">%d月</string>
+    <string name="festival_location">開催地</string>
+    <string name="festival_period">時期</string>
+    <string name="festival_duration">期間</string>
+    <string name="festival_search_hint">祭り名・県名で検索</string>
+
+    <!-- 設定・重み付け画面（都道府県） -->
+    <string name="settings_display">表示設定</string>
+    <string name="settings_prefecture_count">%d県</string>
+    <string name="settings_weight_title">重み付け設定</string>
+    <string name="settings_weight_subtitle">都道府県ごとの選択確率を調整</string>
+    <string name="settings_target">対象</string>
+    <string name="settings_not_target">対象外</string>
+    <string name="settings_weight_adjust">重み付け調整</string>
+    <string name="settings_back_to_settings">設定へ戻る</string>
+    <string name="settings_weight_desc">各都道府県の選択される確率を調整できます。数値が大きいほど選ばれやすくなります。</string>
+    <string name="settings_no_target_prefecture">対象の都道府県がありません。設定で対象を追加してください。</string>
+    <string name="settings_weight_value">重み: %.1f</string>
+
+    <!-- 設定・重み付け画面（スポット） -->
+    <string name="spot_settings_by_region">地方別</string>
+    <string name="spot_settings_by_type">タイプ別</string>
+    <string name="spot_settings_count">%d箇所</string>
+    <string name="spot_settings_weight_subtitle">スポットごとの選択確率を調整</string>
+    <string name="spot_settings_weight_desc">各スポットの選択される確率を調整できます。数値が大きいほど選ばれやすくなります。</string>
+    <string name="spot_settings_no_target">有効なスポットがありません。設定で対象を追加してください。</string>
+
+    <!-- プラン系 -->
+    <string name="plan_add_title">プランに追加</string>
+    <string name="plan_default_title">%sの旅</string>
+    <string name="plan_untitled">無題のプラン</string>
+    <string name="plan_title_hint">例：夏の北海道旅</string>
+    <string name="plan_add_new">新規プランに追加</string>
+    <string name="plan_add_existing">既存のプランに追加</string>
+    <string name="plan_item_count">%d件の項目</string>
+    <string name="plan_already_added">追加済み</string>
+    <string name="plan_add">追加</string>
+    <string name="plan_unassigned">未割り当て</string>
+    <string name="plan_share">共有</string>
+    <string name="plan_share_chooser">プランを共有</string>
+    <string name="plan_edit">編集</string>
+    <string name="plan_create">プラン作成</string>
+    <string name="plan_empty_title">プランがまだありません</string>
+    <string name="plan_empty_message">気になった観光地・グルメ・温泉・お祭りを集めて、自分だけの旅行プランを作りましょう。</string>
+    <string name="plan_create_button">プランを作成</string>
+    <string name="plan_move_up">上へ</string>
+    <string name="plan_move_down">下へ</string>
+    <string name="plan_delete">削除</string>
+    <string name="plan_no_items_short">まだ項目がありません</string>
+    <string name="plan_day_count">%d日間</string>
+    <string name="plan_show_on_map">地図で見る</string>
+    <string name="plan_no_items_placeholder">まだ項目がありません。\n観光・温泉・自然の詳細画面から「プランに追加」、\nまたは下のボタンで宿泊・交通・メモを追加できます。</string>
+    <string name="plan_no_items_paren">（項目なし）</string>
+    <string name="plan_day_format">Day %d</string>
+    <string name="plan_reorder_hint">ドラッグして移動</string>
+    <string name="plan_time_unset">時間未設定</string>
+    <string name="plan_time_none">時刻未設定</string>
+    <string name="plan_edit_time">時刻を編集</string>
+    <string name="plan_delete_block">ブロックを削除</string>
+    <string name="plan_add_time_block">時間ブロックを追加</string>
+    <string name="plan_add_custom">宿泊・交通・メモを追加</string>
+    <string name="plan_time_block">時間ブロック</string>
+    <string name="plan_start_time">開始時刻</string>
+    <string name="plan_hour_suffix">時</string>
+    <string name="plan_minute_suffix">分</string>
+    <string name="plan_block_heading_hint">見出し（任意・例: 午前）</string>
+    <string name="plan_delete_this_block">このブロックを削除</string>
+    <string name="plan_decrease">減らす</string>
+    <string name="plan_increase">増やす</string>
+    <string name="plan_split_by_day">日程ごとに分ける</string>
+    <string name="plan_days_count">日数: %d 日</string>
+    <string name="plan_name_label">プラン名</string>
+    <string name="plan_edit_title">プランを編集</string>
+    <string name="plan_map_empty">地図に表示できる場所がありません。\n観光・温泉・自然・祭りの項目、または位置を設定した宿泊・交通・メモが必要です。</string>
+    <string name="plan_map_view_route">Day %d の経路を見る</string>
+    <string name="plan_map_all_days">全日</string>
+    <string name="plan_morning">午前</string>
+    <string name="plan_memo">メモ</string>
+    <string name="plan_place">場所</string>
+    <string name="plan_address_copied">住所をコピーしました</string>
+    <string name="plan_copy_address">住所をコピー</string>
+    <string name="plan_open_in_map">マップで開く</string>
+    <string name="plan_item_add">項目を追加</string>
+    <string name="plan_item_edit">項目を編集</string>
+    <string name="plan_item_kind">種類</string>
+    <string name="plan_item_title">タイトル</string>
+    <string name="plan_item_title_hint">例：〇〇ホテル</string>
+    <string name="plan_memo_optional">メモ（任意）</string>
+    <string name="plan_location_set">位置を設定済み</string>
+    <string name="plan_location_add_optional">位置を追加（任意）</string>
+    <string name="location_picker_title">位置を選ぶ</string>
+    <string name="location_search_hint">地名・住所・駅名で検索</string>
+    <string name="location_searching">検索中…</string>
+    <string name="location_not_found">見つかりませんでした</string>
+    <string name="location_resolving">住所を取得中…</string>
+    <string name="location_save_point">この地点を保存</string>
+
+    <!-- フォトクレジット -->
+    <string name="photo_credits_title">フォトクレジット</string>
+    <string name="photo_credits_attribution">写真の帰属情報</string>
+    <string name="photo_credits_desc">本アプリで使用している観光スポット写真の作者・ライセンス・出典です。</string>
 </resources>

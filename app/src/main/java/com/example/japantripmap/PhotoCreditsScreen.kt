@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -49,10 +50,10 @@ fun PhotoCreditsScreen(onBack: () -> Unit) {
         containerColor = AppTheme.Background,
         topBar = {
             TopAppBar(
-                title = { Text("フォトクレジット", fontWeight = FontWeight.Bold, fontSize = 17.sp) },
+                title = { Text(stringResource(R.string.photo_credits_title), fontWeight = FontWeight.Bold, fontSize = 17.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -86,11 +87,11 @@ fun PhotoCreditsScreen(onBack: () -> Unit) {
                             modifier = Modifier.size(20.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("写真の帰属情報", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextPrimary)
+                        Text(stringResource(R.string.photo_credits_attribution), fontSize = 15.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextPrimary)
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        "本アプリで使用している観光スポット写真の作者・ライセンス・出典です。",
+                        stringResource(R.string.photo_credits_desc),
                         fontSize = 12.sp,
                         color = AppTheme.TextSecondary,
                     )

@@ -59,6 +59,8 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -66,7 +68,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-/** マーカー/一覧タップで開く詳細画面用の SpotDetail に変換する。 */
+/**
+ * マーカー/一覧タップで開く詳細画面用の SpotDetail に変換する。
+ * title / description / badge / infoRows は日本語のまま渡し、SpotDetailScreen 側の
+ * 描画時に localizeData / localizeInfoLabel でロケールに応じて英訳する。
+ */
 fun RouletteSpot.toSpotDetail(): SpotDetail = SpotDetail(
     title = name,
     prefecture = prefecture,
@@ -76,9 +82,9 @@ fun RouletteSpot.toSpotDetail(): SpotDetail = SpotDetail(
     planCategory = if (kind == SpotKind.ONSEN) PlanItemCategory.ONSEN else PlanItemCategory.NATURE,
     latitude = latitude,
     longitude = longitude,
-    badge = typeMeta.name,
+    badge = localizeTypeLabel(typeMeta.name),
     popularity = popularity,
-    infoRows = listOf((if (kind == SpotKind.ONSEN) "泉質タイプ" else "種別") to typeMeta.name),
+    infoRows = listOf((if (kind == SpotKind.ONSEN) "泉質タイプ" else "種別") to localizeTypeLabel(typeMeta.name)),
 )
 
 private val MapFillStart = Color(0x6633C481)
@@ -102,6 +108,7 @@ fun SpotRouletteScreen(
     var showSettings by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     val isBusy = viewModel.isSpinning || viewModel.isStopping
     val visibleSpots = viewModel.visibleEnabledSpots
@@ -122,12 +129,12 @@ fun SpotRouletteScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // iOS: 設定はアイコン＋「設定」ラベルの白丸ボタン。
-                        PillButton(icon = Icons.Filled.Settings, label = "設定") { showSettings = true }
+                        PillButton(icon = Icons.Filled.Settings, label = stringResource(R.string.common_settings)) { showSettings = true }
                         Spacer(modifier = Modifier.weight(1f))
                         // iOS: 切替はアイコンのみ。
                         IconPillButton(
                             icon = if (viewModel.isListView) Icons.Filled.Map else Icons.AutoMirrored.Filled.List,
-                            contentDescription = if (viewModel.isListView) "地図表示" else "リスト表示",
+                            contentDescription = stringResource(if (viewModel.isListView) R.string.spot_roulette_map_view else R.string.spot_roulette_list_view),
                         ) { viewModel.isListView = !viewModel.isListView }
                     }
                     // iOS(自然): 現在表示中のタイプを右上に小さくチップ表示。
@@ -175,7 +182,7 @@ fun SpotRouletteScreen(
                 ) {
                     val sel = viewModel.selectedSpot
                     if (viewModel.isStopping && sel != null && !viewModel.showResultModal) {
-                        Text(sel.name, fontSize = 32.sp, fontWeight = FontWeight.Bold, color = sel.typeMeta.color)
+                        Text(localizeData(sel.name), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = sel.typeMeta.color)
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -187,7 +194,7 @@ fun SpotRouletteScreen(
             viewModel.selectedSpot?.let { sel ->
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        sel.name,
+                        localizeData(sel.name),
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = sel.typeMeta.color,
@@ -204,7 +211,11 @@ fun SpotRouletteScreen(
         if (viewModel.showResultModal) {
             SpotResultOverlay(
                 spot = viewModel.selectedSpot,
-                onReset = { viewModel.reset() },
+                onReset = {
+                    // 結果画面から次へ進むタイミングで完走を記録し、3 回ごとにレビューを促す。
+                    scope.launch { AppReviewManager.onRouletteCompleted(context) }
+                    viewModel.reset()
+                },
                 onShowDetail = { viewModel.selectedSpot?.let(onOpenSpot) },
             )
         }
@@ -286,7 +297,7 @@ private fun DisplayTypeChips(types: List<SpotTypeMeta>, modifier: Modifier = Mod
                 // デフォルトの行の余白でテキストが下寄りに見えるのを防ぎ、
                 // アイコンと縦中央で揃えるため、フォントパディングを外し行を中央トリムする。
                 Text(
-                    meta.name,
+                    localizeTypeLabel(meta.name),
                     fontSize = 10.sp,
                     color = meta.color,
                     style = androidx.compose.ui.text.TextStyle(
@@ -401,9 +412,9 @@ private fun SpotListView(
                 ) {
                     Icon(meta.icon, contentDescription = null, tint = meta.color, modifier = Modifier.size(20.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(meta.name, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = meta.color)
+                    Text(localizeTypeLabel(meta.name), fontSize = 18.sp, fontWeight = FontWeight.Bold, color = meta.color)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("${spots.size} 件", fontSize = 12.sp, color = AppTheme.TextSecondary)
+                    Text(stringResource(R.string.spot_roulette_count, spots.size), fontSize = 12.sp, color = AppTheme.TextSecondary)
                 }
             }
             // 2 列のカード。
@@ -451,15 +462,15 @@ private fun SpotCard(
         }
         Spacer(modifier = Modifier.height(6.dp))
         Text(
-            spot.name,
+            localizeData(spot.name),
             fontSize = 12.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
             color = if (isSelected) Color(0xFFFF9500) else AppTheme.TextPrimary,
             maxLines = 2,
         )
-        Text(spot.prefecture.displayName, fontSize = 10.sp, color = AppTheme.TextSecondary, modifier = Modifier.padding(top = 2.dp))
+        Text(spot.prefecture.localizedName(), fontSize = 10.sp, color = AppTheme.TextSecondary, modifier = Modifier.padding(top = 2.dp))
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-            Text(meta.tagName, fontSize = 9.sp, color = meta.color)
+            Text(localizeTypeLabel(meta.tagName), fontSize = 9.sp, color = meta.color)
             Spacer(modifier = Modifier.width(4.dp))
             repeat(spot.popularity) {
                 Icon(Icons.Filled.Star, contentDescription = null, tint = Color(0xFFFF9500), modifier = Modifier.size(7.dp))
@@ -488,7 +499,7 @@ private fun SpinButton(
     ) {
         Icon(
             imageVector = if (isSpinning) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-            contentDescription = if (isSpinning) "停止" else "開始",
+            contentDescription = stringResource(if (isSpinning) R.string.common_stop else R.string.common_start),
             tint = if (enabled) Color.Black else Color.Gray,
             modifier = Modifier.size(28.dp),
         )
@@ -511,21 +522,21 @@ private fun SpotResultOverlay(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(spot?.name ?: "", fontSize = 40.sp, fontWeight = FontWeight.Black, color = accent)
+            Text(spot?.name?.let { localizeData(it) } ?: "", fontSize = 40.sp, fontWeight = FontWeight.Black, color = accent)
             spot?.let {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 10.dp)) {
                     Icon(it.typeMeta.icon, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(it.typeMeta.name, fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
+                    Text(localizeTypeLabel(it.typeMeta.name), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = accent)
                 }
                 Text(
-                    it.prefecture.displayName,
+                    it.prefecture.localizedName(),
                     fontSize = 14.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 6.dp),
                 )
                 Text(
-                    it.description,
+                    localizeData(it.description),
                     fontSize = 13.sp,
                     color = AppTheme.TextSecondary,
                     modifier = Modifier.padding(top = 8.dp, start = 32.dp, end = 32.dp),
@@ -548,7 +559,7 @@ private fun SpotResultOverlay(
             ) {
                 Icon(Icons.Filled.Place, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("詳細情報", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
+                Text(stringResource(R.string.spot_roulette_detail_info), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, color = Color.White)
             }
         }
 
@@ -562,7 +573,7 @@ private fun SpotResultOverlay(
                 .clickableIf(true, onReset),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(Icons.Filled.Refresh, contentDescription = "もう一度", tint = Color.White, modifier = Modifier.size(24.dp))
+            Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.common_retry), tint = Color.White, modifier = Modifier.size(24.dp))
         }
     }
 }

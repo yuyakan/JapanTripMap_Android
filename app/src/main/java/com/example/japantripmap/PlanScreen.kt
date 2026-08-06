@@ -74,6 +74,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -266,7 +267,7 @@ private fun PlanListScreen(
                     IconButton(onClick = onOpenPhotoCredits) {
                         Icon(
                             Icons.Outlined.Info,
-                            contentDescription = "写真の帰属情報",
+                            contentDescription = stringResource(R.string.photo_credits_attribution),
                             tint = AppTheme.TextSecondary,
                         )
                     }
@@ -276,7 +277,7 @@ private fun PlanListScreen(
                     if (store.plans.isNotEmpty()) {
                         TextButton(onClick = { editMode = !editMode }) {
                             Text(
-                                if (editMode) "完了" else "編集",
+                                stringResource(if (editMode) R.string.common_done else R.string.plan_edit),
                                 color = PlanTheme.Primary,
                                 fontWeight = FontWeight.SemiBold,
                             )
@@ -295,7 +296,7 @@ private fun PlanListScreen(
                 onClick = { showCreate = true },
                 containerColor = PlanTheme.Primary,
             ) {
-                Icon(Icons.Filled.Add, contentDescription = "プラン作成", tint = Color.White)
+                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.plan_create), tint = Color.White)
             }
         },
     ) { padding ->
@@ -367,16 +368,16 @@ private fun PlanEmptyState(modifier: Modifier = Modifier, onCreate: () -> Unit) 
             )
         }
         Spacer(modifier = Modifier.height(20.dp))
-        Text("プランがまだありません", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.plan_empty_title), fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
         Text(
-            "気になった観光地・グルメ・温泉・お祭りを集めて、自分だけの旅行プランを作りましょう。",
+            stringResource(R.string.plan_empty_message),
             fontSize = 14.sp,
             color = AppTheme.TextSecondary,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(24.dp))
-        PlanPrimaryButton(text = "プランを作成", icon = Icons.Filled.Add, onClick = onCreate)
+        PlanPrimaryButton(text = stringResource(R.string.plan_create_button), icon = Icons.Filled.Add, onClick = onCreate)
     }
 }
 
@@ -428,7 +429,7 @@ private fun PlanCard(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    "${plan.items.size}件の項目",
+                    stringResource(R.string.plan_item_count, plan.items.size),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White.copy(alpha = 0.9f),
@@ -439,19 +440,19 @@ private fun PlanCard(
                 IconButton(onClick = onMoveUp, enabled = canMoveUp, modifier = Modifier.size(32.dp)) {
                     Icon(
                         Icons.Filled.KeyboardArrowUp,
-                        contentDescription = "上へ",
+                        contentDescription = stringResource(R.string.plan_move_up),
                         tint = Color.White.copy(alpha = if (canMoveUp) 1f else 0.35f),
                     )
                 }
                 IconButton(onClick = onMoveDown, enabled = canMoveDown, modifier = Modifier.size(32.dp)) {
                     Icon(
                         Icons.Filled.KeyboardArrowDown,
-                        contentDescription = "下へ",
+                        contentDescription = stringResource(R.string.plan_move_down),
                         tint = Color.White.copy(alpha = if (canMoveDown) 1f else 0.35f),
                     )
                 }
                 IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Filled.Delete, contentDescription = "削除", tint = Color.White)
+                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.plan_delete), tint = Color.White)
                 }
             } else {
                 Icon(
@@ -470,7 +471,7 @@ private fun PlanCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (categoryIcons.isEmpty()) {
-                Text("まだ項目がありません", fontSize = 12.sp, color = AppTheme.TextSecondary)
+                Text(stringResource(R.string.plan_no_items_short), fontSize = 12.sp, color = AppTheme.TextSecondary)
             } else {
                 categoryIcons.forEach { category ->
                     Box(
@@ -498,7 +499,7 @@ private fun PlanCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        "${plan.dayCount}日間",
+                        stringResource(R.string.plan_day_count, plan.dayCount),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = PlanTheme.Primary,
@@ -539,7 +540,7 @@ private fun PlanDetailScreen(
                 title = { Text(plan.title, fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 },
                 actions = {
@@ -547,15 +548,15 @@ private fun PlanDetailScreen(
                     IconButton(onClick = {
                         val send = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, PlanShareFormatter.text(plan))
+                            putExtra(Intent.EXTRA_TEXT, PlanShareFormatter.text(context, plan))
                         }
-                        context.startActivity(Intent.createChooser(send, "プランを共有"))
+                        context.startActivity(Intent.createChooser(send, context.getString(R.string.plan_share_chooser)))
                     }) {
-                        Icon(Icons.Filled.Share, contentDescription = "共有", tint = PlanTheme.Primary)
+                        Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.plan_share), tint = PlanTheme.Primary)
                     }
                     // 編集（タイトル・メモ）。
                     IconButton(onClick = { showEdit = true }) {
-                        Icon(Icons.Filled.Edit, contentDescription = "編集", tint = PlanTheme.Primary)
+                        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.plan_edit), tint = PlanTheme.Primary)
                     }
                 },
                 // 透明にして背景グラデーションを裏まで繋げる。
@@ -580,7 +581,7 @@ private fun PlanDetailScreen(
                 ) {
                     Icon(
                         Icons.Filled.Map,
-                        contentDescription = "地図で見る",
+                        contentDescription = stringResource(R.string.plan_show_on_map),
                         tint = Color.White,
                         modifier = Modifier.size(24.dp),
                     )
@@ -626,7 +627,7 @@ private fun PlanDetailScreen(
                                 modifier = Modifier.size(15.dp),
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text("メモ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
+                            Text(stringResource(R.string.plan_memo), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
                         }
                         Text(plan.memo, fontSize = 14.sp, color = AppTheme.TextPrimary)
                     }
@@ -685,7 +686,7 @@ private fun PlanDetailScreen(
                         if (dayItems.isEmpty()) {
                             item(key = "dayempty_none") {
                                 Text(
-                                    "（項目なし）",
+                                    stringResource(R.string.plan_no_items_paren),
                                     fontSize = 13.sp,
                                     color = Color.Gray,
                                     modifier = Modifier.padding(start = 4.dp, bottom = 4.dp),
@@ -714,7 +715,7 @@ private fun PlanDetailScreen(
                         modifier = Modifier.padding(top = 32.dp),
                     ) {
                         Text(
-                            "まだ項目がありません。\n観光・温泉・自然の詳細画面から「プランに追加」、\nまたは下のボタンで宿泊・交通・メモを追加できます。",
+                            stringResource(R.string.plan_no_items_placeholder),
                             color = Color.Gray,
                         )
                         // ホテル・移動などのカスタム項目は項目が無くても追加できる。
@@ -799,7 +800,7 @@ private fun DayHeaderDropZone(day: Int?, store: TravelPlanStore, planId: String)
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
-            text = if (day != null) "Day $day" else "未割り当て",
+            text = if (day != null) stringResource(R.string.plan_day_format, day) else stringResource(R.string.plan_unassigned),
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             color = PlanAccent,
@@ -882,21 +883,21 @@ private fun PlanItemRow(
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(item.name, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text(localizeData(item.name), fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.width(8.dp))
                 Box(
                     modifier = Modifier
                         .background(accent.copy(alpha = 0.12f), RoundedCornerShape(4.dp))
                         .padding(horizontal = 6.dp, vertical = 2.dp),
                 ) {
-                    Text(item.category.label, fontSize = 11.sp, color = accent)
+                    Text(stringResource(item.category.labelRes), fontSize = 11.sp, color = accent)
                 }
             }
             if (item.prefectureName.isNotBlank()) {
-                Text(item.prefectureName, fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 2.dp))
+                Text(localizeData(item.prefectureName), fontSize = 12.sp, color = Color.Gray, modifier = Modifier.padding(top = 2.dp))
             }
             if (item.detail.isNotBlank()) {
-                Text(item.detail, fontSize = 12.sp, color = Color(0xFF666666), modifier = Modifier.padding(top = 2.dp))
+                Text(localizeData(item.detail), fontSize = 12.sp, color = Color(0xFF666666), modifier = Modifier.padding(top = 2.dp))
             }
             // ドロップ先ハイライト（この項目の直前に入ることを示す）。
             if (hovered) {
@@ -910,13 +911,13 @@ private fun PlanItemRow(
             }
         }
         IconButton(onClick = onRemove) {
-            Icon(Icons.Filled.Delete, contentDescription = "削除", tint = Color(0xFFBBBBBB))
+            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.plan_delete), tint = Color(0xFFBBBBBB))
         }
         // 日程モードではドラッグ用グリップを表示（iOS の line.3.horizontal 相当）。
         if (dayMode) {
             Icon(
                 Icons.Filled.DragHandle,
-                contentDescription = "ドラッグして移動",
+                contentDescription = stringResource(R.string.plan_reorder_hint),
                 tint = PlanAccent.copy(alpha = 0.6f),
                 modifier = Modifier.size(20.dp),
             )
@@ -948,7 +949,7 @@ private fun TimeBlockHeader(
     if (block == null) {
         // ブロック未割当セクションの見出し。
         Text(
-            text = "時間未設定",
+            text = stringResource(R.string.plan_time_unset),
             fontSize = 13.sp,
             fontWeight = FontWeight.SemiBold,
             color = Color.Gray,
@@ -978,7 +979,7 @@ private fun TimeBlockHeader(
                 .padding(horizontal = 10.dp, vertical = 4.dp),
         ) {
             Text(
-                text = block.timeLabel ?: "時刻未設定",
+                text = block.timeLabel ?: stringResource(R.string.plan_time_none),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = PlanAccent,
@@ -989,10 +990,10 @@ private fun TimeBlockHeader(
             Text(block.title, fontSize = 14.sp, fontWeight = FontWeight.Medium)
         }
         Spacer(modifier = Modifier.width(4.dp))
-        Icon(Icons.Filled.Edit, contentDescription = "時刻を編集", tint = Color(0xFFBBBBBB), modifier = Modifier.size(16.dp))
+        Icon(Icons.Filled.Edit, contentDescription = stringResource(R.string.plan_edit_time), tint = Color(0xFFBBBBBB), modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.weight(1f))
         IconButton(onClick = onDelete) {
-            Icon(Icons.Filled.Delete, contentDescription = "ブロックを削除", tint = Color(0xFFDDDDDD), modifier = Modifier.size(18.dp))
+            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.plan_delete_block), tint = Color(0xFFDDDDDD), modifier = Modifier.size(18.dp))
         }
     }
 }
@@ -1011,7 +1012,7 @@ private fun AddTimeBlockButton(onClick: () -> Unit) {
     ) {
         Icon(Icons.Filled.Add, contentDescription = null, tint = PlanAccent, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(6.dp))
-        Text("時間ブロックを追加", fontSize = 13.sp, color = PlanAccent, fontWeight = FontWeight.Medium)
+        Text(stringResource(R.string.plan_add_time_block), fontSize = 13.sp, color = PlanAccent, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -1037,7 +1038,7 @@ private fun AddCustomItemButton(onClick: () -> Unit) {
     ) {
         Icon(Icons.Filled.Add, contentDescription = null, tint = PlanAccent, modifier = Modifier.size(18.dp))
         Spacer(modifier = Modifier.width(6.dp))
-        Text("宿泊・交通・メモを追加", fontSize = 13.sp, color = PlanAccent, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.plan_add_custom), fontSize = 13.sp, color = PlanAccent, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -1068,7 +1069,7 @@ private fun TimeBlockEditDialog(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text("時間ブロック", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.plan_time_block), fontSize = 17.sp, fontWeight = FontWeight.Bold)
 
             // 時刻（時・分のステッパー）。
             Row(
@@ -1079,21 +1080,21 @@ private fun TimeBlockEditDialog(
                     .padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text("開始時刻", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text(stringResource(R.string.plan_start_time), fontSize = 14.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.weight(1f))
-                StepperField(value = hour, range = 0..23, onChange = { hour = it }, suffix = "時")
+                StepperField(value = hour, range = 0..23, onChange = { hour = it }, suffix = stringResource(R.string.plan_hour_suffix))
                 Spacer(modifier = Modifier.width(8.dp))
-                StepperField(value = minute, range = 0..59, step = 5, onChange = { minute = it }, suffix = "分")
+                StepperField(value = minute, range = 0..59, step = 5, onChange = { minute = it }, suffix = stringResource(R.string.plan_minute_suffix))
             }
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("見出し（任意・例: 午前）") },
+                label = { Text(stringResource(R.string.plan_block_heading_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
             PlanPrimaryButton(
-                text = "保存",
+                text = stringResource(R.string.common_save),
                 modifier = Modifier.fillMaxWidth(),
                 onClick = { onSave(block.copy(startHour = hour, startMinute = minute, title = title)) },
             )
@@ -1103,7 +1104,7 @@ private fun TimeBlockEditDialog(
             ) {
                 Icon(Icons.Filled.Delete, contentDescription = null, tint = Color(0xFFE53935), modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("このブロックを削除", color = Color(0xFFE53935))
+                Text(stringResource(R.string.plan_delete_this_block), color = Color(0xFFE53935))
             }
         }
     }
@@ -1114,11 +1115,11 @@ private fun TimeBlockEditDialog(
 private fun StepperField(value: Int, range: IntRange, step: Int = 1, onChange: (Int) -> Unit, suffix: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onChange((value - step).coerceIn(range)) }, modifier = Modifier.size(32.dp)) {
-            Icon(Icons.Filled.RemoveCircleOutline, contentDescription = "減らす", tint = PlanAccent, modifier = Modifier.size(20.dp))
+            Icon(Icons.Filled.RemoveCircleOutline, contentDescription = stringResource(R.string.plan_decrease), tint = PlanAccent, modifier = Modifier.size(20.dp))
         }
         Text("%02d%s".format(value, suffix), fontSize = 15.sp, modifier = Modifier.width(48.dp), textAlign = TextAlign.Center)
         IconButton(onClick = { onChange((value + step).coerceIn(range)) }, modifier = Modifier.size(32.dp)) {
-            Icon(Icons.Filled.AddCircleOutline, contentDescription = "増やす", tint = PlanAccent, modifier = Modifier.size(20.dp))
+            Icon(Icons.Filled.AddCircleOutline, contentDescription = stringResource(R.string.plan_increase), tint = PlanAccent, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -1140,7 +1141,7 @@ private fun DayControlCard(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = PlanAccent, modifier = Modifier.size(20.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text("日程ごとに分ける", fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.plan_split_by_day), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Spacer(modifier = Modifier.weight(1f))
             Switch(
                 checked = dayMode,
@@ -1155,13 +1156,13 @@ private fun DayControlCard(
         if (dayMode) {
             HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp), color = Color(0x11000000))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("日数: $dayCount 日", fontSize = 14.sp)
+                Text(stringResource(R.string.plan_days_count, dayCount), fontSize = 14.sp)
                 Spacer(modifier = Modifier.weight(1f))
                 IconButton(onClick = { onDayCountChange(dayCount - 1) }, enabled = dayCount > 1) {
-                    Icon(Icons.Filled.RemoveCircleOutline, contentDescription = "減らす", tint = if (dayCount > 1) PlanAccent else Color.Gray)
+                    Icon(Icons.Filled.RemoveCircleOutline, contentDescription = stringResource(R.string.plan_decrease), tint = if (dayCount > 1) PlanAccent else Color.Gray)
                 }
                 IconButton(onClick = { onDayCountChange(dayCount + 1) }, enabled = dayCount < 30) {
-                    Icon(Icons.Filled.AddCircleOutline, contentDescription = "増やす", tint = if (dayCount < 30) PlanAccent else Color.Gray)
+                    Icon(Icons.Filled.AddCircleOutline, contentDescription = stringResource(R.string.plan_increase), tint = if (dayCount < 30) PlanAccent else Color.Gray)
                 }
             }
         }
@@ -1187,18 +1188,18 @@ private fun CreatePlanSheet(onDismiss: () -> Unit, onCreate: (String) -> Unit) {
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            Text("プランを作成", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.plan_create_button), fontSize = 17.sp, fontWeight = FontWeight.Bold)
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("プラン名", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextSecondary)
+                Text(stringResource(R.string.plan_name_label), fontSize = 13.sp, fontWeight = FontWeight.Bold, color = AppTheme.TextSecondary)
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    placeholder = { Text("例：夏の北海道旅") },
+                    placeholder = { Text(stringResource(R.string.plan_title_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-            PlanPrimaryButton(text = "作成", onClick = { onCreate(title.ifBlank { "無題のプラン" }) })
+            PlanPrimaryButton(text = stringResource(R.string.plan_add), onClick = { onCreate(title) })
         }
     }
 }
@@ -1228,19 +1229,19 @@ private fun EditPlanSheet(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            Text("プランを編集", fontSize = 17.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.plan_edit_title), fontSize = 17.sp, fontWeight = FontWeight.Bold)
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("プラン名", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
+                Text(stringResource(R.string.plan_name_label), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    placeholder = { Text("例：夏の北海道旅") },
+                    placeholder = { Text(stringResource(R.string.plan_title_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("メモ", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
+                Text(stringResource(R.string.plan_memo), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = PlanTheme.Primary)
                 OutlinedTextField(
                     value = memo,
                     onValueChange = { memo = it },
@@ -1249,7 +1250,7 @@ private fun EditPlanSheet(
                         .height(140.dp),
                 )
             }
-            PlanPrimaryButton(text = "保存", onClick = { onSave(title, memo) })
+            PlanPrimaryButton(text = stringResource(R.string.common_save), onClick = { onSave(title, memo) })
         }
     }
 }

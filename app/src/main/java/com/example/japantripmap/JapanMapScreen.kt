@@ -49,6 +49,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -74,6 +76,7 @@ fun JapanMapScreen(
     var showSettings by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // スピン中は設定を触れないようにする（iOS 版と同じ）。
     val isBusy = viewModel.isSpinning || viewModel.isStopping
@@ -99,13 +102,13 @@ fun JapanMapScreen(
                     Spacer(modifier = Modifier.weight(1f))
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "対象: ${viewModel.effectiveEnabled.size} 都道府県",
+                            text = stringResource(R.string.map_target_prefectures, viewModel.effectiveEnabled.size),
                             fontSize = 13.sp,
                             color = Color.Gray,
                         )
                         if (viewModel.hasCustomWeights) {
                             Text(
-                                text = "重み付け: 有効",
+                                text = stringResource(R.string.map_weighting_enabled),
                                 fontSize = 11.sp,
                                 color = AccentBlue,
                                 modifier = Modifier
@@ -154,7 +157,7 @@ fun JapanMapScreen(
                     .height(64.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                val name = viewModel.selectedPrefecture?.displayName
+                val name = viewModel.selectedPrefecture?.localizedName()
                 if (viewModel.isStopping && name != null && !viewModel.showResultModal) {
                     Text(
                         text = name,
@@ -173,7 +176,11 @@ fun JapanMapScreen(
             ResultOverlay(
                 prefecture = viewModel.selectedPrefecture,
                 mode = viewModel.mode,
-                onReset = { viewModel.reset() },
+                onReset = {
+                    // 結果画面から次へ進むタイミングで完走を記録し、3 回ごとにレビューを促す。
+                    scope.launch { AppReviewManager.onRouletteCompleted(context) }
+                    viewModel.reset()
+                },
                 onShowTourism = { viewModel.selectedPrefecture?.let(onOpenTourism) },
             )
         }
@@ -227,7 +234,7 @@ private fun SettingsChip(onClick: () -> Unit) {
             modifier = Modifier.size(18.dp),
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = "設定", fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+        Text(text = stringResource(R.string.common_settings), fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.Black)
     }
 }
 
@@ -392,7 +399,7 @@ private fun SpinButton(
     ) {
         Icon(
             imageVector = if (isSpinning) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-            contentDescription = if (isSpinning) "停止" else "開始",
+            contentDescription = stringResource(if (isSpinning) R.string.common_stop else R.string.common_start),
             tint = if (enabled) Color.Black else Color.Gray,
             modifier = Modifier.size(28.dp),
         )
@@ -417,22 +424,22 @@ private fun ResultOverlay(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = prefecture?.displayName ?: "",
+                text = prefecture?.localizedName() ?: "",
                 fontSize = 46.sp,
                 fontWeight = FontWeight.Black,
                 color = SelectedColor,
             )
             prefecture?.let {
                 Text(
-                    text = it.regionName,
+                    text = it.localizedRegionName(),
                     fontSize = 18.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 // 温泉／自然モードでは件数を表示。
                 val countText = when (mode) {
-                    RouletteMode.ONSEN -> "${it.onsens.size} つの温泉地"
-                    RouletteMode.NATURE -> "${it.natureSpots.size} つの自然スポット"
+                    RouletteMode.ONSEN -> stringResource(R.string.map_onsen_count, it.onsens.size)
+                    RouletteMode.NATURE -> stringResource(R.string.map_nature_count, it.natureSpots.size)
                     else -> null
                 }
                 if (countText != null) {
@@ -465,9 +472,9 @@ private fun ResultOverlay(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = when (mode) {
-                        RouletteMode.ONSEN -> "温泉情報"
-                        RouletteMode.NATURE -> "自然スポット"
-                        else -> "観光情報"
+                        RouletteMode.ONSEN -> stringResource(R.string.map_result_onsen)
+                        RouletteMode.NATURE -> stringResource(R.string.map_result_nature)
+                        else -> stringResource(R.string.map_result_tourism)
                     },
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -493,7 +500,7 @@ private fun ResultOverlay(
         ) {
             Icon(
                 imageVector = Icons.Filled.Refresh,
-                contentDescription = "もう一度",
+                contentDescription = stringResource(R.string.common_retry),
                 tint = Color.White,
                 modifier = Modifier.size(24.dp),
             )

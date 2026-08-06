@@ -134,8 +134,8 @@ fun PlacesMapSection(
                 places.forEach { place ->
                     Marker(
                         state = MarkerState(position = LatLng(place.latitude, place.longitude)),
-                        title = place.title,
-                        snippet = place.subtitle,
+                        title = localizeData(place.title),
+                        snippet = localizeData(place.subtitle),
                         onClick = {
                             selectedId = place.id
                             true
@@ -151,13 +151,13 @@ fun PlacesMapSection(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = selectedPlace.title,
+                    text = localizeData(selectedPlace.title),
                     fontSize = 15.sp,
                     color = Color(0xFF1F1F1F),
                 )
                 if (selectedPlace.subtitle.isNotBlank()) {
                     Text(
-                        text = selectedPlace.subtitle,
+                        text = localizeData(selectedPlace.subtitle),
                         fontSize = 12.sp,
                         color = Color.Gray,
                     )

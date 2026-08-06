@@ -13,3 +13,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Kotlin コンパイラのローカルキャッシュ／エラーログ（ビルド生成物）。
+.kotlin/
+
+# リリース署名（機密）。リポジトリに含めない。
+keystore.properties
+*.jks
+*.keystore

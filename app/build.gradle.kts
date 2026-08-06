@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     // AGP 9.x は Kotlin サポートを built-in で自動適用するため、
@@ -5,6 +7,21 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
+
+// リリース署名の設定を keystore.properties から読み込む（Git 管理外）。
+// storeFile / storePassword / keyAlias / keyPassword を定義する。ファイルが無ければ署名設定はスキップ。
+val keystorePropsFile = rootProject.file("keystore.properties")
+val keystoreProps = Properties().apply {
+    if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
+}
+
+// Google Maps の API キーは local.properties（Git 管理外）から読み込み、
+// manifestPlaceholders 経由で AndroidManifest に埋め込む。
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val mapsApiKey: String = localProps.getProperty("MAPS_API_KEY", "")
 
 android {
     namespace = "com.example.japantripmap"
@@ -15,19 +32,41 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.japantripmap"
+        applicationId = "com.kanbe1365.japantripmap"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // AndroidManifest の @string/google_maps_key の代わりに使うプレースホルダ。
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+    }
+
+    signingConfigs {
+        create("release") {
+            if (keystorePropsFile.exists()) {
+                storeFile = rootProject.file(keystoreProps.getProperty("storeFile"))
+                storePassword = keystoreProps.getProperty("storePassword")
+                keyAlias = keystoreProps.getProperty("keyAlias")
+                keyPassword = keystoreProps.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
         release {
+            // keystore.properties がある場合のみリリース署名を適用する。
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             optimization {
-                enable = false
+                enable = true
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro",
+                )
             }
         }
     }
@@ -43,6 +82,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // AppReviewManager でデバッグ判定（BuildConfig.DEBUG）に使う。
+        buildConfig = true
     }
 }
 
@@ -59,6 +100,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.maps.compose)
+    // アプリ内レビュー（Play In-App Review）。ktx で suspend 拡張が使える。
+    implementation(libs.play.review)
+    implementation(libs.play.review.ktx)
 
     debugImplementation(libs.androidx.ui.tooling)
 
