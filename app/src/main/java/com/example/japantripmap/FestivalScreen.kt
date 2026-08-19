@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -181,7 +182,9 @@ fun FestivalScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // グラデーションはステータスバーの裏まで敷き、検索バーだけを時計の下に下げる。
                 .background(BrandGradient)
+                .statusBarsPadding()
                 .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 16.dp),
         ) {
             SearchBar(

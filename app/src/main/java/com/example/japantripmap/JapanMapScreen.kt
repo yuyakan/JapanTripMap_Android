@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +50,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -87,48 +89,59 @@ fun JapanMapScreen(
             .background(SeaColor),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // 上部バー：設定ボタン（左）＋対象県数（右）。結果表示中・スピン中は隠す。
-            if (!isBusy && !viewModel.showResultModal) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SettingsChip(onClick = { showSettings = true })
-                    Spacer(modifier = Modifier.weight(1f))
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = stringResource(R.string.map_target_prefectures, viewModel.effectiveEnabled.size),
-                            fontSize = 13.sp,
-                            color = Color.Gray,
-                        )
-                        if (viewModel.hasCustomWeights) {
+            // 上部バー：設定ボタン（左）＋対象県数（右）。結果表示中・スピン中は中身を隠すが、
+            // 常にヘッダーと同じ高さを確保して地図の縦位置がスピン開始で動かないようにする。
+            // 高さは実測して placeholder に反映するので、内容が見切れることはない。
+            val headerContentVisible = !isBusy && !viewModel.showResultModal
+            var headerHeight by remember { mutableStateOf(0.dp) }
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (headerHeight > 0.dp) Modifier.height(headerHeight) else Modifier),
+            ) {
+                if (headerContentVisible) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onSizeChanged {
+                                with(density) { headerHeight = it.height.toDp() }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SettingsChip(onClick = { showSettings = true })
+                        Spacer(modifier = Modifier.weight(1f))
+                        Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = stringResource(R.string.map_weighting_enabled),
-                                fontSize = 11.sp,
-                                color = AccentBlue,
-                                modifier = Modifier
-                                    .padding(top = 2.dp)
-                                    .background(AccentBlue.copy(alpha = 0.1f), RoundedCornerShape(3.dp))
-                                    .padding(horizontal = 6.dp, vertical = 1.dp),
+                                text = stringResource(R.string.map_target_prefectures, viewModel.effectiveEnabled.size),
+                                fontSize = 13.sp,
+                                color = Color.Gray,
                             )
+                            if (viewModel.hasCustomWeights) {
+                                Text(
+                                    text = stringResource(R.string.map_weighting_enabled),
+                                    fontSize = 11.sp,
+                                    color = AccentBlue,
+                                    modifier = Modifier
+                                        .padding(top = 2.dp)
+                                        .background(AccentBlue.copy(alpha = 0.1f), RoundedCornerShape(3.dp))
+                                        .padding(horizontal = 6.dp, vertical = 1.dp),
+                                )
+                            }
                         }
                     }
                 }
-            } else {
-                // レイアウトを安定させるための上部スペーサー。
-                Spacer(modifier = Modifier.height(48.dp))
             }
 
             // 温泉・自然タブが常に確保しているタイプチップ行（22dp）と同じ高さを都道府県でも確保し、
-            // ヘッダー高さを揃えて 3 タブで地図の縦位置を一致させる。
-            if (!isBusy && !viewModel.showResultModal) {
-                Spacer(modifier = Modifier.height(22.dp))
-            }
+            // ヘッダー高さを揃えて 3 タブで地図の縦位置を一致させる。スピン中も高さは維持する。
+            Spacer(modifier = Modifier.height(22.dp))
 
             // 地図＋県名を縦方向中央に寄せる。
             Spacer(modifier = Modifier.weight(1f))

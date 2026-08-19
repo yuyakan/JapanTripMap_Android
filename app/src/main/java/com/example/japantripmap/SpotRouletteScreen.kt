@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -118,7 +119,11 @@ fun SpotRouletteScreen(
             .fillMaxSize()
             .background(AppTheme.Background),
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
+        ) {
             // 上部バー：設定（左）＋地図/リスト切替アイコン（右）。スピン中・結果表示中は隠す。
             if (!isBusy && !viewModel.showResultModal) {
                 Column(modifier = Modifier.fillMaxWidth()) {
