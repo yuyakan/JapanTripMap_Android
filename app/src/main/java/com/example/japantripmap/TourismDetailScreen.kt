@@ -164,12 +164,15 @@ fun TourismDetailScreen(
         )
     }
 
+    // 地図ドラッグ中はリストスクロールを止め、地図のパンを親に横取りされないようにする。
+    var mapTouched by remember { mutableStateOf(false) }
     // ヘッダーは持たず、戻るボタンを左上にフローティングで重ねる（iOS 版 TourismDetailView 準拠）。
     Box(modifier = Modifier.fillMaxSize().background(AppTheme.Background)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
+            userScrollEnabled = !mapTouched,
         ) {
             // 戻るボタン + 県名の分だけ上部に余白を確保する（ステータスバー + フローティング分）。
             item { Spacer(modifier = Modifier.statusBarsPadding().height(44.dp)) }
@@ -198,6 +201,7 @@ fun TourismDetailScreen(
                 item {
                     PlacesMapSection(
                         showSelectedPlace = false,
+                        onMapTouch = { mapTouched = it },
                         places = info.attractions.map { a ->
                             MapPlace(
                                 id = a.name,

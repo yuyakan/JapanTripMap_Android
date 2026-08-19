@@ -159,11 +159,13 @@ fun SpotDetailScreen(
         )
     }
 
+    // 地図ドラッグ中は本文スクロールを止め、地図のパンを親に横取りされないようにする。
+    var mapTouched by remember { mutableStateOf(false) }
     Box(modifier = Modifier.fillMaxSize().background(detail.accent)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState(), enabled = !mapTouched),
         ) {
             // ヒーローヘッダー。
             HeroHeader(detail)
@@ -197,13 +199,14 @@ fun SpotDetailScreen(
                     PlacesMapSection(
                         title = stringResource(R.string.common_map),
                         places = listOf(place),
+                        onMapTouch = { mapTouched = it },
                     )
                 }
 
                 // プランで位置を設定したグルメ・お土産は、その位置を地図カードで表示する
                 // （iOS 版 PlanItemPlaceMap 相当）。
                 if (allowsLocation && currentItem?.hasCoordinate == true) {
-                    PlanItemLocationCard(item = currentItem, accent = detail.accent)
+                    PlanItemLocationCard(item = currentItem, accent = detail.accent, onMapTouch = { mapTouched = it })
                 }
 
                 // 説明カード。

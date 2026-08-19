@@ -358,7 +358,7 @@ fun CustomPlanItemScreen(
  * 呼び出し側で座標の有無を保証すること（latitude/longitude は非 null 前提）。
  */
 @Composable
-fun PlanItemLocationCard(item: PlanItem, accent: Color) {
+fun PlanItemLocationCard(item: PlanItem, accent: Color, onMapTouch: (Boolean) -> Unit = {}) {
     val context = LocalContext.current
     var addressCopied by remember(item.id) { mutableStateOf(false) }
 
@@ -396,6 +396,7 @@ fun PlanItemLocationCard(item: PlanItem, accent: Color) {
 
         PlacesMapSection(
             showSelectedPlace = false,
+            onMapTouch = onMapTouch,
             places = listOf(
                 MapPlace(
                     id = item.id,

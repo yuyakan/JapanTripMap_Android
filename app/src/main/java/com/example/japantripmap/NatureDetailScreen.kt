@@ -74,6 +74,8 @@ fun NatureDetailScreen(
     val spots = prefecture.natureSpots
     val context = LocalContext.current
     var pendingItem by remember { mutableStateOf<PlanItem?>(null) }
+    // 地図ドラッグ中はリストスクロールを止め、地図のパンを親に横取りされないようにする。
+    var mapTouched by remember { mutableStateOf(false) }
 
     pendingItem?.let { item ->
         AddToPlanDialog(
@@ -108,6 +110,7 @@ fun NatureDetailScreen(
                 .padding(padding),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
+            userScrollEnabled = !mapTouched,
         ) {
             item {
                 Text(
@@ -126,6 +129,7 @@ fun NatureDetailScreen(
             item {
                 PlacesMapSection(
                     title = stringResource(R.string.nature_prefecture_map, prefecture.localizedName()),
+                    onMapTouch = { mapTouched = it },
                     places = spots.map { s ->
                         MapPlace(
                             id = s.name,

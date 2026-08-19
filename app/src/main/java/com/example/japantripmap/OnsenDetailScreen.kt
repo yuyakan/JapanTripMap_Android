@@ -79,6 +79,8 @@ fun OnsenDetailScreen(
     val onsens = prefecture.onsens
     val context = LocalContext.current
     var pendingItem by remember { mutableStateOf<PlanItem?>(null) }
+    // 地図ドラッグ中はリストスクロールを止め、地図のパンを親に横取りされないようにする。
+    var mapTouched by remember { mutableStateOf(false) }
 
     pendingItem?.let { item ->
         AddToPlanDialog(
@@ -113,6 +115,7 @@ fun OnsenDetailScreen(
                 .padding(padding),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
+            userScrollEnabled = !mapTouched,
         ) {
             item {
                 Text(
@@ -131,6 +134,7 @@ fun OnsenDetailScreen(
             item {
                 PlacesMapSection(
                     title = stringResource(R.string.onsen_prefecture_map, prefecture.localizedName()),
+                    onMapTouch = { mapTouched = it },
                     places = onsens.map { o ->
                         MapPlace(
                             id = o.name,

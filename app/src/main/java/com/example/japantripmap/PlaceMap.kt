@@ -19,6 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.android.gms.maps.model.CameraPosition
@@ -81,6 +83,11 @@ fun PlacesMapSection(
     title: String? = null,
     /** 地図下部に選択中スポット名を出すか。 */
     showSelectedPlace: Boolean = true,
+    /**
+     * 地図に指が触れている間 true を通知する。詳細画面は外側が verticalScroll / LazyColumn の
+     * ため、これを受けて地図ドラッグ中だけ親スクロールを止め、地図のパンを親に横取りされないようにする。
+     */
+    onMapTouch: (Boolean) -> Unit = {},
 ) {
     if (places.isEmpty()) return
 
@@ -123,7 +130,23 @@ fun PlacesMapSection(
                 .fillMaxWidth()
                 .padding(horizontal = 8.dp)
                 .height(280.dp)
-                .clip(RoundedCornerShape(14.dp)),
+                .clip(RoundedCornerShape(14.dp))
+                // Initial パスで down/up を「消費せず」監視し、地図に触れている間だけ親へ通知する。
+                // 消費しないので地図（AndroidView）にもイベントが届き、パン・ズームはそのまま機能する。
+                // 親側はこの通知でスクロールを一時停止し、地図ドラッグの横取りを防ぐ。
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val down = awaitPointerEvent(PointerEventPass.Initial)
+                            if (down.changes.any { it.pressed }) onMapTouch(true)
+                            // 全ポインタが離れるまで待ってから解除する。
+                            do {
+                                val e = awaitPointerEvent(PointerEventPass.Initial)
+                            } while (e.changes.any { it.pressed })
+                            onMapTouch(false)
+                        }
+                    }
+                },
         ) {
             GoogleMap(
                 modifier = Modifier.fillMaxSize(),
