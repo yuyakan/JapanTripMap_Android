@@ -1,8 +1,14 @@
 package com.example.japantripmap
 
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.libraries.ads.mobile.sdk.MobileAds
+import com.google.android.libraries.ads.mobile.sdk.initialization.InitializationConfig
+import kotlin.concurrent.thread
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,12 +33,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.navigationBarsPadding
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // 起動時の白い中間画面を消す。super.onCreate より前に呼ぶ必要がある。
+        // iOS 版と同じく、システムスプラッシュ（ティール地＋アイコン）を約 2 秒
+        // 保持してから本体へ遷移する。
+        val splash = installSplashScreen()
+        val start = System.currentTimeMillis()
+        splash.setKeepOnScreenCondition {
+            System.currentTimeMillis() - start < SPLASH_DURATION_MS
+        }
         super.onCreate(savedInstanceState)
+        // EEA 等では UMP の同意フォームを表示し、同意が済んで（または不要で）広告リクエストが
+        // 許可されてから AdMob を初期化する。対象外の地域では即座に許可され従来どおり広告が出る。
+        ConsentManager.gatherConsentThen(this) { initializeAds() }
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = AppTheme.Background) {
@@ -41,15 +62,55 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    /**
+     * AdMob（GMA Next-Gen SDK）を初期化し、最初のインタースティシャルを先読みする。
+     * UMP の同意フロー（[ConsentManager]）で広告リクエストが許可された後に呼ばれる。
+     * Next-Gen SDK は初期化を必ずバックグラウンドスレッドで行うよう求めている（ANR 回避）。
+     * アプリ ID は AndroidManifest の APPLICATION_ID メタデータから読み、単一の情報源に揃える。
+     */
+    private fun initializeAds() {
+        if (MobileAds.isInitialized) return
+        val appId = admobAppIdFromManifest() ?: run {
+            Log.w(TAG, "AdMob の APPLICATION_ID がマニフェストに無いため初期化をスキップ")
+            return
+        }
+        thread(name = "MobileAdsInit") {
+            MobileAds.initialize(
+                applicationContext,
+                InitializationConfig.Builder(appId).build(),
+            ) {
+                // アダプタ初期化完了。最初のインタースティシャルを先読みしておく。
+                InterstitialAdManager.loadAd(applicationContext)
+            }
+        }
+    }
+
+    /** AndroidManifest の `com.google.android.gms.ads.APPLICATION_ID` メタデータ値を取得する。 */
+    private fun admobAppIdFromManifest(): String? = try {
+        val appInfo = packageManager.getApplicationInfo(
+            packageName, PackageManager.GET_META_DATA,
+        )
+        appInfo.metaData?.getString("com.google.android.gms.ads.APPLICATION_ID")
+    } catch (e: PackageManager.NameNotFoundException) {
+        null
+    }
+
+    private companion object {
+        private const val TAG = "MainActivity"
+
+        /** スプラッシュを表示し続ける時間（iOS 版の 2 秒に合わせる）。 */
+        const val SPLASH_DURATION_MS = 2000L
+    }
 }
 
 /** ボトムタブの定義。iOS 版 ContentView の 5 タブに対応。 */
-private enum class MainTab(val label: String, val icon: ImageVector) {
-    PREFECTURE("都道府県", Icons.Filled.Map),
-    ONSEN("温泉", Icons.Filled.Hotel),
-    NATURE("自然", Icons.Filled.Park),
-    FESTIVAL("祭り", Icons.Filled.Celebration),
-    PLAN("マイプラン", Icons.Filled.Luggage),
+private enum class MainTab(val labelRes: Int, val icon: ImageVector) {
+    PREFECTURE(R.string.tab_prefecture, Icons.Filled.Map),
+    ONSEN(R.string.tab_onsen, Icons.Filled.Hotel),
+    NATURE(R.string.tab_nature, Icons.Filled.Park),
+    FESTIVAL(R.string.tab_festival, Icons.Filled.Celebration),
+    PLAN(R.string.tab_plan, Icons.Filled.Luggage),
 }
 
 private val TabAccent = Color(0xFFFF9500)
@@ -73,24 +134,33 @@ private fun AppRoot() {
     // 個別スポット詳細（一覧詳細のさらに上に重ねる）。null なら非表示。
     var spotDetail by remember { mutableStateOf<SpotDetail?>(null) }
 
-    // タブごとに別インスタンス（対象県・重みを独立管理）。
+    // 都道府県ルーレット（全国モード）。
     val tourismViewModel: RouletteViewModel = viewModel(
         key = "tourism",
         factory = RouletteViewModel.factory(RouletteMode.TOURISM),
     )
-    val onsenViewModel: RouletteViewModel = viewModel(
-        key = "onsen",
-        factory = RouletteViewModel.factory(RouletteMode.ONSEN),
+    // 温泉・自然はスポット単位ルーレット（設定・重みを端末に永続化）。
+    val application = LocalContext.current.applicationContext as android.app.Application
+    val onsenViewModel: SpotRouletteViewModel = viewModel(
+        key = "onsen_spot",
+        factory = SpotRouletteViewModel.factory(application, SpotKind.ONSEN),
     )
-    val natureViewModel: RouletteViewModel = viewModel(
-        key = "nature",
-        factory = RouletteViewModel.factory(RouletteMode.NATURE),
+    val natureViewModel: SpotRouletteViewModel = viewModel(
+        key = "nature_spot",
+        factory = SpotRouletteViewModel.factory(application, SpotKind.NATURE),
     )
     val planStore: TravelPlanStore = viewModel()
 
     // 最前面：個別スポット詳細。
     spotDetail?.let { sd ->
-        SpotDetailScreen(detail = sd, store = planStore, onClose = { spotDetail = null })
+        SpotDetailScreen(
+            detail = sd, store = planStore,
+            onClose = {
+                // iOS 版の詳細戻るで count += 2 する挙動に合わせる。
+                InterstitialAdManager.addDetailPoints()
+                spotDetail = null
+            },
+        )
         return
     }
 
@@ -99,21 +169,33 @@ private fun AppRoot() {
         is Detail.Tourism -> {
             TourismDetailScreen(
                 prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it }, onBack = { detail = null },
+                onOpenSpot = { spotDetail = it },
+                onBack = {
+                    InterstitialAdManager.addDetailPoints()
+                    detail = null
+                },
             )
             return
         }
         is Detail.Onsen -> {
             OnsenDetailScreen(
                 prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it }, onBack = { detail = null },
+                onOpenSpot = { spotDetail = it },
+                onBack = {
+                    InterstitialAdManager.addDetailPoints()
+                    detail = null
+                },
             )
             return
         }
         is Detail.Nature -> {
             NatureDetailScreen(
                 prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it }, onBack = { detail = null },
+                onOpenSpot = { spotDetail = it },
+                onBack = {
+                    InterstitialAdManager.addDetailPoints()
+                    detail = null
+                },
             )
             return
         }
@@ -128,16 +210,14 @@ private fun AppRoot() {
                     viewModel = tourismViewModel,
                     onOpenTourism = { detail = Detail.Tourism(it) },
                 )
-                MainTab.ONSEN -> SpotIconMapScreen(
+                MainTab.ONSEN -> SpotRouletteScreen(
                     modifier = Modifier.fillMaxSize(),
-                    title = "全国の温泉地",
-                    spots = remember { onsenIconSpots() },
+                    viewModel = onsenViewModel,
                     onOpenSpot = { spotDetail = it.toSpotDetail() },
                 )
-                MainTab.NATURE -> SpotIconMapScreen(
+                MainTab.NATURE -> SpotRouletteScreen(
                     modifier = Modifier.fillMaxSize(),
-                    title = "全国の自然スポット",
-                    spots = remember { natureIconSpots() },
+                    viewModel = natureViewModel,
                     onOpenSpot = { spotDetail = it.toSpotDetail() },
                 )
                 MainTab.FESTIVAL -> FestivalScreen(onOpenSpot = { spotDetail = it })
@@ -152,11 +232,21 @@ private fun AppRoot() {
             containerColor = AppTheme.Background,
         ) {
             MainTab.entries.forEach { tab ->
+                val tabLabel = stringResource(tab.labelRes)
                 NavigationBarItem(
                     selected = selectedTab == tab,
                     onClick = { selectedTab = tab },
-                    icon = { Icon(tab.icon, contentDescription = tab.label) },
-                    label = { Text(tab.label) },
+                    icon = { Icon(tab.icon, contentDescription = tabLabel) },
+                    label = {
+                        // ラベルは常に 1 行。英語などで長くなっても折り返して崩れないようにする。
+                        Text(
+                            tabLabel,
+                            maxLines = 1,
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = 11.sp,
+                        )
+                    },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = TabAccent,
                         selectedTextColor = TabAccent,
@@ -172,6 +262,6 @@ private fun AppRoot() {
 @Composable
 private fun PlaceholderTab(name: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-        Text("$name（準備中）", color = Color.Gray)
+        Text(stringResource(R.string.placeholder_preparing, name), color = Color.Gray)
     }
 }

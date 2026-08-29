@@ -1,0 +1,247 @@
+<resources>
+    <!-- app_name はローカライズしない（ブランド名） -->
+
+    <!-- ボトムタブ -->
+    <string name="tab_prefecture">Map</string>
+    <string name="tab_onsen">Onsen</string>
+    <string name="tab_nature">Nature</string>
+    <string name="tab_festival">Festival</string>
+    <string name="tab_plan">Plan</string>
+    <string name="placeholder_preparing">%s (Coming Soon)</string>
+
+    <!-- 共通 -->
+    <string name="common_back">Back</string>
+    <string name="common_close">Close</string>
+    <string name="common_done">Done</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_reset">Reset</string>
+    <string name="common_clear">Clear</string>
+    <string name="common_settings">Settings</string>
+    <string name="common_select_all">Select All</string>
+    <string name="common_deselect_all">Deselect All</string>
+    <string name="common_save">Save</string>
+    <string name="common_all">All</string>
+    <string name="common_start">Start</string>
+    <string name="common_stop">Stop</string>
+    <string name="common_retry">Try Again</string>
+    <string name="common_add_to_plan">Add to Plan</string>
+    <string name="common_map">Map</string>
+
+    <!-- 温泉タイプ -->
+    <string name="onsen_type_scenic">Scenic Hot Spring</string>
+    <string name="onsen_type_historical">Historical Hot Spring</string>
+    <string name="onsen_type_therapeutic">Therapeutic Hot Spring</string>
+    <string name="onsen_type_resort">Resort</string>
+    <string name="onsen_type_mountain">Mountain Hot Spring</string>
+    <string name="onsen_type_seaside">Seaside Hot Spring</string>
+    <string name="onsen_type_ski">Ski Hot Spring</string>
+    <string name="onsen_type_fallback">Therapeutic Hot Spring</string>
+
+    <!-- 自然タイプ -->
+    <string name="nature_type_night_view">Night View</string>
+    <string name="nature_type_starry_sky">Starry Sky</string>
+    <string name="nature_type_sea">Sea</string>
+    <string name="nature_type_camping">Camping</string>
+    <string name="nature_type_fallback">Nature</string>
+
+    <!-- グルメカテゴリ -->
+    <string name="food_category_ramen">Ramen</string>
+    <string name="food_category_seafood">Seafood</string>
+    <string name="food_category_meat">Meat Dishes</string>
+    <string name="food_category_sweets">Sweets</string>
+    <string name="food_category_local">Local Cuisine</string>
+    <string name="food_category_drinks">Beverages</string>
+    <string name="food_category_vegetables">Vegetables &amp; Fruits</string>
+
+    <!-- お土産カテゴリ -->
+    <string name="souvenir_category_food">Food</string>
+    <string name="souvenir_category_crafts">Crafts</string>
+    <string name="souvenir_category_textiles">Textiles / Clothing</string>
+    <string name="souvenir_category_ceramics">Ceramics</string>
+    <string name="souvenir_category_regional">Regional Specialties</string>
+
+    <!-- 祭りカテゴリ -->
+    <string name="festival_category_summer">Summer</string>
+    <string name="festival_category_fireworks">Fireworks</string>
+    <string name="festival_category_traditional">Traditional</string>
+    <string name="festival_category_dance">Dance</string>
+    <string name="festival_category_food">Food</string>
+    <string name="festival_category_seasonal">Seasonal</string>
+    <string name="festival_category_religious">Religious</string>
+    <string name="festival_filter_spring">Spring</string>
+    <string name="festival_filter_autumn">Autumn</string>
+    <string name="festival_filter_winter">Winter</string>
+    <string name="festival_filter_sakura">Cherry Blossom</string>
+    <string name="festival_filter_illumination">Illumination</string>
+    <string name="festival_filter_snow">Snow</string>
+
+    <!-- プランのカテゴリ -->
+    <string name="plan_category_attraction">Attraction</string>
+    <string name="plan_category_gourmet">Gourmet</string>
+    <string name="plan_category_onsen">Hot Spring</string>
+    <string name="plan_category_festival">Festival</string>
+    <string name="plan_category_nature">Nature</string>
+    <string name="plan_category_souvenir">Souvenir</string>
+    <string name="plan_category_hotel">Hotel</string>
+    <string name="plan_category_transport">Station / Airport</string>
+    <string name="plan_category_memo">Memo</string>
+
+    <!-- 観光詳細画面 -->
+    <string name="tourism_section_map">Tourist Map</string>
+    <string name="tourism_section_gourmet">Local Gourmet</string>
+    <string name="tourism_section_gourmet_subtitle">Flavors of %s</string>
+    <string name="tourism_section_onsen">Hot Springs</string>
+    <string name="tourism_section_souvenir">Souvenirs</string>
+    <string name="tourism_section_souvenir_subtitle">Memories of %s</string>
+    <string name="tourism_section_photos">Spot Photos</string>
+    <string name="tourism_load_more">Show More</string>
+    <string name="info_price_range">Price Range</string>
+    <string name="info_best_season">Best Season</string>
+    <string name="info_category">Category</string>
+    <string name="info_onsen_quality">Spring Type</string>
+    <string name="added_to_plan">Added to \"%s\"</string>
+
+    <!-- スポット詳細画面 -->
+    <string name="detail_more_search">Explore More</string>
+    <string name="detail_more_info">Details</string>
+    <string name="detail_basic_info">Basic Information</string>
+    <string name="detail_features">Features</string>
+    <string name="detail_change_location">Change Location</string>
+    <string name="detail_add_location">Add Location</string>
+
+    <!-- SNS 検索 -->
+    <string name="social_open_google_maps">Open in Google Maps</string>
+    <string name="social_tabelog">Find restaurants on Tabelog</string>
+    <string name="social_youtube">Search on YouTube</string>
+    <string name="social_instagram">Search on Instagram</string>
+
+    <!-- 温泉・自然のスポット詳細一覧 -->
+    <string name="onsen_prefecture_title">Hot Springs in %s</string>
+    <string name="onsen_prefecture_map">Hot Spring Map of %s</string>
+    <string name="onsen_count">%d hot springs</string>
+    <string name="nature_prefecture_title">Nature in %s</string>
+    <string name="nature_prefecture_map">Nature Map of %s</string>
+    <string name="nature_count">%d nature spots</string>
+    <string name="spot_type_kind">Type</string>
+    <string name="spot_tag_mountain">Mountain</string>
+
+    <!-- 都道府県ルーレット / マップ画面 -->
+    <string name="map_target_prefectures">Target: %d prefectures</string>
+    <string name="map_weighting_enabled">Weighting: On</string>
+    <string name="map_onsen_count">%d hot springs</string>
+    <string name="map_nature_count">%d nature spots</string>
+    <string name="map_result_onsen">Hot Springs</string>
+    <string name="map_result_nature">Nature Spots</string>
+    <string name="map_result_tourism">Tourist Information</string>
+
+    <!-- スポットルーレット画面 -->
+    <string name="spot_roulette_map_view">Map View</string>
+    <string name="spot_roulette_list_view">List View</string>
+    <string name="spot_roulette_count">%d spots</string>
+    <string name="spot_roulette_detail_info">Details</string>
+
+    <!-- 祭り画面 -->
+    <string name="festival_min_rating">★%s+</string>
+    <string name="festival_all_periods">All Periods</string>
+    <string name="festival_month">%d</string>
+    <string name="festival_location">Location</string>
+    <string name="festival_period">Period</string>
+    <string name="festival_duration">Duration</string>
+    <string name="festival_search_hint">Search by festival or prefecture name</string>
+
+    <!-- 設定・重み付け画面（都道府県） -->
+    <string name="settings_display">Display Settings</string>
+    <string name="settings_prefecture_count">%d prefectures</string>
+    <string name="settings_weight_title">Weight Settings</string>
+    <string name="settings_weight_subtitle">Adjust selection probability for each prefecture</string>
+    <string name="settings_target">Target</string>
+    <string name="settings_not_target">Excluded</string>
+    <string name="settings_weight_adjust">Weight Adjustment</string>
+    <string name="settings_back_to_settings">Back to Settings</string>
+    <string name="settings_weight_desc">You can adjust the probability of each prefecture being selected. Higher values make them more likely to be chosen.</string>
+    <string name="settings_no_target_prefecture">No target prefectures. Add targets in Settings.</string>
+    <string name="settings_weight_value">Weight: %.1f</string>
+
+    <!-- 設定・重み付け画面（スポット） -->
+    <string name="spot_settings_by_region">By Region</string>
+    <string name="spot_settings_by_type">By Type</string>
+    <string name="spot_settings_count">%d spots</string>
+    <string name="spot_settings_weight_subtitle">Adjust selection probability for each spot</string>
+    <string name="spot_settings_weight_desc">You can adjust the probability of each spot being selected. Higher values make them more likely to be chosen.</string>
+    <string name="spot_settings_no_target">No enabled spots. Add targets in Settings.</string>
+
+    <!-- プラン系 -->
+    <string name="plan_add_title">Add to Plan</string>
+    <string name="plan_default_title">Trip to %s</string>
+    <string name="plan_untitled">Untitled Plan</string>
+    <string name="plan_title_hint">e.g. Summer in Hokkaido</string>
+    <string name="plan_add_new">Create new plan and add</string>
+    <string name="plan_add_existing">Add to an existing plan</string>
+    <string name="plan_item_count">%d items</string>
+    <string name="plan_already_added">Added</string>
+    <string name="plan_add">Add</string>
+    <string name="plan_unassigned">Unassigned</string>
+    <string name="plan_share">Share</string>
+    <string name="plan_share_chooser">Share plan</string>
+    <string name="plan_edit">Edit</string>
+    <string name="plan_create">Create Plan</string>
+    <string name="plan_empty_title">No plans yet</string>
+    <string name="plan_empty_message">Collect the spots, food, hot springs and festivals you like, and build your own travel plan.</string>
+    <string name="plan_create_button">Create Plan</string>
+    <string name="plan_move_up">Move up</string>
+    <string name="plan_move_down">Move down</string>
+    <string name="plan_delete">Delete</string>
+    <string name="plan_no_items_short">No items yet</string>
+    <string name="plan_day_count">%d days</string>
+    <string name="plan_show_on_map">Show on map</string>
+    <string name="plan_no_items_placeholder">No items yet.\nUse \"Add to Plan\" from any detail screen,\nor use the button below to add a hotel, station, or note.</string>
+    <string name="plan_no_items_paren">(no items)</string>
+    <string name="plan_day_format">Day %d</string>
+    <string name="plan_reorder_hint">Drag to move</string>
+    <string name="plan_time_unset">No time set</string>
+    <string name="plan_time_none">No time set</string>
+    <string name="plan_edit_time">Edit time</string>
+    <string name="plan_delete_block">Delete block</string>
+    <string name="plan_add_time_block">Add time block</string>
+    <string name="plan_add_custom">Add hotel, station, etc.</string>
+    <string name="plan_time_block">Time block</string>
+    <string name="plan_start_time">Start time</string>
+    <string name="plan_hour_suffix">h</string>
+    <string name="plan_minute_suffix">m</string>
+    <string name="plan_block_heading_hint">Heading (optional, e.g. Morning)</string>
+    <string name="plan_delete_this_block">Delete this time block</string>
+    <string name="plan_decrease">Decrease</string>
+    <string name="plan_increase">Increase</string>
+    <string name="plan_split_by_day">Split by day</string>
+    <string name="plan_days_count">Days: %d</string>
+    <string name="plan_name_label">Plan name</string>
+    <string name="plan_edit_title">Edit Plan</string>
+    <string name="plan_map_empty">No mappable locations.\nYou need attraction, hot spring, nature, or festival items, or hotel/station/note items with a location set.</string>
+    <string name="plan_map_view_route">View route for Day %d</string>
+    <string name="plan_map_all_days">All days</string>
+    <string name="plan_morning">Morning</string>
+    <string name="plan_memo">Memo</string>
+    <string name="plan_place">Location</string>
+    <string name="plan_address_copied">Address copied</string>
+    <string name="plan_copy_address">Copy address</string>
+    <string name="plan_open_in_map">Open in map</string>
+    <string name="plan_item_add">Add item</string>
+    <string name="plan_item_edit">Edit item</string>
+    <string name="plan_item_kind">Type</string>
+    <string name="plan_item_title">Title</string>
+    <string name="plan_item_title_hint">e.g. XYZ Hotel</string>
+    <string name="plan_memo_optional">Memo (optional)</string>
+    <string name="plan_location_set">Location set</string>
+    <string name="plan_location_add_optional">Add location (optional)</string>
+    <string name="location_picker_title">Choose Location</string>
+    <string name="location_search_hint">Search by place, address, or station</string>
+    <string name="location_searching">Searching…</string>
+    <string name="location_not_found">Not found</string>
+    <string name="location_resolving">Getting address…</string>
+    <string name="location_save_point">Save this location</string>
+
+    <!-- フォトクレジット -->
+    <string name="photo_credits_title">Photo Credits</string>
+    <string name="photo_credits_attribution">Photo Attribution</string>
+    <string name="photo_credits_desc">Authors, licenses, and sources of the tourist spot photos used in this app.</string>
+</resources>

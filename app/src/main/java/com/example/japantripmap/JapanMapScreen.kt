@@ -15,7 +15,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,6 +32,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -48,7 +52,11 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -73,6 +81,10 @@ fun JapanMapScreen(
     var showSettings by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // 画面が前面に来たら（iOS の handleMapAppear 相当）広告発火判定＋次の広告を先読みする。
+    LaunchedEffect(Unit) { InterstitialAdManager.handleScreenAppear(context) }
 
     // スピン中は設定を触れないようにする（iOS 版と同じ）。
     val isBusy = viewModel.isSpinning || viewModel.isStopping
@@ -83,42 +95,59 @@ fun JapanMapScreen(
             .background(SeaColor),
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // 上部バー：設定ボタン（左）＋対象県数（右）。結果表示中・スピン中は隠す。
-            if (!isBusy && !viewModel.showResultModal) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SettingsChip(onClick = { showSettings = true })
-                    Spacer(modifier = Modifier.weight(1f))
-                    Column(horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = "対象: ${viewModel.effectiveEnabled.size} 都道府県",
-                            fontSize = 13.sp,
-                            color = Color.Gray,
-                        )
-                        if (viewModel.hasCustomWeights) {
+            // 上部バー：設定ボタン（左）＋対象県数（右）。結果表示中・スピン中は中身を隠すが、
+            // 常にヘッダーと同じ高さを確保して地図の縦位置がスピン開始で動かないようにする。
+            // 高さは実測して placeholder に反映するので、内容が見切れることはない。
+            val headerContentVisible = !isBusy && !viewModel.showResultModal
+            var headerHeight by remember { mutableStateOf(0.dp) }
+            val density = androidx.compose.ui.platform.LocalDensity.current
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (headerHeight > 0.dp) Modifier.height(headerHeight) else Modifier),
+            ) {
+                if (headerContentVisible) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .onSizeChanged {
+                                with(density) { headerHeight = it.height.toDp() }
+                            }
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        SettingsChip(onClick = { showSettings = true })
+                        Spacer(modifier = Modifier.weight(1f))
+                        Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "重み付け: 有効",
-                                fontSize = 11.sp,
-                                color = AccentBlue,
-                                modifier = Modifier
-                                    .padding(top = 2.dp)
-                                    .background(AccentBlue.copy(alpha = 0.1f), RoundedCornerShape(3.dp))
-                                    .padding(horizontal = 6.dp, vertical = 1.dp),
+                                text = stringResource(R.string.map_target_prefectures, viewModel.effectiveEnabled.size),
+                                fontSize = 13.sp,
+                                color = Color.Gray,
                             )
+                            if (viewModel.hasCustomWeights) {
+                                Text(
+                                    text = stringResource(R.string.map_weighting_enabled),
+                                    fontSize = 11.sp,
+                                    color = AccentBlue,
+                                    modifier = Modifier
+                                        .padding(top = 2.dp)
+                                        .background(AccentBlue.copy(alpha = 0.1f), RoundedCornerShape(3.dp))
+                                        .padding(horizontal = 6.dp, vertical = 1.dp),
+                                )
+                            }
                         }
                     }
                 }
-            } else {
-                // レイアウトを安定させるための上部スペーサー。
-                Spacer(modifier = Modifier.height(48.dp))
             }
+
+            // 温泉・自然タブが常に確保しているタイプチップ行（22dp）と同じ高さを都道府県でも確保し、
+            // ヘッダー高さを揃えて 3 タブで地図の縦位置を一致させる。スピン中も高さは維持する。
+            Spacer(modifier = Modifier.height(22.dp))
 
             // 地図＋県名を縦方向中央に寄せる。
             Spacer(modifier = Modifier.weight(1f))
@@ -131,25 +160,40 @@ fun JapanMapScreen(
                     // スピン中・停止中・結果表示中はタップ無効（iOS 版と同じ）。
                     if (!isBusy && !viewModel.showResultModal) onOpenTourism(pref)
                 },
+                // 温泉・自然タブの SpotMap と同じサイズ指定（横 8dp パディング＋clipToBounds）に
+                // 揃えて、3 タブで日本地図の描画位置・大きさを一致させる。
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1f),
+                    .aspectRatio(1f)
+                    .padding(horizontal = 8.dp)
+                    .clipToBounds(),
             )
 
             // スピン中／停止中に選択県名を大きく表示。
+            // Box の高さは 64dp 固定にして地図の縦位置を動かさない。
+            // 県名が 2〜3 行になったときは Text を unbounded で描き、Box の中央から
+            // 上下対称にはみ出させることで、地図を押しのけず・見切れずに全行を表示する。
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                val name = viewModel.selectedPrefecture?.displayName
+                val name = viewModel.selectedPrefecture?.localizedName()
                 if (viewModel.isStopping && name != null && !viewModel.showResultModal) {
                     Text(
                         text = name,
                         fontSize = 34.sp,
+                        // 2〜3 行になったとき行同士が重ならないよう行間を明示する。
+                        lineHeight = 40.sp,
                         fontWeight = FontWeight.Bold,
                         color = SelectedColor,
+                        // 県名が長くて 2 行になっても中央寄せを保つ。
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(unbounded = true)
+                            .padding(horizontal = 24.dp),
                     )
                 }
             }
@@ -162,7 +206,12 @@ fun JapanMapScreen(
             ResultOverlay(
                 prefecture = viewModel.selectedPrefecture,
                 mode = viewModel.mode,
-                onReset = { viewModel.reset() },
+                onReset = {
+                    // 結果画面から次へ進むタイミングで iOS 版と同じ発火判定を行う
+                    // （ポイント加算＋広告／レビュー／Play レビューの試行）。
+                    InterstitialAdManager.registerRouletteSpin(context)
+                    viewModel.reset()
+                },
                 onShowTourism = { viewModel.selectedPrefecture?.let(onOpenTourism) },
             )
         }
@@ -216,7 +265,7 @@ private fun SettingsChip(onClick: () -> Unit) {
             modifier = Modifier.size(18.dp),
         )
         Spacer(modifier = Modifier.width(6.dp))
-        Text(text = "設定", fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+        Text(text = stringResource(R.string.common_settings), fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.Black)
     }
 }
 
@@ -381,7 +430,7 @@ private fun SpinButton(
     ) {
         Icon(
             imageVector = if (isSpinning) Icons.Filled.Stop else Icons.Filled.PlayArrow,
-            contentDescription = if (isSpinning) "停止" else "開始",
+            contentDescription = stringResource(if (isSpinning) R.string.common_stop else R.string.common_start),
             tint = if (enabled) Color.Black else Color.Gray,
             modifier = Modifier.size(28.dp),
         )
@@ -406,22 +455,29 @@ private fun ResultOverlay(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
-                text = prefecture?.displayName ?: "",
+                text = prefecture?.localizedName() ?: "",
                 fontSize = 46.sp,
+                // 2 行になったとき行同士が重ならないよう行間を明示する。
+                lineHeight = 52.sp,
                 fontWeight = FontWeight.Black,
                 color = SelectedColor,
+                // 県名が長くて 2 行になっても中央寄せを保つ。
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
             )
             prefecture?.let {
                 Text(
-                    text = it.regionName,
+                    text = it.localizedRegionName(),
                     fontSize = 18.sp,
                     color = Color.Gray,
                     modifier = Modifier.padding(top = 8.dp),
                 )
                 // 温泉／自然モードでは件数を表示。
                 val countText = when (mode) {
-                    RouletteMode.ONSEN -> "${it.onsens.size} つの温泉地"
-                    RouletteMode.NATURE -> "${it.natureSpots.size} つの自然スポット"
+                    RouletteMode.ONSEN -> stringResource(R.string.map_onsen_count, it.onsens.size)
+                    RouletteMode.NATURE -> stringResource(R.string.map_nature_count, it.natureSpots.size)
                     else -> null
                 }
                 if (countText != null) {
@@ -454,9 +510,9 @@ private fun ResultOverlay(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = when (mode) {
-                        RouletteMode.ONSEN -> "温泉情報"
-                        RouletteMode.NATURE -> "自然スポット"
-                        else -> "観光情報"
+                        RouletteMode.ONSEN -> stringResource(R.string.map_result_onsen)
+                        RouletteMode.NATURE -> stringResource(R.string.map_result_nature)
+                        else -> stringResource(R.string.map_result_tourism)
                     },
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -482,7 +538,7 @@ private fun ResultOverlay(
         ) {
             Icon(
                 imageVector = Icons.Filled.Refresh,
-                contentDescription = "もう一度",
+                contentDescription = stringResource(R.string.common_retry),
                 tint = Color.White,
                 modifier = Modifier.size(24.dp),
             )

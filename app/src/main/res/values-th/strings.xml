@@ -1,0 +1,247 @@
+<resources>
+    <!-- app_name はローカライズしない（ブランド名） -->
+
+    <!-- ボトムタブ -->
+    <string name="tab_prefecture">แผนที่</string>
+    <string name="tab_onsen">ออนเซ็น</string>
+    <string name="tab_nature">ธรรมชาติ</string>
+    <string name="tab_festival">เทศกาล</string>
+    <string name="tab_plan">แผน</string>
+    <string name="placeholder_preparing">%s (เร็วๆ นี้)</string>
+
+    <!-- 共通 -->
+    <string name="common_back">กลับ</string>
+    <string name="common_close">ปิด</string>
+    <string name="common_done">เสร็จสิ้น</string>
+    <string name="common_cancel">ยกเลิก</string>
+    <string name="common_reset">รีเซ็ต</string>
+    <string name="common_clear">ล้าง</string>
+    <string name="common_settings">การตั้งค่า</string>
+    <string name="common_select_all">เลือกทั้งหมด</string>
+    <string name="common_deselect_all">ยกเลิกทั้งหมด</string>
+    <string name="common_save">บันทึก</string>
+    <string name="common_all">ทั้งหมด</string>
+    <string name="common_start">เริ่ม</string>
+    <string name="common_stop">หยุด</string>
+    <string name="common_retry">ลองอีกครั้ง</string>
+    <string name="common_add_to_plan">เพิ่มลงในแผน</string>
+    <string name="common_map">แผนที่</string>
+
+    <!-- 温泉タイプ -->
+    <string name="onsen_type_scenic">ออนเซ็นวิวสวย</string>
+    <string name="onsen_type_historical">ออนเซ็นเชิงประวัติศาสตร์</string>
+    <string name="onsen_type_therapeutic">ออนเซ็นเพื่อการบำบัด</string>
+    <string name="onsen_type_resort">รีสอร์ต</string>
+    <string name="onsen_type_mountain">ออนเซ็นบนภูเขา</string>
+    <string name="onsen_type_seaside">ออนเซ็นริมทะเล</string>
+    <string name="onsen_type_ski">ออนเซ็นลานสกี</string>
+    <string name="onsen_type_fallback">ออนเซ็นเพื่อการบำบัด</string>
+
+    <!-- 自然タイプ -->
+    <string name="nature_type_night_view">วิวกลางคืน</string>
+    <string name="nature_type_starry_sky">ท้องฟ้าดาว</string>
+    <string name="nature_type_sea">ทะเล</string>
+    <string name="nature_type_camping">แคมป์ปิ้ง</string>
+    <string name="nature_type_fallback">ธรรมชาติ</string>
+
+    <!-- グルメカテゴリ -->
+    <string name="food_category_ramen">ราเมง</string>
+    <string name="food_category_seafood">อาหารทะเล</string>
+    <string name="food_category_meat">เมนูเนื้อ</string>
+    <string name="food_category_sweets">ของหวาน</string>
+    <string name="food_category_local">อาหารพื้นเมือง</string>
+    <string name="food_category_drinks">เครื่องดื่ม</string>
+    <string name="food_category_vegetables">ผักและผลไม้</string>
+
+    <!-- お土産カテゴリ -->
+    <string name="souvenir_category_food">อาหาร</string>
+    <string name="souvenir_category_crafts">งานหัตถกรรม</string>
+    <string name="souvenir_category_textiles">สิ่งทอ / เสื้อผ้า</string>
+    <string name="souvenir_category_ceramics">เครื่องปั้นดินเผา</string>
+    <string name="souvenir_category_regional">ของขึ้นชื่อประจำท้องถิ่น</string>
+
+    <!-- 祭りカテゴリ -->
+    <string name="festival_category_summer">ฤดูร้อน</string>
+    <string name="festival_category_fireworks">ดอกไม้ไฟ</string>
+    <string name="festival_category_traditional">ดั้งเดิม</string>
+    <string name="festival_category_dance">การรำ</string>
+    <string name="festival_category_food">อาหาร</string>
+    <string name="festival_category_seasonal">ตามฤดูกาล</string>
+    <string name="festival_category_religious">ศาสนา</string>
+    <string name="festival_filter_spring">ฤดูใบไม้ผลิ</string>
+    <string name="festival_filter_autumn">ฤดูใบไม้ร่วง</string>
+    <string name="festival_filter_winter">ฤดูหนาว</string>
+    <string name="festival_filter_sakura">ซากุระ</string>
+    <string name="festival_filter_illumination">ไฟประดับ</string>
+    <string name="festival_filter_snow">หิมะ</string>
+
+    <!-- プランのカテゴリ -->
+    <string name="plan_category_attraction">สถานที่ท่องเที่ยว</string>
+    <string name="plan_category_gourmet">อาหาร</string>
+    <string name="plan_category_onsen">ออนเซ็น</string>
+    <string name="plan_category_festival">เทศกาล</string>
+    <string name="plan_category_nature">ธรรมชาติ</string>
+    <string name="plan_category_souvenir">ของฝาก</string>
+    <string name="plan_category_hotel">ที่พัก</string>
+    <string name="plan_category_transport">สถานี / สนามบิน</string>
+    <string name="plan_category_memo">บันทึก</string>
+
+    <!-- 観光詳細画面 -->
+    <string name="tourism_section_map">แผนที่ท่องเที่ยว</string>
+    <string name="tourism_section_gourmet">อาหารท้องถิ่น</string>
+    <string name="tourism_section_gourmet_subtitle">รสชาติแห่ง%s</string>
+    <string name="tourism_section_onsen">ออนเซ็น</string>
+    <string name="tourism_section_souvenir">ของฝาก</string>
+    <string name="tourism_section_souvenir_subtitle">ความทรงจำแห่ง%s</string>
+    <string name="tourism_section_photos">ภาพสถานที่</string>
+    <string name="tourism_load_more">ดูเพิ่มเติม</string>
+    <string name="info_price_range">ช่วงราคา</string>
+    <string name="info_best_season">ช่วงเวลาที่แนะนำ</string>
+    <string name="info_category">หมวดหมู่</string>
+    <string name="info_onsen_quality">ประเภทของน้ำแร่</string>
+    <string name="added_to_plan">เพิ่มลงใน \"%s\" แล้ว</string>
+
+    <!-- スポット詳細画面 -->
+    <string name="detail_more_search">สำรวจเพิ่มเติม</string>
+    <string name="detail_more_info">รายละเอียด</string>
+    <string name="detail_basic_info">ข้อมูลพื้นฐาน</string>
+    <string name="detail_features">จุดเด่น</string>
+    <string name="detail_change_location">เปลี่ยนตำแหน่ง</string>
+    <string name="detail_add_location">เพิ่มตำแหน่ง</string>
+
+    <!-- SNS 検索 -->
+    <string name="social_open_google_maps">เปิดใน Google Maps</string>
+    <string name="social_tabelog">ค้นหาร้านอาหารบน Tabelog</string>
+    <string name="social_youtube">ค้นหาบน YouTube</string>
+    <string name="social_instagram">ค้นหาบน Instagram</string>
+
+    <!-- 温泉・自然のスポット詳細一覧 -->
+    <string name="onsen_prefecture_title">ออนเซ็นใน%s</string>
+    <string name="onsen_prefecture_map">แผนที่ออนเซ็นของ%s</string>
+    <string name="onsen_count">ออนเซ็น %d แห่ง</string>
+    <string name="nature_prefecture_title">ธรรมชาติใน%s</string>
+    <string name="nature_prefecture_map">แผนที่ธรรมชาติของ%s</string>
+    <string name="nature_count">จุดชมธรรมชาติ %d แห่ง</string>
+    <string name="spot_type_kind">ประเภท</string>
+    <string name="spot_tag_mountain">ภูเขา</string>
+
+    <!-- 都道府県ルーレット / マップ画面 -->
+    <string name="map_target_prefectures">เป้าหมาย: %d จังหวัด</string>
+    <string name="map_weighting_enabled">การถ่วงน้ำหนัก: เปิด</string>
+    <string name="map_onsen_count">ออนเซ็น %d แห่ง</string>
+    <string name="map_nature_count">จุดชมธรรมชาติ %d แห่ง</string>
+    <string name="map_result_onsen">ออนเซ็น</string>
+    <string name="map_result_nature">จุดชมธรรมชาติ</string>
+    <string name="map_result_tourism">ข้อมูลท่องเที่ยว</string>
+
+    <!-- スポットルーレット画面 -->
+    <string name="spot_roulette_map_view">มุมมองแผนที่</string>
+    <string name="spot_roulette_list_view">มุมมองรายการ</string>
+    <string name="spot_roulette_count">%d รายการ</string>
+    <string name="spot_roulette_detail_info">รายละเอียด</string>
+
+    <!-- 祭り画面 -->
+    <string name="festival_min_rating">★%s ขึ้นไป</string>
+    <string name="festival_all_periods">ทุกช่วงเวลา</string>
+    <string name="festival_month">%d</string>
+    <string name="festival_location">สถานที่จัด</string>
+    <string name="festival_period">ช่วงเวลา</string>
+    <string name="festival_duration">ระยะเวลา</string>
+    <string name="festival_search_hint">ค้นหาด้วยชื่อเทศกาลหรือจังหวัด</string>
+
+    <!-- 設定・重み付け画面（都道府県） -->
+    <string name="settings_display">การตั้งค่าการแสดงผล</string>
+    <string name="settings_prefecture_count">%d จังหวัด</string>
+    <string name="settings_weight_title">การตั้งค่าการถ่วงน้ำหนัก</string>
+    <string name="settings_weight_subtitle">ปรับความน่าจะเป็นในการเลือกของแต่ละจังหวัด</string>
+    <string name="settings_target">เป้าหมาย</string>
+    <string name="settings_not_target">ยกเว้น</string>
+    <string name="settings_weight_adjust">ปรับการถ่วงน้ำหนัก</string>
+    <string name="settings_back_to_settings">กลับไปที่การตั้งค่า</string>
+    <string name="settings_weight_desc">คุณสามารถปรับความน่าจะเป็นในการเลือกของแต่ละจังหวัดได้ ค่ายิ่งสูงยิ่งมีโอกาสถูกเลือกมากขึ้น</string>
+    <string name="settings_no_target_prefecture">ไม่มีจังหวัดเป้าหมาย โปรดเพิ่มเป้าหมายในการตั้งค่า</string>
+    <string name="settings_weight_value">น้ำหนัก: %.1f</string>
+
+    <!-- 設定・重み付け画面（スポット） -->
+    <string name="spot_settings_by_region">ตามภูมิภาค</string>
+    <string name="spot_settings_by_type">ตามประเภท</string>
+    <string name="spot_settings_count">%d แห่ง</string>
+    <string name="spot_settings_weight_subtitle">ปรับความน่าจะเป็นในการเลือกของแต่ละจุด</string>
+    <string name="spot_settings_weight_desc">คุณสามารถปรับความน่าจะเป็นในการเลือกของแต่ละจุดได้ ค่ายิ่งสูงยิ่งมีโอกาสถูกเลือกมากขึ้น</string>
+    <string name="spot_settings_no_target">ไม่มีจุดที่ใช้งานได้ โปรดเพิ่มเป้าหมายในการตั้งค่า</string>
+
+    <!-- プラン系 -->
+    <string name="plan_add_title">เพิ่มลงในแผน</string>
+    <string name="plan_default_title">ทริป%s</string>
+    <string name="plan_untitled">แผนไม่มีชื่อ</string>
+    <string name="plan_title_hint">เช่น ทริปฮอกไกโดฤดูร้อน</string>
+    <string name="plan_add_new">สร้างแผนใหม่แล้วเพิ่ม</string>
+    <string name="plan_add_existing">เพิ่มลงในแผนที่มีอยู่</string>
+    <string name="plan_item_count">%d รายการ</string>
+    <string name="plan_already_added">เพิ่มแล้ว</string>
+    <string name="plan_add">เพิ่ม</string>
+    <string name="plan_unassigned">ยังไม่ได้กำหนด</string>
+    <string name="plan_share">แชร์</string>
+    <string name="plan_share_chooser">แชร์แผน</string>
+    <string name="plan_edit">แก้ไข</string>
+    <string name="plan_create">สร้างแผน</string>
+    <string name="plan_empty_title">ยังไม่มีแผน</string>
+    <string name="plan_empty_message">รวบรวมสถานที่ท่องเที่ยว อาหาร ออนเซ็น และเทศกาลที่คุณสนใจ เพื่อสร้างแผนการเดินทางในแบบของคุณเอง</string>
+    <string name="plan_create_button">สร้างแผน</string>
+    <string name="plan_move_up">เลื่อนขึ้น</string>
+    <string name="plan_move_down">เลื่อนลง</string>
+    <string name="plan_delete">ลบ</string>
+    <string name="plan_no_items_short">ยังไม่มีรายการ</string>
+    <string name="plan_day_count">%d วัน</string>
+    <string name="plan_show_on_map">ดูบนแผนที่</string>
+    <string name="plan_no_items_placeholder">ยังไม่มีรายการ\nใช้ \"เพิ่มลงในแผน\" จากหน้ารายละเอียดใดก็ได้\nหรือใช้ปุ่มด้านล่างเพื่อเพิ่มที่พัก สถานี หรือบันทึก</string>
+    <string name="plan_no_items_paren">(ไม่มีรายการ)</string>
+    <string name="plan_day_format">วันที่ %d</string>
+    <string name="plan_reorder_hint">ลากเพื่อย้าย</string>
+    <string name="plan_time_unset">ยังไม่ได้ตั้งเวลา</string>
+    <string name="plan_time_none">ยังไม่ได้ตั้งเวลา</string>
+    <string name="plan_edit_time">แก้ไขเวลา</string>
+    <string name="plan_delete_block">ลบบล็อก</string>
+    <string name="plan_add_time_block">เพิ่มบล็อกเวลา</string>
+    <string name="plan_add_custom">เพิ่มที่พัก สถานี ฯลฯ</string>
+    <string name="plan_time_block">บล็อกเวลา</string>
+    <string name="plan_start_time">เวลาเริ่มต้น</string>
+    <string name="plan_hour_suffix">ชม.</string>
+    <string name="plan_minute_suffix">น.</string>
+    <string name="plan_block_heading_hint">หัวข้อ (ไม่บังคับ เช่น ช่วงเช้า)</string>
+    <string name="plan_delete_this_block">ลบบล็อกเวลานี้</string>
+    <string name="plan_decrease">ลด</string>
+    <string name="plan_increase">เพิ่ม</string>
+    <string name="plan_split_by_day">แบ่งตามวัน</string>
+    <string name="plan_days_count">จำนวนวัน: %d วัน</string>
+    <string name="plan_name_label">ชื่อแผน</string>
+    <string name="plan_edit_title">แก้ไขแผน</string>
+    <string name="plan_map_empty">ไม่มีสถานที่ที่แสดงบนแผนที่ได้\nต้องมีรายการท่องเที่ยว ออนเซ็น ธรรมชาติ หรือเทศกาล หรือรายการที่พัก/สถานี/บันทึกที่ตั้งค่าตำแหน่งไว้</string>
+    <string name="plan_map_view_route">ดูเส้นทางวันที่ %d</string>
+    <string name="plan_map_all_days">ทุกวัน</string>
+    <string name="plan_morning">ช่วงเช้า</string>
+    <string name="plan_memo">บันทึก</string>
+    <string name="plan_place">สถานที่</string>
+    <string name="plan_address_copied">คัดลอกที่อยู่แล้ว</string>
+    <string name="plan_copy_address">คัดลอกที่อยู่</string>
+    <string name="plan_open_in_map">เปิดในแผนที่</string>
+    <string name="plan_item_add">เพิ่มรายการ</string>
+    <string name="plan_item_edit">แก้ไขรายการ</string>
+    <string name="plan_item_kind">ประเภท</string>
+    <string name="plan_item_title">ชื่อ</string>
+    <string name="plan_item_title_hint">เช่น โรงแรม XYZ</string>
+    <string name="plan_memo_optional">บันทึก (ไม่บังคับ)</string>
+    <string name="plan_location_set">ตั้งค่าตำแหน่งแล้ว</string>
+    <string name="plan_location_add_optional">เพิ่มตำแหน่ง (ไม่บังคับ)</string>
+    <string name="location_picker_title">เลือกตำแหน่ง</string>
+    <string name="location_search_hint">ค้นหาด้วยชื่อสถานที่ ที่อยู่ หรือสถานี</string>
+    <string name="location_searching">กำลังค้นหา…</string>
+    <string name="location_not_found">ไม่พบ</string>
+    <string name="location_resolving">กำลังดึงที่อยู่…</string>
+    <string name="location_save_point">บันทึกตำแหน่งนี้</string>
+
+    <!-- フォトクレジット -->
+    <string name="photo_credits_title">เครดิตภาพ</string>
+    <string name="photo_credits_attribution">การระบุแหล่งที่มาของภาพ</string>
+    <string name="photo_credits_desc">ผู้สร้าง ใบอนุญาต และแหล่งที่มาของภาพสถานที่ท่องเที่ยวที่ใช้ในแอปนี้</string>
+</resources>

@@ -118,6 +118,16 @@ enum class Prefecture(
     }
 }
 
+/** ロケールに応じた都道府県名（英語ロケールなら "Hokkaido" など）。 */
+fun Prefecture.localizedName(): String = localizeData(displayName)
+
+/** ロケールに応じた地方名（英語ロケールなら "Tohoku" など）。 */
+fun Prefecture.localizedRegionName(): String = localizeData(regionName)
+
+/** regionKey からロケールに応じた地方名を返す。 */
+fun localizedRegionNameFor(regionKey: String): String =
+    localizeData(Prefecture.regionNameFor(regionKey))
+
 /** 観光情報（観光スポット・グルメ・お土産）へのアクセサ。 */
 val Prefecture.tourismInfo: TourismInfo?
     get() = TOURISM_INFO[this]

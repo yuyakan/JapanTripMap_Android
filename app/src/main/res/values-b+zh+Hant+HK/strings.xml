@@ -1,0 +1,247 @@
+<resources>
+    <!-- app_name はローカライズしない（ブランド名） -->
+
+    <!-- ボトムタブ -->
+    <string name="tab_prefecture">地圖</string>
+    <string name="tab_onsen">溫泉</string>
+    <string name="tab_nature">自然</string>
+    <string name="tab_festival">祭典</string>
+    <string name="tab_plan">行程</string>
+    <string name="placeholder_preparing">%s（準備中）</string>
+
+    <!-- 共通 -->
+    <string name="common_back">返回</string>
+    <string name="common_close">關閉</string>
+    <string name="common_done">完成</string>
+    <string name="common_cancel">取消</string>
+    <string name="common_reset">重設</string>
+    <string name="common_clear">清除</string>
+    <string name="common_settings">設定</string>
+    <string name="common_select_all">全選</string>
+    <string name="common_deselect_all">取消全選</string>
+    <string name="common_save">儲存</string>
+    <string name="common_all">全部</string>
+    <string name="common_start">開始</string>
+    <string name="common_stop">停止</string>
+    <string name="common_retry">再試一次</string>
+    <string name="common_add_to_plan">加入行程</string>
+    <string name="common_map">地圖</string>
+
+    <!-- 温泉タイプ -->
+    <string name="onsen_type_scenic">絕景溫泉</string>
+    <string name="onsen_type_historical">歷史溫泉</string>
+    <string name="onsen_type_therapeutic">療養溫泉</string>
+    <string name="onsen_type_resort">度假村</string>
+    <string name="onsen_type_mountain">山間溫泉</string>
+    <string name="onsen_type_seaside">海邊溫泉</string>
+    <string name="onsen_type_ski">滑雪溫泉</string>
+    <string name="onsen_type_fallback">療養溫泉</string>
+
+    <!-- 自然タイプ -->
+    <string name="nature_type_night_view">夜景</string>
+    <string name="nature_type_starry_sky">星空</string>
+    <string name="nature_type_sea">大海</string>
+    <string name="nature_type_camping">露營</string>
+    <string name="nature_type_fallback">自然</string>
+
+    <!-- グルメカテゴリ -->
+    <string name="food_category_ramen">拉麵</string>
+    <string name="food_category_seafood">海鮮</string>
+    <string name="food_category_meat">肉類料理</string>
+    <string name="food_category_sweets">甜點</string>
+    <string name="food_category_local">鄉土料理</string>
+    <string name="food_category_drinks">飲品</string>
+    <string name="food_category_vegetables">蔬菜·水果</string>
+
+    <!-- お土産カテゴリ -->
+    <string name="souvenir_category_food">食品</string>
+    <string name="souvenir_category_crafts">工藝品</string>
+    <string name="souvenir_category_textiles">織物·服飾</string>
+    <string name="souvenir_category_ceramics">陶瓷器</string>
+    <string name="souvenir_category_regional">地方特產</string>
+
+    <!-- 祭りカテゴリ -->
+    <string name="festival_category_summer">夏日</string>
+    <string name="festival_category_fireworks">煙火</string>
+    <string name="festival_category_traditional">傳統</string>
+    <string name="festival_category_dance">舞蹈</string>
+    <string name="festival_category_food">美食</string>
+    <string name="festival_category_seasonal">季節</string>
+    <string name="festival_category_religious">宗教</string>
+    <string name="festival_filter_spring">春</string>
+    <string name="festival_filter_autumn">秋</string>
+    <string name="festival_filter_winter">冬</string>
+    <string name="festival_filter_sakura">櫻花</string>
+    <string name="festival_filter_illumination">燈飾</string>
+    <string name="festival_filter_snow">雪</string>
+
+    <!-- プランのカテゴリ -->
+    <string name="plan_category_attraction">觀光景點</string>
+    <string name="plan_category_gourmet">美食</string>
+    <string name="plan_category_onsen">溫泉</string>
+    <string name="plan_category_festival">祭典</string>
+    <string name="plan_category_nature">自然</string>
+    <string name="plan_category_souvenir">手信</string>
+    <string name="plan_category_hotel">住宿</string>
+    <string name="plan_category_transport">車站·機場</string>
+    <string name="plan_category_memo">備註</string>
+
+    <!-- 観光詳細画面 -->
+    <string name="tourism_section_map">觀光地圖</string>
+    <string name="tourism_section_gourmet">當地美食</string>
+    <string name="tourism_section_gourmet_subtitle">%s的味道</string>
+    <string name="tourism_section_onsen">溫泉</string>
+    <string name="tourism_section_souvenir">手信</string>
+    <string name="tourism_section_souvenir_subtitle">%s的回憶</string>
+    <string name="tourism_section_photos">景點相片</string>
+    <string name="tourism_load_more">查看更多</string>
+    <string name="info_price_range">價格區間</string>
+    <string name="info_best_season">推薦時節</string>
+    <string name="info_category">類別</string>
+    <string name="info_onsen_quality">泉質類型</string>
+    <string name="added_to_plan">已加入「%s」</string>
+
+    <!-- スポット詳細画面 -->
+    <string name="detail_more_search">了解更多</string>
+    <string name="detail_more_info">詳細資訊</string>
+    <string name="detail_basic_info">基本資訊</string>
+    <string name="detail_features">特色</string>
+    <string name="detail_change_location">變更位置</string>
+    <string name="detail_add_location">新增位置</string>
+
+    <!-- SNS 検索 -->
+    <string name="social_open_google_maps">在 Google 地圖中開啟</string>
+    <string name="social_tabelog">在 Tabelog 上尋找餐廳</string>
+    <string name="social_youtube">在 YouTube 上搜尋</string>
+    <string name="social_instagram">在 Instagram 上搜尋</string>
+
+    <!-- 温泉・自然のスポット詳細一覧 -->
+    <string name="onsen_prefecture_title">%s的溫泉</string>
+    <string name="onsen_prefecture_map">%s溫泉地圖</string>
+    <string name="onsen_count">%d 處溫泉</string>
+    <string name="nature_prefecture_title">%s的自然</string>
+    <string name="nature_prefecture_map">%s自然地圖</string>
+    <string name="nature_count">%d 個自然景點</string>
+    <string name="spot_type_kind">類型</string>
+    <string name="spot_tag_mountain">山</string>
+
+    <!-- 都道府県ルーレット / マップ画面 -->
+    <string name="map_target_prefectures">目標：%d 個都道府縣</string>
+    <string name="map_weighting_enabled">權重：已開啟</string>
+    <string name="map_onsen_count">%d 處溫泉</string>
+    <string name="map_nature_count">%d 個自然景點</string>
+    <string name="map_result_onsen">溫泉</string>
+    <string name="map_result_nature">自然景點</string>
+    <string name="map_result_tourism">觀光資訊</string>
+
+    <!-- スポットルーレット画面 -->
+    <string name="spot_roulette_map_view">地圖檢視</string>
+    <string name="spot_roulette_list_view">清單檢視</string>
+    <string name="spot_roulette_count">%d 項</string>
+    <string name="spot_roulette_detail_info">詳細資訊</string>
+
+    <!-- 祭り画面 -->
+    <string name="festival_min_rating">★%s 以上</string>
+    <string name="festival_all_periods">全部時段</string>
+    <string name="festival_month">%d</string>
+    <string name="festival_location">舉辦地</string>
+    <string name="festival_period">時節</string>
+    <string name="festival_duration">時長</string>
+    <string name="festival_search_hint">按祭典或縣名搜尋</string>
+
+    <!-- 設定・重み付け画面（都道府県） -->
+    <string name="settings_display">顯示設定</string>
+    <string name="settings_prefecture_count">%d 個縣</string>
+    <string name="settings_weight_title">權重設定</string>
+    <string name="settings_weight_subtitle">調整各都道府縣的選中機率</string>
+    <string name="settings_target">目標</string>
+    <string name="settings_not_target">已排除</string>
+    <string name="settings_weight_adjust">權重調整</string>
+    <string name="settings_back_to_settings">返回設定</string>
+    <string name="settings_weight_desc">你可以調整每個都道府縣被選中的機率。數值越大越容易被選中。</string>
+    <string name="settings_no_target_prefecture">沒有目標都道府縣。請在設定中新增目標。</string>
+    <string name="settings_weight_value">權重：%.1f</string>
+
+    <!-- 設定・重み付け画面（スポット） -->
+    <string name="spot_settings_by_region">按地區</string>
+    <string name="spot_settings_by_type">按類型</string>
+    <string name="spot_settings_count">%d 處</string>
+    <string name="spot_settings_weight_subtitle">調整各景點的選中機率</string>
+    <string name="spot_settings_weight_desc">你可以調整每個景點被選中的機率。數值越大越容易被選中。</string>
+    <string name="spot_settings_no_target">沒有可用景點。請在設定中新增目標。</string>
+
+    <!-- プラン系 -->
+    <string name="plan_add_title">加入行程</string>
+    <string name="plan_default_title">%s之旅</string>
+    <string name="plan_untitled">未命名行程</string>
+    <string name="plan_title_hint">例：夏日北海道之旅</string>
+    <string name="plan_add_new">建立新行程並加入</string>
+    <string name="plan_add_existing">加入現有行程</string>
+    <string name="plan_item_count">%d 個項目</string>
+    <string name="plan_already_added">已加入</string>
+    <string name="plan_add">新增</string>
+    <string name="plan_unassigned">未分配</string>
+    <string name="plan_share">分享</string>
+    <string name="plan_share_chooser">分享行程</string>
+    <string name="plan_edit">編輯</string>
+    <string name="plan_create">建立行程</string>
+    <string name="plan_empty_title">尚無行程</string>
+    <string name="plan_empty_message">收集你喜歡的觀光地、美食、溫泉與祭典，打造專屬於你的旅行行程。</string>
+    <string name="plan_create_button">建立行程</string>
+    <string name="plan_move_up">上移</string>
+    <string name="plan_move_down">下移</string>
+    <string name="plan_delete">刪除</string>
+    <string name="plan_no_items_short">尚無項目</string>
+    <string name="plan_day_count">%d 天</string>
+    <string name="plan_show_on_map">在地圖上查看</string>
+    <string name="plan_no_items_placeholder">尚無項目。\n可在任意詳情頁面使用「加入行程」，\n或用下方按鈕新增住宿、交通或備註。</string>
+    <string name="plan_no_items_paren">（無項目）</string>
+    <string name="plan_day_format">第 %d 天</string>
+    <string name="plan_reorder_hint">拖曳以移動</string>
+    <string name="plan_time_unset">未設定時間</string>
+    <string name="plan_time_none">未設定時間</string>
+    <string name="plan_edit_time">編輯時間</string>
+    <string name="plan_delete_block">刪除時段</string>
+    <string name="plan_add_time_block">新增時間段</string>
+    <string name="plan_add_custom">新增住宿、交通等</string>
+    <string name="plan_time_block">時間段</string>
+    <string name="plan_start_time">開始時間</string>
+    <string name="plan_hour_suffix">時</string>
+    <string name="plan_minute_suffix">分</string>
+    <string name="plan_block_heading_hint">標題（可選，例：上午）</string>
+    <string name="plan_delete_this_block">刪除此時間段</string>
+    <string name="plan_decrease">減少</string>
+    <string name="plan_increase">增加</string>
+    <string name="plan_split_by_day">按天劃分</string>
+    <string name="plan_days_count">天數：%d 天</string>
+    <string name="plan_name_label">行程名稱</string>
+    <string name="plan_edit_title">編輯行程</string>
+    <string name="plan_map_empty">沒有可在地圖上顯示的地點。\n需要觀光、溫泉、自然、祭典項目，或已設定位置的住宿/交通/備註項目。</string>
+    <string name="plan_map_view_route">查看第 %d 天路線</string>
+    <string name="plan_map_all_days">全部行程</string>
+    <string name="plan_morning">上午</string>
+    <string name="plan_memo">備註</string>
+    <string name="plan_place">地點</string>
+    <string name="plan_address_copied">已複製地址</string>
+    <string name="plan_copy_address">複製地址</string>
+    <string name="plan_open_in_map">在地圖中開啟</string>
+    <string name="plan_item_add">新增項目</string>
+    <string name="plan_item_edit">編輯項目</string>
+    <string name="plan_item_kind">類型</string>
+    <string name="plan_item_title">標題</string>
+    <string name="plan_item_title_hint">例：〇〇酒店</string>
+    <string name="plan_memo_optional">備註（可選）</string>
+    <string name="plan_location_set">已設定位置</string>
+    <string name="plan_location_add_optional">新增位置（可選）</string>
+    <string name="location_picker_title">選擇位置</string>
+    <string name="location_search_hint">按地名、地址或車站搜尋</string>
+    <string name="location_searching">搜尋中…</string>
+    <string name="location_not_found">找不到</string>
+    <string name="location_resolving">正在取得地址…</string>
+    <string name="location_save_point">儲存此地點</string>
+
+    <!-- フォトクレジット -->
+    <string name="photo_credits_title">相片版權</string>
+    <string name="photo_credits_attribution">相片來源標註</string>
+    <string name="photo_credits_desc">本應用程式中使用的觀光景點相片的作者、授權與來源。</string>
+</resources>
