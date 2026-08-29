@@ -1,9 +1,14 @@
 package com.example.japantripmap
 
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.google.android.libraries.ads.mobile.sdk.MobileAds
+import com.google.android.libraries.ads.mobile.sdk.initialization.InitializationConfig
+import kotlin.concurrent.thread
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,6 +51,9 @@ class MainActivity : ComponentActivity() {
             System.currentTimeMillis() - start < SPLASH_DURATION_MS
         }
         super.onCreate(savedInstanceState)
+        // EEA 等では UMP の同意フォームを表示し、同意が済んで（または不要で）広告リクエストが
+        // 許可されてから AdMob を初期化する。対象外の地域では即座に許可され従来どおり広告が出る。
+        ConsentManager.gatherConsentThen(this) { initializeAds() }
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = AppTheme.Background) {
@@ -55,7 +63,42 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * AdMob（GMA Next-Gen SDK）を初期化し、最初のインタースティシャルを先読みする。
+     * UMP の同意フロー（[ConsentManager]）で広告リクエストが許可された後に呼ばれる。
+     * Next-Gen SDK は初期化を必ずバックグラウンドスレッドで行うよう求めている（ANR 回避）。
+     * アプリ ID は AndroidManifest の APPLICATION_ID メタデータから読み、単一の情報源に揃える。
+     */
+    private fun initializeAds() {
+        if (MobileAds.isInitialized) return
+        val appId = admobAppIdFromManifest() ?: run {
+            Log.w(TAG, "AdMob の APPLICATION_ID がマニフェストに無いため初期化をスキップ")
+            return
+        }
+        thread(name = "MobileAdsInit") {
+            MobileAds.initialize(
+                applicationContext,
+                InitializationConfig.Builder(appId).build(),
+            ) {
+                // アダプタ初期化完了。最初のインタースティシャルを先読みしておく。
+                InterstitialAdManager.loadAd(applicationContext)
+            }
+        }
+    }
+
+    /** AndroidManifest の `com.google.android.gms.ads.APPLICATION_ID` メタデータ値を取得する。 */
+    private fun admobAppIdFromManifest(): String? = try {
+        val appInfo = packageManager.getApplicationInfo(
+            packageName, PackageManager.GET_META_DATA,
+        )
+        appInfo.metaData?.getString("com.google.android.gms.ads.APPLICATION_ID")
+    } catch (e: PackageManager.NameNotFoundException) {
+        null
+    }
+
     private companion object {
+        private const val TAG = "MainActivity"
+
         /** スプラッシュを表示し続ける時間（iOS 版の 2 秒に合わせる）。 */
         const val SPLASH_DURATION_MS = 2000L
     }
@@ -110,7 +153,14 @@ private fun AppRoot() {
 
     // 最前面：個別スポット詳細。
     spotDetail?.let { sd ->
-        SpotDetailScreen(detail = sd, store = planStore, onClose = { spotDetail = null })
+        SpotDetailScreen(
+            detail = sd, store = planStore,
+            onClose = {
+                // iOS 版の詳細戻るで count += 2 する挙動に合わせる。
+                InterstitialAdManager.addDetailPoints()
+                spotDetail = null
+            },
+        )
         return
     }
 
@@ -119,21 +169,33 @@ private fun AppRoot() {
         is Detail.Tourism -> {
             TourismDetailScreen(
                 prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it }, onBack = { detail = null },
+                onOpenSpot = { spotDetail = it },
+                onBack = {
+                    InterstitialAdManager.addDetailPoints()
+                    detail = null
+                },
             )
             return
         }
         is Detail.Onsen -> {
             OnsenDetailScreen(
                 prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it }, onBack = { detail = null },
+                onOpenSpot = { spotDetail = it },
+                onBack = {
+                    InterstitialAdManager.addDetailPoints()
+                    detail = null
+                },
             )
             return
         }
         is Detail.Nature -> {
             NatureDetailScreen(
                 prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it }, onBack = { detail = null },
+                onOpenSpot = { spotDetail = it },
+                onBack = {
+                    InterstitialAdManager.addDetailPoints()
+                    detail = null
+                },
             )
             return
         }

@@ -260,6 +260,9 @@ fun SpotDetailScreen(
                     }
                 }
 
+                // 本文の下にレクタングル(300x250)（iOS 版の各詳細ビューと同じ位置）。
+                MediumRectangleAd(adUnitId = AdConfig.detailBannerUnitId)
+
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }

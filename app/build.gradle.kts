@@ -23,6 +23,12 @@ val localProps = Properties().apply {
 }
 val mapsApiKey: String = localProps.getProperty("MAPS_API_KEY", "")
 
+// AdMob のアプリ ID。本番の App ID を既定にする（App ID は DEBUG/Release で分けず 1 つ）。
+// 開発時の自己クリック対策は AdConfig.kt 側でユニット ID をテストにすることで担保する。
+// 別の ID を使いたい場合は local.properties に ADMOB_APP_ID を定義して差し替える。
+val admobAppId: String =
+    localProps.getProperty("ADMOB_APP_ID", "ca-app-pub-3155724310732667~1162264732")
+
 android {
     namespace = "com.example.japantripmap"
     compileSdk {
@@ -35,13 +41,15 @@ android {
         applicationId = "com.kanbe1365.japantripmap"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 5
+        versionName = "1.1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // AndroidManifest の @string/google_maps_key の代わりに使うプレースホルダ。
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        // AndroidManifest の AdMob APPLICATION_ID メタデータに埋め込む。
+        manifestPlaceholders["ADMOB_APP_ID"] = admobAppId
     }
 
     signingConfigs {
@@ -103,6 +111,11 @@ dependencies {
     // アプリ内レビュー（Play In-App Review）。ktx で suspend 拡張が使える。
     implementation(libs.play.review)
     implementation(libs.play.review.ktx)
+    // AdMob（GMA Next-Gen SDK）。iOS 版と同じタイミングで
+    // インタースティシャル／バナー広告を配信する。
+    implementation(libs.ads.mobile.sdk)
+    // UMP（GDPR 同意フォーム）。EEA/英国/スイス向けに同意を取得してから広告を出す。
+    implementation(libs.user.messaging.platform)
 
     debugImplementation(libs.androidx.ui.tooling)
 

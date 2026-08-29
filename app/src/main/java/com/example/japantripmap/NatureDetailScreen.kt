@@ -141,6 +141,8 @@ fun NatureDetailScreen(
                     },
                 )
             }
+            // 地図の下にレクタングル(300x250)（iOS 版 NatureSpotMapView と同じ位置）。
+            item { MediumRectangleAd(adUnitId = AdConfig.detailBannerUnitId) }
             items(spots.size) { i ->
                 val s = spots[i]
                 NatureCard(

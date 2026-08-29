@@ -123,6 +123,7 @@
     <string name="nature_prefecture_map">%sの自然地図</string>
     <string name="nature_count">%d つの自然スポット</string>
     <string name="spot_type_kind">種別</string>
+    <string name="spot_tag_mountain">山</string>
 
     <!-- 都道府県ルーレット / マップ画面 -->
     <string name="map_target_prefectures">対象: %d 都道府県</string>

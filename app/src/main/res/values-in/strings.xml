@@ -1,0 +1,247 @@
+<resources>
+    <!-- app_name はローカライズしない（ブランド名） -->
+
+    <!-- ボトムタブ -->
+    <string name="tab_prefecture">Peta</string>
+    <string name="tab_onsen">Onsen</string>
+    <string name="tab_nature">Alam</string>
+    <string name="tab_festival">Festival</string>
+    <string name="tab_plan">Rencana</string>
+    <string name="placeholder_preparing">%s (Segera Hadir)</string>
+
+    <!-- 共通 -->
+    <string name="common_back">Kembali</string>
+    <string name="common_close">Tutup</string>
+    <string name="common_done">Selesai</string>
+    <string name="common_cancel">Batal</string>
+    <string name="common_reset">Atur ulang</string>
+    <string name="common_clear">Hapus</string>
+    <string name="common_settings">Pengaturan</string>
+    <string name="common_select_all">Pilih semua</string>
+    <string name="common_deselect_all">Batal pilih semua</string>
+    <string name="common_save">Simpan</string>
+    <string name="common_all">Semua</string>
+    <string name="common_start">Mulai</string>
+    <string name="common_stop">Berhenti</string>
+    <string name="common_retry">Coba lagi</string>
+    <string name="common_add_to_plan">Tambahkan ke rencana</string>
+    <string name="common_map">Peta</string>
+
+    <!-- 温泉タイプ -->
+    <string name="onsen_type_scenic">Onsen pemandangan</string>
+    <string name="onsen_type_historical">Onsen bersejarah</string>
+    <string name="onsen_type_therapeutic">Onsen terapi</string>
+    <string name="onsen_type_resort">Resor</string>
+    <string name="onsen_type_mountain">Onsen pegunungan</string>
+    <string name="onsen_type_seaside">Onsen tepi laut</string>
+    <string name="onsen_type_ski">Onsen ski</string>
+    <string name="onsen_type_fallback">Onsen terapi</string>
+
+    <!-- 自然タイプ -->
+    <string name="nature_type_night_view">Pemandangan malam</string>
+    <string name="nature_type_starry_sky">Langit berbintang</string>
+    <string name="nature_type_sea">Laut</string>
+    <string name="nature_type_camping">Berkemah</string>
+    <string name="nature_type_fallback">Alam</string>
+
+    <!-- グルメカテゴリ -->
+    <string name="food_category_ramen">Ramen</string>
+    <string name="food_category_seafood">Makanan laut</string>
+    <string name="food_category_meat">Hidangan daging</string>
+    <string name="food_category_sweets">Manisan</string>
+    <string name="food_category_local">Masakan lokal</string>
+    <string name="food_category_drinks">Minuman</string>
+    <string name="food_category_vegetables">Sayur &amp; buah</string>
+
+    <!-- お土産カテゴリ -->
+    <string name="souvenir_category_food">Makanan</string>
+    <string name="souvenir_category_crafts">Kerajinan</string>
+    <string name="souvenir_category_textiles">Tekstil / Pakaian</string>
+    <string name="souvenir_category_ceramics">Keramik</string>
+    <string name="souvenir_category_regional">Spesialitas daerah</string>
+
+    <!-- 祭りカテゴリ -->
+    <string name="festival_category_summer">Musim panas</string>
+    <string name="festival_category_fireworks">Kembang api</string>
+    <string name="festival_category_traditional">Tradisional</string>
+    <string name="festival_category_dance">Tari</string>
+    <string name="festival_category_food">Kuliner</string>
+    <string name="festival_category_seasonal">Musiman</string>
+    <string name="festival_category_religious">Keagamaan</string>
+    <string name="festival_filter_spring">Musim semi</string>
+    <string name="festival_filter_autumn">Musim gugur</string>
+    <string name="festival_filter_winter">Musim dingin</string>
+    <string name="festival_filter_sakura">Bunga sakura</string>
+    <string name="festival_filter_illumination">Iluminasi</string>
+    <string name="festival_filter_snow">Salju</string>
+
+    <!-- プランのカテゴリ -->
+    <string name="plan_category_attraction">Atraksi</string>
+    <string name="plan_category_gourmet">Kuliner</string>
+    <string name="plan_category_onsen">Onsen</string>
+    <string name="plan_category_festival">Festival</string>
+    <string name="plan_category_nature">Alam</string>
+    <string name="plan_category_souvenir">Suvenir</string>
+    <string name="plan_category_hotel">Hotel</string>
+    <string name="plan_category_transport">Stasiun / Bandara</string>
+    <string name="plan_category_memo">Catatan</string>
+
+    <!-- 観光詳細画面 -->
+    <string name="tourism_section_map">Peta wisata</string>
+    <string name="tourism_section_gourmet">Kuliner lokal</string>
+    <string name="tourism_section_gourmet_subtitle">Cita rasa %s</string>
+    <string name="tourism_section_onsen">Onsen</string>
+    <string name="tourism_section_souvenir">Suvenir</string>
+    <string name="tourism_section_souvenir_subtitle">Kenangan dari %s</string>
+    <string name="tourism_section_photos">Foto lokasi</string>
+    <string name="tourism_load_more">Tampilkan lebih banyak</string>
+    <string name="info_price_range">Kisaran harga</string>
+    <string name="info_best_season">Musim terbaik</string>
+    <string name="info_category">Kategori</string>
+    <string name="info_onsen_quality">Jenis mata air</string>
+    <string name="added_to_plan">Ditambahkan ke \"%s\"</string>
+
+    <!-- スポット詳細画面 -->
+    <string name="detail_more_search">Jelajahi lebih lanjut</string>
+    <string name="detail_more_info">Detail</string>
+    <string name="detail_basic_info">Informasi dasar</string>
+    <string name="detail_features">Fitur</string>
+    <string name="detail_change_location">Ubah lokasi</string>
+    <string name="detail_add_location">Tambahkan lokasi</string>
+
+    <!-- SNS 検索 -->
+    <string name="social_open_google_maps">Buka di Google Maps</string>
+    <string name="social_tabelog">Cari restoran di Tabelog</string>
+    <string name="social_youtube">Cari di YouTube</string>
+    <string name="social_instagram">Cari di Instagram</string>
+
+    <!-- 温泉・自然のスポット詳細一覧 -->
+    <string name="onsen_prefecture_title">Onsen di %s</string>
+    <string name="onsen_prefecture_map">Peta onsen %s</string>
+    <string name="onsen_count">%d onsen</string>
+    <string name="nature_prefecture_title">Alam di %s</string>
+    <string name="nature_prefecture_map">Peta alam %s</string>
+    <string name="nature_count">%d lokasi alam</string>
+    <string name="spot_type_kind">Jenis</string>
+    <string name="spot_tag_mountain">Gunung</string>
+
+    <!-- 都道府県ルーレット / マップ画面 -->
+    <string name="map_target_prefectures">Target: %d prefektur</string>
+    <string name="map_weighting_enabled">Pembobotan: Aktif</string>
+    <string name="map_onsen_count">%d onsen</string>
+    <string name="map_nature_count">%d lokasi alam</string>
+    <string name="map_result_onsen">Onsen</string>
+    <string name="map_result_nature">Lokasi alam</string>
+    <string name="map_result_tourism">Informasi wisata</string>
+
+    <!-- スポットルーレット画面 -->
+    <string name="spot_roulette_map_view">Tampilan peta</string>
+    <string name="spot_roulette_list_view">Tampilan daftar</string>
+    <string name="spot_roulette_count">%d lokasi</string>
+    <string name="spot_roulette_detail_info">Detail</string>
+
+    <!-- 祭り画面 -->
+    <string name="festival_min_rating">★%s+</string>
+    <string name="festival_all_periods">Semua periode</string>
+    <string name="festival_month">%d</string>
+    <string name="festival_location">Lokasi</string>
+    <string name="festival_period">Periode</string>
+    <string name="festival_duration">Durasi</string>
+    <string name="festival_search_hint">Cari berdasarkan nama festival atau prefektur</string>
+
+    <!-- 設定・重み付け画面（都道府県） -->
+    <string name="settings_display">Pengaturan tampilan</string>
+    <string name="settings_prefecture_count">%d prefektur</string>
+    <string name="settings_weight_title">Pengaturan bobot</string>
+    <string name="settings_weight_subtitle">Sesuaikan peluang pemilihan tiap prefektur</string>
+    <string name="settings_target">Target</string>
+    <string name="settings_not_target">Dikecualikan</string>
+    <string name="settings_weight_adjust">Penyesuaian bobot</string>
+    <string name="settings_back_to_settings">Kembali ke pengaturan</string>
+    <string name="settings_weight_desc">Anda dapat menyesuaikan peluang tiap prefektur dipilih. Nilai lebih tinggi membuatnya lebih mungkin terpilih.</string>
+    <string name="settings_no_target_prefecture">Tidak ada prefektur target. Tambahkan target di Pengaturan.</string>
+    <string name="settings_weight_value">Bobot: %.1f</string>
+
+    <!-- 設定・重み付け画面（スポット） -->
+    <string name="spot_settings_by_region">Menurut wilayah</string>
+    <string name="spot_settings_by_type">Menurut jenis</string>
+    <string name="spot_settings_count">%d lokasi</string>
+    <string name="spot_settings_weight_subtitle">Sesuaikan peluang pemilihan tiap lokasi</string>
+    <string name="spot_settings_weight_desc">Anda dapat menyesuaikan peluang tiap lokasi dipilih. Nilai lebih tinggi membuatnya lebih mungkin terpilih.</string>
+    <string name="spot_settings_no_target">Tidak ada lokasi aktif. Tambahkan target di Pengaturan.</string>
+
+    <!-- プラン系 -->
+    <string name="plan_add_title">Tambahkan ke rencana</string>
+    <string name="plan_default_title">Perjalanan ke %s</string>
+    <string name="plan_untitled">Rencana tanpa judul</string>
+    <string name="plan_title_hint">mis. Musim panas di Hokkaido</string>
+    <string name="plan_add_new">Buat rencana baru dan tambahkan</string>
+    <string name="plan_add_existing">Tambahkan ke rencana yang ada</string>
+    <string name="plan_item_count">%d item</string>
+    <string name="plan_already_added">Ditambahkan</string>
+    <string name="plan_add">Tambah</string>
+    <string name="plan_unassigned">Belum ditetapkan</string>
+    <string name="plan_share">Bagikan</string>
+    <string name="plan_share_chooser">Bagikan rencana</string>
+    <string name="plan_edit">Edit</string>
+    <string name="plan_create">Buat rencana</string>
+    <string name="plan_empty_title">Belum ada rencana</string>
+    <string name="plan_empty_message">Kumpulkan tempat, kuliner, onsen, dan festival yang Anda sukai, lalu buat rencana perjalanan Anda sendiri.</string>
+    <string name="plan_create_button">Buat rencana</string>
+    <string name="plan_move_up">Naik</string>
+    <string name="plan_move_down">Turun</string>
+    <string name="plan_delete">Hapus</string>
+    <string name="plan_no_items_short">Belum ada item</string>
+    <string name="plan_day_count">%d hari</string>
+    <string name="plan_show_on_map">Tampilkan di peta</string>
+    <string name="plan_no_items_placeholder">Belum ada item.\nGunakan \"Tambahkan ke rencana\" dari layar detail mana pun,\natau gunakan tombol di bawah untuk menambahkan hotel, stasiun, atau catatan.</string>
+    <string name="plan_no_items_paren">(tidak ada item)</string>
+    <string name="plan_day_format">Hari %d</string>
+    <string name="plan_reorder_hint">Seret untuk memindahkan</string>
+    <string name="plan_time_unset">Waktu belum diatur</string>
+    <string name="plan_time_none">Waktu belum diatur</string>
+    <string name="plan_edit_time">Edit waktu</string>
+    <string name="plan_delete_block">Hapus blok</string>
+    <string name="plan_add_time_block">Tambahkan blok waktu</string>
+    <string name="plan_add_custom">Tambahkan hotel, stasiun, dll.</string>
+    <string name="plan_time_block">Blok waktu</string>
+    <string name="plan_start_time">Waktu mulai</string>
+    <string name="plan_hour_suffix">j</string>
+    <string name="plan_minute_suffix">mnt</string>
+    <string name="plan_block_heading_hint">Judul (opsional, mis. Pagi)</string>
+    <string name="plan_delete_this_block">Hapus blok waktu ini</string>
+    <string name="plan_decrease">Kurangi</string>
+    <string name="plan_increase">Tambah</string>
+    <string name="plan_split_by_day">Bagi per hari</string>
+    <string name="plan_days_count">Jumlah hari: %d</string>
+    <string name="plan_name_label">Nama rencana</string>
+    <string name="plan_edit_title">Edit rencana</string>
+    <string name="plan_map_empty">Tidak ada lokasi yang dapat dipetakan.\nAnda memerlukan item atraksi, onsen, alam, atau festival, atau item hotel/stasiun/catatan dengan lokasi yang telah diatur.</string>
+    <string name="plan_map_view_route">Lihat rute Hari %d</string>
+    <string name="plan_map_all_days">Semua hari</string>
+    <string name="plan_morning">Pagi</string>
+    <string name="plan_memo">Catatan</string>
+    <string name="plan_place">Lokasi</string>
+    <string name="plan_address_copied">Alamat disalin</string>
+    <string name="plan_copy_address">Salin alamat</string>
+    <string name="plan_open_in_map">Buka di peta</string>
+    <string name="plan_item_add">Tambahkan item</string>
+    <string name="plan_item_edit">Edit item</string>
+    <string name="plan_item_kind">Jenis</string>
+    <string name="plan_item_title">Judul</string>
+    <string name="plan_item_title_hint">mis. Hotel XYZ</string>
+    <string name="plan_memo_optional">Catatan (opsional)</string>
+    <string name="plan_location_set">Lokasi telah diatur</string>
+    <string name="plan_location_add_optional">Tambahkan lokasi (opsional)</string>
+    <string name="location_picker_title">Pilih lokasi</string>
+    <string name="location_search_hint">Cari berdasarkan tempat, alamat, atau stasiun</string>
+    <string name="location_searching">Mencari…</string>
+    <string name="location_not_found">Tidak ditemukan</string>
+    <string name="location_resolving">Mengambil alamat…</string>
+    <string name="location_save_point">Simpan lokasi ini</string>
+
+    <!-- フォトクレジット -->
+    <string name="photo_credits_title">Kredit foto</string>
+    <string name="photo_credits_attribution">Atribusi foto</string>
+    <string name="photo_credits_desc">Penulis, lisensi, dan sumber foto tempat wisata yang digunakan dalam aplikasi ini.</string>
+</resources>

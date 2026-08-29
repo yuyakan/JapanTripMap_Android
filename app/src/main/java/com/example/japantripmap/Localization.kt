@@ -4,119 +4,150 @@ import java.util.Locale
 
 /**
  * データ層（スポット名・説明文・グルメ・お土産・祭りなど、コードに日本語で直書きされた
- * 値）を、端末ロケールに応じて日本語／英語で出し分けるためのヘルパ。
+ * 値）を、端末ロケールに応じて各言語で出し分けるためのヘルパ。
  *
- * UI 文言は strings.xml / values-en に切り出して stringResource で解決するが、
- * データは約 3,100 件と量が多いため、iOS の翻訳資産から生成した [DATA_JA_TO_EN] を
- * 使って表示時に差し替える方式をとる。iOS 版 MapRoulette と同じ英訳になる。
+ * UI 文言は strings.xml / values-xx に切り出して stringResource で解決するが、
+ * データは約 3,100 件と量が多いため、iOS の翻訳資産から生成した言語別マップ
+ * （[DATA_JA_TO_EN] など）を使って表示時に差し替える方式をとる。
+ * iOS 版 MapRoulette が対応する 12 言語（ja/en/de/es/fr/id/ko/th/vi/
+ * 簡体字/繁体字/香港中国語）に対応する。
+ *
+ * 生成物:
+ * - DataTranslations.kt: 汎用データ表（DATA_JA_TO_*）… tools/gen_data_translations.py
+ * - LabelTranslations.kt: タイプ／情報ラベル表（TYPE_LABEL_* / INFO_LABEL_*）… tools/gen_label_translations.py
  */
 
-/** アプリが英語表示すべきロケールかどうか。日本語以外はすべて英語にフォールバックする。 */
-fun isEnglishLocale(): Boolean =
-    Locale.getDefault().language != Locale.JAPANESE.language
+/** アプリが対応する表示言語。日本語がデフォルト（＝データ原文）。 */
+enum class AppLocale { JA, EN, DE, ES, FR, ID, KO, TH, VI, ZH_HANS, ZH_HANT, ZH_HK }
+
+/**
+ * 端末ロケールを [AppLocale] に解決する。
+ *
+ * 中国語は script（Hans/Hant）と region（HK/TW/MO）から簡体・繁体・香港を判定する。
+ * 未対応の言語はすべて英語にフォールバックする（iOS 版と同じ挙動）。
+ */
+fun currentAppLocale(): AppLocale {
+    val loc = Locale.getDefault()
+    return when (loc.language) {
+        Locale.JAPANESE.language -> AppLocale.JA
+        "de" -> AppLocale.DE
+        "es" -> AppLocale.ES
+        "fr" -> AppLocale.FR
+        "in", "id" -> AppLocale.ID // Android の Indonesian は legacy "in"
+        "ko" -> AppLocale.KO
+        "th" -> AppLocale.TH
+        "vi" -> AppLocale.VI
+        "zh" -> resolveChinese(loc)
+        else -> AppLocale.EN
+    }
+}
+
+private fun resolveChinese(loc: Locale): AppLocale {
+    val script = loc.script // "Hans" / "Hant"（無いこともある）
+    val region = loc.country.uppercase(Locale.ROOT)
+    return when {
+        script == "Hans" -> AppLocale.ZH_HANS
+        script == "Hant" -> if (region == "HK" || region == "MO") AppLocale.ZH_HK else AppLocale.ZH_HANT
+        region == "CN" || region == "SG" -> AppLocale.ZH_HANS
+        region == "HK" || region == "MO" -> AppLocale.ZH_HK
+        region == "TW" -> AppLocale.ZH_HANT
+        else -> AppLocale.ZH_HANS // 既定は簡体字
+    }
+}
+
+/** その言語の汎用データ表（日本語→訳）。日本語ロケールは null（原文のまま）。 */
+private fun dataMapFor(locale: AppLocale): Map<String, String>? = when (locale) {
+    AppLocale.JA -> null
+    AppLocale.EN -> DATA_JA_TO_EN
+    AppLocale.DE -> DATA_JA_TO_DE
+    AppLocale.ES -> DATA_JA_TO_ES
+    AppLocale.FR -> DATA_JA_TO_FR
+    AppLocale.ID -> DATA_JA_TO_ID
+    AppLocale.KO -> DATA_JA_TO_KO
+    AppLocale.TH -> DATA_JA_TO_TH
+    AppLocale.VI -> DATA_JA_TO_VI
+    AppLocale.ZH_HANS -> DATA_JA_TO_ZH_HANS
+    AppLocale.ZH_HANT -> DATA_JA_TO_ZH_HANT
+    AppLocale.ZH_HK -> DATA_JA_TO_ZH_HK
+}
+
+private fun typeLabelMapFor(locale: AppLocale): Map<String, String>? = when (locale) {
+    AppLocale.JA -> null
+    AppLocale.EN -> TYPE_LABEL_EN
+    AppLocale.DE -> TYPE_LABEL_DE
+    AppLocale.ES -> TYPE_LABEL_ES
+    AppLocale.FR -> TYPE_LABEL_FR
+    AppLocale.ID -> TYPE_LABEL_ID
+    AppLocale.KO -> TYPE_LABEL_KO
+    AppLocale.TH -> TYPE_LABEL_TH
+    AppLocale.VI -> TYPE_LABEL_VI
+    AppLocale.ZH_HANS -> TYPE_LABEL_ZH_HANS
+    AppLocale.ZH_HANT -> TYPE_LABEL_ZH_HANT
+    AppLocale.ZH_HK -> TYPE_LABEL_ZH_HK
+}
+
+private fun infoLabelMapFor(locale: AppLocale): Map<String, String>? = when (locale) {
+    AppLocale.JA -> null
+    AppLocale.EN -> INFO_LABEL_EN
+    AppLocale.DE -> INFO_LABEL_DE
+    AppLocale.ES -> INFO_LABEL_ES
+    AppLocale.FR -> INFO_LABEL_FR
+    AppLocale.ID -> INFO_LABEL_ID
+    AppLocale.KO -> INFO_LABEL_KO
+    AppLocale.TH -> INFO_LABEL_TH
+    AppLocale.VI -> INFO_LABEL_VI
+    AppLocale.ZH_HANS -> INFO_LABEL_ZH_HANS
+    AppLocale.ZH_HANT -> INFO_LABEL_ZH_HANT
+    AppLocale.ZH_HK -> INFO_LABEL_ZH_HK
+}
 
 /**
  * データ文字列を現在のロケール向けに解決する。
  *
  * - 日本語ロケール: そのまま日本語を返す。
- * - 英語ロケール: [DATA_JA_TO_EN] に対応があればその英訳を、
- *   なければ価格表記（例: "1,000-1,800円" → "¥1,000-1,800"）を機械変換し、
+ * - それ以外: 該当言語の [dataMapFor] に対応があればその訳を、
+ *   なければ価格表記（例 "1,000-1,800円"）を機械変換し、
  *   それでも変換できなければ元の日本語をそのまま返す（欠落しても壊れないように）。
+ *   中国語圏では未訳の固有名詞が漢字のまま残ることがあるが表示上は自然。
  */
 fun localizeData(ja: String): String {
-    if (!isEnglishLocale()) return ja
-    DATA_JA_TO_EN[ja]?.let { return it }
+    val map = dataMapFor(currentAppLocale()) ?: return ja
+    map[ja]?.let { return it }
     return localizePriceRange(ja) ?: ja
 }
 
-/** リストの各要素をデータ文字列として英訳する。グルメ・お土産名の配列などに使う。 */
-fun localizeDataList(list: List<String>): List<String> =
-    if (isEnglishLocale()) list.map { localizeData(it) } else list
-
-/**
- * タイプ／カテゴリのラベル（温泉タイプ・自然タイプ・グルメ／お土産カテゴリなど）専用の英訳。
- *
- * これらは文脈依存の語（例: "絶景" は温泉タイプでは "Scenic Hot Spring" だが、
- * 説明文中では "Spectacular view"）なので、汎用の [DATA_JA_TO_EN] は使わず、
- * iOS のフル名称（onsen_type.* / nature_type.* / *_category）に対応させた専用表で解決する。
- * SpotTypeMeta.name / tagName やカテゴリラベルの表示時に使う。非対応なら元の文字列を返す。
- */
-fun localizeTypeLabel(ja: String): String {
-    if (!isEnglishLocale()) return ja
-    return TYPE_LABEL_JA_TO_EN[ja] ?: ja
+/** リストの各要素をデータ文字列として翻訳する。グルメ・お土産名の配列などに使う。 */
+fun localizeDataList(list: List<String>): List<String> {
+    if (dataMapFor(currentAppLocale()) == null) return list
+    return list.map { localizeData(it) }
 }
 
 /**
- * 「基本情報」行のラベル（価格帯・カテゴリ・泉質タイプ等）を英訳する。
+ * タイプ／カテゴリのラベル（温泉タイプ・自然タイプ・グルメ／お土産カテゴリなど）専用の翻訳。
+ *
+ * これらは文脈依存の語（例: "絶景" は温泉タイプでは "Scenic Hot Spring" だが、
+ * 説明文中では "Spectacular view"）なので、汎用の [dataMapFor] は使わず、
+ * strings.xml のフル名称に対応させた専用表（[typeLabelMapFor]）で解決する。
+ * SpotTypeMeta.name / tagName やカテゴリラベルの表示時に使う。非対応なら元の文字列を返す。
+ */
+fun localizeTypeLabel(ja: String): String {
+    val map = typeLabelMapFor(currentAppLocale()) ?: return ja
+    return map[ja] ?: ja
+}
+
+/**
+ * 「基本情報」行のラベル（価格帯・カテゴリ・泉質タイプ等）を翻訳する。
  *
  * SpotDetail.infoRows は非 Composable な場所（toSpotDetail など）で組み立てるため、
  * stringResource ではなくこの固定表で解決する。strings.xml の同名リソースと訳を揃える。
  */
 fun localizeInfoLabel(ja: String): String {
-    if (!isEnglishLocale()) return ja
-    return INFO_LABEL_JA_TO_EN[ja] ?: ja
+    val map = infoLabelMapFor(currentAppLocale()) ?: return ja
+    return map[ja] ?: ja
 }
 
-private val INFO_LABEL_JA_TO_EN: Map<String, String> = mapOf(
-    "価格帯" to "Price Range",
-    "おすすめ時期" to "Best Season",
-    "カテゴリ" to "Category",
-    "泉質タイプ" to "Spring Type",
-    "種別" to "Type",
-    "開催地" to "Location",
-    "時期" to "Period",
-    "期間" to "Duration",
-)
-
-// タイプ／カテゴリラベルの日本語 → 英語（iOS フル名称）。
-private val TYPE_LABEL_JA_TO_EN: Map<String, String> = mapOf(
-    // 温泉タイプ（onsen_type.*）。name と tagName（短縮）の両方を含む。
-    "絶景" to "Scenic Hot Spring",
-    "歴史" to "Historical Hot Spring",
-    "療養" to "Therapeutic Hot Spring",
-    "リゾート" to "Resort",
-    "山あい" to "Mountain Hot Spring",
-    "山" to "Mountain",
-    "海辺" to "Seaside Hot Spring",
-    "海" to "Sea",
-    "スキー" to "Ski Hot Spring",
-    // 自然タイプ（nature_type.*）
-    "夜景" to "Night View",
-    "星空" to "Starry Sky",
-    "キャンプ" to "Camping",
-    "自然" to "Nature",
-    // グルメカテゴリ（food_category_*）
-    "ラーメン" to "Ramen",
-    "海鮮" to "Seafood",
-    "肉" to "Meat Dishes",
-    "スイーツ" to "Sweets",
-    "郷土料理" to "Local Cuisine",
-    "ドリンク" to "Beverages",
-    "野菜・果物" to "Vegetables & Fruits",
-    // お土産カテゴリ（souvenirCategory.*）
-    "食品" to "Food",
-    "工芸品" to "Crafts",
-    "織物" to "Textiles / Clothing",
-    "陶磁器" to "Ceramics",
-    "地域特産" to "Regional Specialties",
-    // 祭りカテゴリ（festival.*_tag）
-    "夏祭り" to "Summer",
-    "花火" to "Fireworks",
-    "伝統" to "Traditional",
-    "踊り" to "Dance",
-    "グルメ" to "Food",
-    "季節" to "Seasonal",
-    "宗教" to "Religious",
-    "春" to "Spring",
-    "秋" to "Autumn",
-    "冬" to "Winter",
-    "桜" to "Cherry Blossom",
-    "イルミ" to "Illumination",
-    "雪" to "Snow",
-)
-
 // 価格レンジ（例: "1,000-1,800円" / "800-1,200円"）を "¥1,000-1,800" 形式へ。
-// iOS の価格表記に合わせる。翻訳表に無い価格帯のフォールバック用。
+// iOS の価格表記に合わせる。翻訳表に無い価格帯のフォールバック用（言語非依存）。
 private val PRICE_RANGE = Regex("""^([\d,]+)-([\d,]+)円$""")
 
 private fun localizePriceRange(ja: String): String? {

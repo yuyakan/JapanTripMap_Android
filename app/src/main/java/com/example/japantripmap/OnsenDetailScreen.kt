@@ -146,6 +146,8 @@ fun OnsenDetailScreen(
                     },
                 )
             }
+            // 地図の下にレクタングル(300x250)（iOS 版 OnsenMapView と同じ位置）。
+            item { MediumRectangleAd(adUnitId = AdConfig.detailBannerUnitId) }
             items(onsens.size) { i ->
                 val o = onsens[i]
                 OnsenCard(

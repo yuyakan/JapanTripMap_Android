@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -42,6 +43,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,11 +62,13 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -111,6 +115,9 @@ fun SpotRouletteScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    // 画面が前面に来たら（iOS の handleMapAppear 相当）広告発火判定＋次の広告を先読みする。
+    LaunchedEffect(Unit) { InterstitialAdManager.handleScreenAppear(context) }
+
     val isBusy = viewModel.isSpinning || viewModel.isStopping
     val visibleSpots = viewModel.visibleEnabledSpots
 
@@ -125,8 +132,16 @@ fun SpotRouletteScreen(
                 .statusBarsPadding(),
         ) {
             // 上部バー：設定（左）＋地図/リスト切替アイコン（右）。スピン中・結果表示中は隠す。
+            // 隠すときは通常時ヘッダーと同じ高さの placeholder を出し、スピン開始で地図の縦位置が
+            // ズレないようにする（都道府県タブと同じ実測方式。測定前は 52dp をフォールバック）。
+            var headerHeight by remember { mutableStateOf(52.dp) }
+            val density = androidx.compose.ui.platform.LocalDensity.current
             if (!isBusy && !viewModel.showResultModal) {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onSizeChanged { with(density) { headerHeight = it.height.toDp() } },
+                ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -163,7 +178,7 @@ fun SpotRouletteScreen(
                     }
                 }
             } else {
-                Spacer(modifier = Modifier.height(52.dp))
+                Spacer(modifier = Modifier.height(headerHeight))
             }
 
             if (viewModel.isListView) {
@@ -181,13 +196,29 @@ fun SpotRouletteScreen(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 // スピン中／停止中に選択スポット名を大きく表示。
+                // Box の高さは 64dp 固定にして地図の縦位置を動かさない。
+                // 名前が 2〜3 行になったときは Text を unbounded で描き、Box の中央から
+                // 上下対称にはみ出させることで、地図を押しのけず・見切れずに全行を表示する。
                 Box(
                     modifier = Modifier.fillMaxWidth().height(64.dp),
                     contentAlignment = Alignment.Center,
                 ) {
                     val sel = viewModel.selectedSpot
                     if (viewModel.isStopping && sel != null && !viewModel.showResultModal) {
-                        Text(localizeData(sel.name), fontSize = 32.sp, fontWeight = FontWeight.Bold, color = sel.typeMeta.color)
+                        Text(
+                            localizeData(sel.name),
+                            fontSize = 32.sp,
+                            // 2〜3 行になったとき行同士が重ならないよう行間を明示する。
+                            lineHeight = 38.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = sel.typeMeta.color,
+                            // 名前が長くて 2 行になっても中央寄せを保つ。
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(unbounded = true)
+                                .padding(horizontal = 24.dp),
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -201,9 +232,14 @@ fun SpotRouletteScreen(
                     Text(
                         localizeData(sel.name),
                         fontSize = 32.sp,
+                        // 2〜3 行になったとき行同士が重ならないよう行間を明示する。
+                        lineHeight = 38.sp,
                         fontWeight = FontWeight.Bold,
                         color = sel.typeMeta.color,
+                        // 名前が長くて 2 行になっても中央寄せを保つ。
+                        textAlign = TextAlign.Center,
                         modifier = Modifier
+                            .fillMaxWidth(0.9f)
                             .clip(RoundedCornerShape(12.dp))
                             .background(Color(0xF2FFFFFF))
                             .padding(horizontal = 20.dp, vertical = 12.dp),
@@ -217,8 +253,9 @@ fun SpotRouletteScreen(
             SpotResultOverlay(
                 spot = viewModel.selectedSpot,
                 onReset = {
-                    // 結果画面から次へ進むタイミングで完走を記録し、3 回ごとにレビューを促す。
-                    scope.launch { AppReviewManager.onRouletteCompleted(context) }
+                    // 結果画面から次へ進むタイミングで iOS 版と同じ発火判定を行う
+                    // （ポイント加算＋広告／レビュー／Play レビューの試行）。
+                    InterstitialAdManager.registerRouletteSpin(context)
                     viewModel.reset()
                 },
                 onShowDetail = { viewModel.selectedSpot?.let(onOpenSpot) },
@@ -527,7 +564,19 @@ private fun SpotResultOverlay(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(spot?.name?.let { localizeData(it) } ?: "", fontSize = 40.sp, fontWeight = FontWeight.Black, color = accent)
+            Text(
+                spot?.name?.let { localizeData(it) } ?: "",
+                fontSize = 40.sp,
+                // 2 行になったとき行同士が重ならないよう行間を明示する。
+                lineHeight = 46.sp,
+                fontWeight = FontWeight.Black,
+                color = accent,
+                // 名前が長くて 2 行になっても中央寄せを保つ。
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
+            )
             spot?.let {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 10.dp)) {
                     Icon(it.typeMeta.icon, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))

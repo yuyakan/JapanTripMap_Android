@@ -123,6 +123,7 @@
     <string name="nature_prefecture_map">Nature Map of %s</string>
     <string name="nature_count">%d nature spots</string>
     <string name="spot_type_kind">Type</string>
+    <string name="spot_tag_mountain">Mountain</string>
 
     <!-- 都道府県ルーレット / マップ画面 -->
     <string name="map_target_prefectures">Target: %d prefectures</string>

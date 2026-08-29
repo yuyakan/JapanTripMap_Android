@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -31,6 +32,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +56,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -79,6 +82,9 @@ fun JapanMapScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+
+    // 画面が前面に来たら（iOS の handleMapAppear 相当）広告発火判定＋次の広告を先読みする。
+    LaunchedEffect(Unit) { InterstitialAdManager.handleScreenAppear(context) }
 
     // スピン中は設定を触れないようにする（iOS 版と同じ）。
     val isBusy = viewModel.isSpinning || viewModel.isStopping
@@ -164,6 +170,9 @@ fun JapanMapScreen(
             )
 
             // スピン中／停止中に選択県名を大きく表示。
+            // Box の高さは 64dp 固定にして地図の縦位置を動かさない。
+            // 県名が 2〜3 行になったときは Text を unbounded で描き、Box の中央から
+            // 上下対称にはみ出させることで、地図を押しのけず・見切れずに全行を表示する。
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -175,8 +184,16 @@ fun JapanMapScreen(
                     Text(
                         text = name,
                         fontSize = 34.sp,
+                        // 2〜3 行になったとき行同士が重ならないよう行間を明示する。
+                        lineHeight = 40.sp,
                         fontWeight = FontWeight.Bold,
                         color = SelectedColor,
+                        // 県名が長くて 2 行になっても中央寄せを保つ。
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight(unbounded = true)
+                            .padding(horizontal = 24.dp),
                     )
                 }
             }
@@ -190,8 +207,9 @@ fun JapanMapScreen(
                 prefecture = viewModel.selectedPrefecture,
                 mode = viewModel.mode,
                 onReset = {
-                    // 結果画面から次へ進むタイミングで完走を記録し、3 回ごとにレビューを促す。
-                    scope.launch { AppReviewManager.onRouletteCompleted(context) }
+                    // 結果画面から次へ進むタイミングで iOS 版と同じ発火判定を行う
+                    // （ポイント加算＋広告／レビュー／Play レビューの試行）。
+                    InterstitialAdManager.registerRouletteSpin(context)
                     viewModel.reset()
                 },
                 onShowTourism = { viewModel.selectedPrefecture?.let(onOpenTourism) },
@@ -439,8 +457,15 @@ private fun ResultOverlay(
             Text(
                 text = prefecture?.localizedName() ?: "",
                 fontSize = 46.sp,
+                // 2 行になったとき行同士が重ならないよう行間を明示する。
+                lineHeight = 52.sp,
                 fontWeight = FontWeight.Black,
                 color = SelectedColor,
+                // 県名が長くて 2 行になっても中央寄せを保つ。
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
             )
             prefecture?.let {
                 Text(

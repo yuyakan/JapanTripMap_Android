@@ -1,0 +1,247 @@
+<resources>
+    <!-- app_name はローカライズしない（ブランド名） -->
+
+    <!-- ボトムタブ -->
+    <string name="tab_prefecture">Bản đồ</string>
+    <string name="tab_onsen">Onsen</string>
+    <string name="tab_nature">Thiên nhiên</string>
+    <string name="tab_festival">Lễ hội</string>
+    <string name="tab_plan">Kế hoạch</string>
+    <string name="placeholder_preparing">%s (Sắp ra mắt)</string>
+
+    <!-- 共通 -->
+    <string name="common_back">Quay lại</string>
+    <string name="common_close">Đóng</string>
+    <string name="common_done">Xong</string>
+    <string name="common_cancel">Hủy</string>
+    <string name="common_reset">Đặt lại</string>
+    <string name="common_clear">Xóa</string>
+    <string name="common_settings">Cài đặt</string>
+    <string name="common_select_all">Chọn tất cả</string>
+    <string name="common_deselect_all">Bỏ chọn tất cả</string>
+    <string name="common_save">Lưu</string>
+    <string name="common_all">Tất cả</string>
+    <string name="common_start">Bắt đầu</string>
+    <string name="common_stop">Dừng</string>
+    <string name="common_retry">Thử lại</string>
+    <string name="common_add_to_plan">Thêm vào kế hoạch</string>
+    <string name="common_map">Bản đồ</string>
+
+    <!-- 温泉タイプ -->
+    <string name="onsen_type_scenic">Onsen cảnh đẹp</string>
+    <string name="onsen_type_historical">Onsen lịch sử</string>
+    <string name="onsen_type_therapeutic">Onsen trị liệu</string>
+    <string name="onsen_type_resort">Khu nghỉ dưỡng</string>
+    <string name="onsen_type_mountain">Onsen trên núi</string>
+    <string name="onsen_type_seaside">Onsen ven biển</string>
+    <string name="onsen_type_ski">Onsen khu trượt tuyết</string>
+    <string name="onsen_type_fallback">Onsen trị liệu</string>
+
+    <!-- 自然タイプ -->
+    <string name="nature_type_night_view">Cảnh đêm</string>
+    <string name="nature_type_starry_sky">Bầu trời sao</string>
+    <string name="nature_type_sea">Biển</string>
+    <string name="nature_type_camping">Cắm trại</string>
+    <string name="nature_type_fallback">Thiên nhiên</string>
+
+    <!-- グルメカテゴリ -->
+    <string name="food_category_ramen">Ramen</string>
+    <string name="food_category_seafood">Hải sản</string>
+    <string name="food_category_meat">Món thịt</string>
+    <string name="food_category_sweets">Đồ ngọt</string>
+    <string name="food_category_local">Ẩm thực địa phương</string>
+    <string name="food_category_drinks">Đồ uống</string>
+    <string name="food_category_vegetables">Rau &amp; trái cây</string>
+
+    <!-- お土産カテゴリ -->
+    <string name="souvenir_category_food">Thực phẩm</string>
+    <string name="souvenir_category_crafts">Thủ công mỹ nghệ</string>
+    <string name="souvenir_category_textiles">Vải vóc / Trang phục</string>
+    <string name="souvenir_category_ceramics">Gốm sứ</string>
+    <string name="souvenir_category_regional">Đặc sản vùng miền</string>
+
+    <!-- 祭りカテゴリ -->
+    <string name="festival_category_summer">Mùa hè</string>
+    <string name="festival_category_fireworks">Pháo hoa</string>
+    <string name="festival_category_traditional">Truyền thống</string>
+    <string name="festival_category_dance">Múa</string>
+    <string name="festival_category_food">Ẩm thực</string>
+    <string name="festival_category_seasonal">Theo mùa</string>
+    <string name="festival_category_religious">Tôn giáo</string>
+    <string name="festival_filter_spring">Mùa xuân</string>
+    <string name="festival_filter_autumn">Mùa thu</string>
+    <string name="festival_filter_winter">Mùa đông</string>
+    <string name="festival_filter_sakura">Hoa anh đào</string>
+    <string name="festival_filter_illumination">Đèn trang trí</string>
+    <string name="festival_filter_snow">Tuyết</string>
+
+    <!-- プランのカテゴリ -->
+    <string name="plan_category_attraction">Điểm tham quan</string>
+    <string name="plan_category_gourmet">Ẩm thực</string>
+    <string name="plan_category_onsen">Onsen</string>
+    <string name="plan_category_festival">Lễ hội</string>
+    <string name="plan_category_nature">Thiên nhiên</string>
+    <string name="plan_category_souvenir">Quà lưu niệm</string>
+    <string name="plan_category_hotel">Chỗ ở</string>
+    <string name="plan_category_transport">Ga / Sân bay</string>
+    <string name="plan_category_memo">Ghi chú</string>
+
+    <!-- 観光詳細画面 -->
+    <string name="tourism_section_map">Bản đồ du lịch</string>
+    <string name="tourism_section_gourmet">Ẩm thực địa phương</string>
+    <string name="tourism_section_gourmet_subtitle">Hương vị của %s</string>
+    <string name="tourism_section_onsen">Onsen</string>
+    <string name="tourism_section_souvenir">Quà lưu niệm</string>
+    <string name="tourism_section_souvenir_subtitle">Kỷ niệm về %s</string>
+    <string name="tourism_section_photos">Ảnh địa điểm</string>
+    <string name="tourism_load_more">Xem thêm</string>
+    <string name="info_price_range">Khoảng giá</string>
+    <string name="info_best_season">Thời điểm lý tưởng</string>
+    <string name="info_category">Danh mục</string>
+    <string name="info_onsen_quality">Loại nước khoáng</string>
+    <string name="added_to_plan">Đã thêm vào \"%s\"</string>
+
+    <!-- スポット詳細画面 -->
+    <string name="detail_more_search">Khám phá thêm</string>
+    <string name="detail_more_info">Chi tiết</string>
+    <string name="detail_basic_info">Thông tin cơ bản</string>
+    <string name="detail_features">Đặc điểm</string>
+    <string name="detail_change_location">Đổi vị trí</string>
+    <string name="detail_add_location">Thêm vị trí</string>
+
+    <!-- SNS 検索 -->
+    <string name="social_open_google_maps">Mở trong Google Maps</string>
+    <string name="social_tabelog">Tìm nhà hàng trên Tabelog</string>
+    <string name="social_youtube">Tìm trên YouTube</string>
+    <string name="social_instagram">Tìm trên Instagram</string>
+
+    <!-- 温泉・自然のスポット詳細一覧 -->
+    <string name="onsen_prefecture_title">Onsen ở %s</string>
+    <string name="onsen_prefecture_map">Bản đồ onsen của %s</string>
+    <string name="onsen_count">%d onsen</string>
+    <string name="nature_prefecture_title">Thiên nhiên ở %s</string>
+    <string name="nature_prefecture_map">Bản đồ thiên nhiên của %s</string>
+    <string name="nature_count">%d điểm thiên nhiên</string>
+    <string name="spot_type_kind">Loại</string>
+    <string name="spot_tag_mountain">Núi</string>
+
+    <!-- 都道府県ルーレット / マップ画面 -->
+    <string name="map_target_prefectures">Mục tiêu: %d tỉnh</string>
+    <string name="map_weighting_enabled">Trọng số: Bật</string>
+    <string name="map_onsen_count">%d onsen</string>
+    <string name="map_nature_count">%d điểm thiên nhiên</string>
+    <string name="map_result_onsen">Onsen</string>
+    <string name="map_result_nature">Điểm thiên nhiên</string>
+    <string name="map_result_tourism">Thông tin du lịch</string>
+
+    <!-- スポットルーレット画面 -->
+    <string name="spot_roulette_map_view">Xem bản đồ</string>
+    <string name="spot_roulette_list_view">Xem danh sách</string>
+    <string name="spot_roulette_count">%d địa điểm</string>
+    <string name="spot_roulette_detail_info">Chi tiết</string>
+
+    <!-- 祭り画面 -->
+    <string name="festival_min_rating">★%s trở lên</string>
+    <string name="festival_all_periods">Mọi thời điểm</string>
+    <string name="festival_month">%d</string>
+    <string name="festival_location">Địa điểm tổ chức</string>
+    <string name="festival_period">Thời điểm</string>
+    <string name="festival_duration">Thời gian</string>
+    <string name="festival_search_hint">Tìm theo tên lễ hội hoặc tỉnh</string>
+
+    <!-- 設定・重み付け画面（都道府県） -->
+    <string name="settings_display">Cài đặt hiển thị</string>
+    <string name="settings_prefecture_count">%d tỉnh</string>
+    <string name="settings_weight_title">Cài đặt trọng số</string>
+    <string name="settings_weight_subtitle">Điều chỉnh xác suất chọn của từng tỉnh</string>
+    <string name="settings_target">Mục tiêu</string>
+    <string name="settings_not_target">Loại trừ</string>
+    <string name="settings_weight_adjust">Điều chỉnh trọng số</string>
+    <string name="settings_back_to_settings">Quay lại cài đặt</string>
+    <string name="settings_weight_desc">Bạn có thể điều chỉnh xác suất được chọn của từng tỉnh. Giá trị càng cao thì càng dễ được chọn.</string>
+    <string name="settings_no_target_prefecture">Không có tỉnh mục tiêu. Hãy thêm mục tiêu trong Cài đặt.</string>
+    <string name="settings_weight_value">Trọng số: %.1f</string>
+
+    <!-- 設定・重み付け画面（スポット） -->
+    <string name="spot_settings_by_region">Theo vùng</string>
+    <string name="spot_settings_by_type">Theo loại</string>
+    <string name="spot_settings_count">%d địa điểm</string>
+    <string name="spot_settings_weight_subtitle">Điều chỉnh xác suất chọn của từng địa điểm</string>
+    <string name="spot_settings_weight_desc">Bạn có thể điều chỉnh xác suất được chọn của từng địa điểm. Giá trị càng cao thì càng dễ được chọn.</string>
+    <string name="spot_settings_no_target">Không có địa điểm nào được bật. Hãy thêm mục tiêu trong Cài đặt.</string>
+
+    <!-- プラン系 -->
+    <string name="plan_add_title">Thêm vào kế hoạch</string>
+    <string name="plan_default_title">Chuyến đi %s</string>
+    <string name="plan_untitled">Kế hoạch chưa đặt tên</string>
+    <string name="plan_title_hint">vd: Hokkaido mùa hè</string>
+    <string name="plan_add_new">Tạo kế hoạch mới và thêm</string>
+    <string name="plan_add_existing">Thêm vào kế hoạch hiện có</string>
+    <string name="plan_item_count">%d mục</string>
+    <string name="plan_already_added">Đã thêm</string>
+    <string name="plan_add">Thêm</string>
+    <string name="plan_unassigned">Chưa gán</string>
+    <string name="plan_share">Chia sẻ</string>
+    <string name="plan_share_chooser">Chia sẻ kế hoạch</string>
+    <string name="plan_edit">Chỉnh sửa</string>
+    <string name="plan_create">Tạo kế hoạch</string>
+    <string name="plan_empty_title">Chưa có kế hoạch nào</string>
+    <string name="plan_empty_message">Hãy thu thập những điểm tham quan, món ăn, onsen và lễ hội bạn yêu thích để tạo kế hoạch du lịch của riêng mình.</string>
+    <string name="plan_create_button">Tạo kế hoạch</string>
+    <string name="plan_move_up">Di chuyển lên</string>
+    <string name="plan_move_down">Di chuyển xuống</string>
+    <string name="plan_delete">Xóa</string>
+    <string name="plan_no_items_short">Chưa có mục nào</string>
+    <string name="plan_day_count">%d ngày</string>
+    <string name="plan_show_on_map">Xem trên bản đồ</string>
+    <string name="plan_no_items_placeholder">Chưa có mục nào.\nDùng \"Thêm vào kế hoạch\" từ bất kỳ màn hình chi tiết nào,\nhoặc dùng nút bên dưới để thêm chỗ ở, ga, hoặc ghi chú.</string>
+    <string name="plan_no_items_paren">(không có mục)</string>
+    <string name="plan_day_format">Ngày %d</string>
+    <string name="plan_reorder_hint">Kéo để di chuyển</string>
+    <string name="plan_time_unset">Chưa đặt thời gian</string>
+    <string name="plan_time_none">Chưa đặt thời gian</string>
+    <string name="plan_edit_time">Chỉnh sửa thời gian</string>
+    <string name="plan_delete_block">Xóa khối</string>
+    <string name="plan_add_time_block">Thêm khối thời gian</string>
+    <string name="plan_add_custom">Thêm chỗ ở, ga, v.v.</string>
+    <string name="plan_time_block">Khối thời gian</string>
+    <string name="plan_start_time">Thời gian bắt đầu</string>
+    <string name="plan_hour_suffix">giờ</string>
+    <string name="plan_minute_suffix">phút</string>
+    <string name="plan_block_heading_hint">Tiêu đề (tùy chọn, vd: Buổi sáng)</string>
+    <string name="plan_delete_this_block">Xóa khối thời gian này</string>
+    <string name="plan_decrease">Giảm</string>
+    <string name="plan_increase">Tăng</string>
+    <string name="plan_split_by_day">Chia theo ngày</string>
+    <string name="plan_days_count">Số ngày: %d ngày</string>
+    <string name="plan_name_label">Tên kế hoạch</string>
+    <string name="plan_edit_title">Chỉnh sửa kế hoạch</string>
+    <string name="plan_map_empty">Không có địa điểm nào để hiển thị trên bản đồ.\nBạn cần các mục tham quan, onsen, thiên nhiên, hoặc lễ hội, hoặc các mục chỗ ở/ga/ghi chú đã đặt vị trí.</string>
+    <string name="plan_map_view_route">Xem lộ trình Ngày %d</string>
+    <string name="plan_map_all_days">Tất cả các ngày</string>
+    <string name="plan_morning">Buổi sáng</string>
+    <string name="plan_memo">Ghi chú</string>
+    <string name="plan_place">Địa điểm</string>
+    <string name="plan_address_copied">Đã sao chép địa chỉ</string>
+    <string name="plan_copy_address">Sao chép địa chỉ</string>
+    <string name="plan_open_in_map">Mở trong bản đồ</string>
+    <string name="plan_item_add">Thêm mục</string>
+    <string name="plan_item_edit">Chỉnh sửa mục</string>
+    <string name="plan_item_kind">Loại</string>
+    <string name="plan_item_title">Tiêu đề</string>
+    <string name="plan_item_title_hint">vd: Khách sạn XYZ</string>
+    <string name="plan_memo_optional">Ghi chú (tùy chọn)</string>
+    <string name="plan_location_set">Đã đặt vị trí</string>
+    <string name="plan_location_add_optional">Thêm vị trí (tùy chọn)</string>
+    <string name="location_picker_title">Chọn vị trí</string>
+    <string name="location_search_hint">Tìm theo địa danh, địa chỉ, hoặc nhà ga</string>
+    <string name="location_searching">Đang tìm…</string>
+    <string name="location_not_found">Không tìm thấy</string>
+    <string name="location_resolving">Đang lấy địa chỉ…</string>
+    <string name="location_save_point">Lưu vị trí này</string>
+
+    <!-- フォトクレジット -->
+    <string name="photo_credits_title">Ghi công ảnh</string>
+    <string name="photo_credits_attribution">Nguồn ảnh</string>
+    <string name="photo_credits_desc">Tác giả, giấy phép và nguồn của các ảnh điểm du lịch được sử dụng trong ứng dụng này.</string>
+</resources>

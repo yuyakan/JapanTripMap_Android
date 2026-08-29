@@ -241,6 +241,10 @@ fun TourismDetailScreen(
                 }
             }
 
+            // 観光セクションの下にアダプティブバナー（iOS 版 TourismDetailView と同じ位置・ID）。
+            // iOS の AdaptiveBannerAdView は既定のセクション間バナー（bannerUnitId）を使う。
+            item { AdaptiveBannerAd(adUnitId = AdConfig.bannerUnitId) }
+
             // ご当地グルメ（2列リッチカード + もっと見る）。
             if (gourmets.isNotEmpty()) {
                 richGridSection(
@@ -292,6 +296,10 @@ fun TourismDetailScreen(
                     )
                 }
             }
+
+            // グルメの下だけレクタングル(300x250)。eCPM が高い傾向のため試験的に採用（iOS 版と同じ）。
+            // iOS の MediumRectangleAdView() は引数なし＝既定のセクション間バナー（bannerUnitId）。
+            item { MediumRectangleAd(adUnitId = AdConfig.bannerUnitId) }
 
             // 温泉（2列リッチカード）。
             if (onsens.isNotEmpty()) {
@@ -392,6 +400,9 @@ fun TourismDetailScreen(
                     )
                 }
             }
+
+            // お土産の下にアダプティブバナー（iOS 版 TourismDetailView と同じ位置・ID＝セクション間バナー）。
+            item { AdaptiveBannerAd(adUnitId = AdConfig.bannerUnitId) }
 
             // フォトギャラリー（写真を持つ観光スポットの横スクロール）。一番下に配置。
             val photographed = info?.attractions?.filter { ATTRACTION_PHOTOS[it.name] != null } ?: emptyList()

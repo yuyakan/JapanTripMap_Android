@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  リソース圧縮（shrinkResources）から保護する drawable の指定。
+
+  観光スポットの写真（attraction_*）は、コードで名前文字列から
+  Resources.getIdentifier(...) を使って動的に解決している（AttractionPhoto.kt /
+  TourismDetailScreen.kt / SpotDetailScreen.kt）。この動的参照は R8 の静的解析では
+  検出できないため、リリースビルドで「未使用」と誤判定され全削除されていた。
+  結果、フォトギャラリー（Spot Photos）に写真が一切出なくなる。
+
+  ここで attraction_* を明示的に keep して削除を防ぐ。
+  他のリソースには圧縮を引き続き効かせたいので shrinkMode は既定（safe）のまま。
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/attraction_*" />
