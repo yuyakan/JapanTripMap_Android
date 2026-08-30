@@ -8,8 +8,10 @@
       postSplashScreenTheme で本体テーマに戻す。
     -->
     <style name="Theme.JapanTripMap.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/ic_launcher_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_foreground</item>
+        <!-- 円マスクで切られる windowSplashScreenAnimatedIcon は使わず、windowBackground に
+             全画面の画像(splash_window)を指定して、見切れなく高解像度で表示する。 -->
+        <item name="android:windowBackground">@drawable/splash_window</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
         <item name="postSplashScreenTheme">@style/Theme.JapanTripMap</item>
     </style>
 </resources>

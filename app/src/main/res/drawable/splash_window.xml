@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  起動時スプラッシュの全画面背景。円マスクで切られる windowSplashScreenAnimatedIcon
+  は使わず、windowBackground にこの layer-list を指定して画像を見切れなく表示する。
+  背景色は画像に焼き込まれた背景色に合わせ、境目を出さない。
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/splash_background" />
+    <item
+        android:drawable="@drawable/splash_foreground"
+        android:gravity="center" />
+</layer-list>
