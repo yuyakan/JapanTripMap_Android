@@ -180,7 +180,7 @@
     <string name="plan_item_count">%d รายการ</string>
     <string name="plan_already_added">เพิ่มแล้ว</string>
     <string name="plan_add">เพิ่ม</string>
-    <string name="plan_unassigned">ยังไม่ได้กำหนด</string>
+    <string name="plan_unassigned">ยังไม่จัดวัน</string>
     <string name="plan_share">แชร์</string>
     <string name="plan_share_chooser">แชร์แผน</string>
     <string name="plan_edit">แก้ไข</string>

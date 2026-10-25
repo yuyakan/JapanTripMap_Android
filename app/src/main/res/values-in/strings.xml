@@ -180,7 +180,7 @@
     <string name="plan_item_count">%d item</string>
     <string name="plan_already_added">Ditambahkan</string>
     <string name="plan_add">Tambah</string>
-    <string name="plan_unassigned">Belum ditetapkan</string>
+    <string name="plan_unassigned">Belum ditentukan</string>
     <string name="plan_share">Bagikan</string>
     <string name="plan_share_chooser">Bagikan rencana</string>
     <string name="plan_edit">Edit</string>

@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import androidx.activity.compose.BackHandler
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -113,6 +114,12 @@ fun SpotDetailScreen(
     planContext: SpotPlanContext? = null,
 ) {
     val context = LocalContext.current
+    // 詳細を閉じたら広告カウントを +2（iOS 各詳細ビューの戻る処理と同じ。どこから開いても加算する）。
+    val close: () -> Unit = {
+        InterstitialAdManager.addDetailPoints()
+        onClose()
+    }
+    BackHandler(onBack = close)
     var showAddDialog by remember { mutableStateOf(false) }
 
     // プラン経由 かつ 元データに座標が無いカテゴリ（グルメ・お土産）でのみ位置編集を許可する。
@@ -295,7 +302,7 @@ fun SpotDetailScreen(
                 .size(36.dp)
                 .clip(CircleShape)
                 .background(Color.White)
-                .clickable(onClick = onClose),
+                .clickable(onClick = close),
             contentAlignment = Alignment.Center,
         ) {
             Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = detail.accent, modifier = Modifier.size(18.dp))

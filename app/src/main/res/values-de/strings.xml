@@ -180,7 +180,7 @@
     <string name="plan_item_count">%d Einträge</string>
     <string name="plan_already_added">Hinzugefügt</string>
     <string name="plan_add">Hinzufügen</string>
-    <string name="plan_unassigned">Nicht zugewiesen</string>
+    <string name="plan_unassigned">Nicht zugeordnet</string>
     <string name="plan_share">Teilen</string>
     <string name="plan_share_chooser">Plan teilen</string>
     <string name="plan_edit">Bearbeiten</string>

@@ -196,7 +196,7 @@
     <string name="plan_show_on_map">在地圖上查看</string>
     <string name="plan_no_items_placeholder">尚無項目。\n可在任意詳情頁面使用「加入行程」，\n或用下方按鈕新增住宿、交通或備註。</string>
     <string name="plan_no_items_paren">（無項目）</string>
-    <string name="plan_day_format">第 %d 天</string>
+    <string name="plan_day_format">第 %d 日</string>
     <string name="plan_reorder_hint">拖曳以移動</string>
     <string name="plan_time_unset">未設定時間</string>
     <string name="plan_time_none">未設定時間</string>

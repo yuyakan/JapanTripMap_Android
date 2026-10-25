@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import androidx.activity.compose.BackHandler
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -180,11 +181,8 @@ private fun AppRoot() {
     spotDetail?.let { sd ->
         SpotDetailScreen(
             detail = sd, store = planStore,
-            onClose = {
-                // iOS 版の詳細戻るで count += 2 する挙動に合わせる。
-                InterstitialAdManager.addDetailPoints()
-                spotDetail = null
-            },
+            // 広告カウントの加算は SpotDetailScreen 側で行う。
+            onClose = { spotDetail = null },
         )
         return
     }
@@ -194,10 +192,7 @@ private fun AppRoot() {
         TourismDetailScreen(
             prefecture = t.prefecture, store = planStore,
             onOpenSpot = openSpot,
-            onBack = {
-                InterstitialAdManager.addDetailPoints()
-                tourism = null
-            },
+            onBack = { tourism = null },
         )
         return
     }
@@ -207,11 +202,6 @@ private fun AppRoot() {
             onSelect = { tourism = TourismTarget(it) },
             onClose = { showPrefectureSearch = false },
         )
-        return
-    }
-
-    homePlanId?.let { id ->
-        PlanScreen(store = planStore, fixedPlanId = id, onExitFixedPlan = { homePlanId = null })
         return
     }
 
@@ -243,7 +233,10 @@ private fun AppRoot() {
                     }
                 }
                 MainTab.NEARBY -> NearbyScreen(onOpenSpot = openSpot)
-                MainTab.HOME -> HomeScreen(
+                // ホームの「次の旅」から開いたプランは、iOS の NavigationLink と同じくホームタブ内に重ねる。
+                MainTab.HOME -> homePlanId?.let { id ->
+                    PlanScreen(store = planStore, fixedPlanId = id, onExitFixedPlan = { homePlanId = null })
+                } ?: HomeScreen(
                     store = planStore,
                     onOpenPrefecture = { pref, spot ->
                         tourism = TourismTarget(pref)

@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import androidx.activity.compose.BackHandler
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -181,6 +182,13 @@ fun TourismDetailScreen(
     // 全画面で開く Shorts フィード / 写真ビューア。
     var shortsFeed by remember { mutableStateOf<ShortsFeedRequest?>(null) }
     var photoViewerStart by remember { mutableStateOf<Int?>(null) }
+
+    // 戻ると広告カウントを +2（iOS TourismDetailView の戻るボタンと同じ）。
+    val back: () -> Unit = {
+        InterstitialAdManager.addDetailPoints()
+        onBack()
+    }
+    BackHandler(onBack = back)
 
     LaunchedEffect(prefecture) {
         // ホームの「最近見た県」に記録する（マップ・検索・ホームのどこから来てもここを通る）。
@@ -488,7 +496,7 @@ fun TourismDetailScreen(
 
         // 戻るボタン（左上フローティング・白い角丸ピル）。
         FloatingBackButton(
-            onBack = onBack,
+            onBack = back,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .statusBarsPadding()

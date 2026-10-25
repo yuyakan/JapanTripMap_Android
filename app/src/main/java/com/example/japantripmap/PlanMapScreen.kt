@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import androidx.activity.compose.BackHandler
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -88,6 +89,7 @@ fun PlanMapScreen(
     onOpenItem: (PlanItem) -> Unit,
     onClose: () -> Unit,
 ) {
+    BackHandler(onBack = onClose)
     val context = LocalContext.current
     val dayMode = plan.groupingMode == PlanGroupingMode.DAY
     var selectedDay by remember { mutableStateOf<Int?>(null) } // null = 全日

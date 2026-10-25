@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import androidx.activity.compose.BackHandler
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -193,6 +194,7 @@ fun CustomPlanItemScreen(
     onEdit: () -> Unit,
     onClose: () -> Unit,
 ) {
+    BackHandler(onBack = onClose)
     val accent = planCategoryColor(item.category)
 
     Box(modifier = Modifier.fillMaxSize().background(accent)) {
@@ -449,10 +451,8 @@ fun CustomPlanItemSheet(
                 ),
             )
         },
-        // 下地に不透明色を敷いてから背景グラデーションを重ねる（下の画面が透けないように）。
-        modifier = Modifier
-            .background(AppTheme.Background)
-            .background(PlanTheme.backgroundGradient),
+        // iOS 3.0 でマイプラン配下は白基調（pageBackground）。下の画面が透けないよう不透明にする。
+        modifier = Modifier.background(PlanTheme.pageBackground),
     ) { padding ->
         Column(
             modifier = Modifier

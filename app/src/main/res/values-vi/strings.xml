@@ -180,7 +180,7 @@
     <string name="plan_item_count">%d mục</string>
     <string name="plan_already_added">Đã thêm</string>
     <string name="plan_add">Thêm</string>
-    <string name="plan_unassigned">Chưa gán</string>
+    <string name="plan_unassigned">Chưa xếp ngày</string>
     <string name="plan_share">Chia sẻ</string>
     <string name="plan_share_chooser">Chia sẻ kế hoạch</string>
     <string name="plan_edit">Chỉnh sửa</string>

@@ -180,7 +180,7 @@
     <string name="plan_item_count">항목 %d개</string>
     <string name="plan_already_added">추가됨</string>
     <string name="plan_add">추가</string>
-    <string name="plan_unassigned">미지정</string>
+    <string name="plan_unassigned">미배정</string>
     <string name="plan_share">공유</string>
     <string name="plan_share_chooser">플랜 공유</string>
     <string name="plan_edit">편집</string>
@@ -196,7 +196,7 @@
     <string name="plan_show_on_map">지도에서 보기</string>
     <string name="plan_no_items_placeholder">아직 항목이 없습니다.\n상세 화면에서 \"플랜에 추가\"를 사용하거나,\n아래 버튼으로 숙박·교통·메모를 추가할 수 있습니다.</string>
     <string name="plan_no_items_paren">(항목 없음)</string>
-    <string name="plan_day_format">Day %d</string>
+    <string name="plan_day_format">%d일째</string>
     <string name="plan_reorder_hint">드래그하여 이동</string>
     <string name="plan_time_unset">시간 미설정</string>
     <string name="plan_time_none">시간 미설정</string>

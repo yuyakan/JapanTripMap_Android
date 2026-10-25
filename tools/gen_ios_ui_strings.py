@@ -154,6 +154,8 @@ ENTRIES = [
     ("plan_location_add_optional", "plan.custom.location.add", "set"),
     ("plan_start_time", "plan.timeblock.starttime", "set"),
     ("detail_add_location", "plan.locatable.add", "set"),
+    ("plan_day_format", "plan.day.format", "set"),
+    ("plan_unassigned", "plan.day.unassigned", "set"),
     ("detail_change_location", "plan.locatable.change", "set"),
     # 費用・割り勘
     ("plan_cost_total", "plan.cost.total", "add"),

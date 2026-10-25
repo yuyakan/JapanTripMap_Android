@@ -180,7 +180,7 @@
     <string name="plan_item_count">%d件の項目</string>
     <string name="plan_already_added">追加済み</string>
     <string name="plan_add">追加</string>
-    <string name="plan_unassigned">未割り当て</string>
+    <string name="plan_unassigned">未割当</string>
     <string name="plan_share">共有</string>
     <string name="plan_share_chooser">プランを共有</string>
     <string name="plan_edit">編集</string>
@@ -196,7 +196,7 @@
     <string name="plan_show_on_map">地図で見る</string>
     <string name="plan_no_items_placeholder">まだ項目がありません。\n観光・温泉・自然の詳細画面から「プランに追加」、\nまたは下のボタンで宿泊・交通・メモを追加できます。</string>
     <string name="plan_no_items_paren">（項目なし）</string>
-    <string name="plan_day_format">Day %d</string>
+    <string name="plan_day_format">%d日目</string>
     <string name="plan_reorder_hint">ドラッグして移動</string>
     <string name="plan_time_unset">時間未設定</string>
     <string name="plan_time_none">時刻未設定</string>
