@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -39,6 +40,12 @@ private const val TAG = "AdBanner"
  */
 private object BannerAdCache {
     private val views = HashMap<String, AdView>()
+
+    /**
+     * 読み込みに失敗したキー。失敗した枠は空白を残さず畳む（iOS 版の didFail と同じ）。
+     * Compose の状態として持ち、失敗通知で即座に枠が消えるようにする。
+     */
+    val failed = mutableStateMapOf<String, Boolean>()
 
     /**
      * キャッシュから取得。無ければ [create] で作ってロードし、以後使い回す。
@@ -86,9 +93,11 @@ fun AdaptiveBannerAd(
     // 画面幅から左右余白を引いた dp 幅でアダプティブサイズを算出する。
     val adWidthDp = (configuration.screenWidthDp - horizontalPadding * 2).coerceAtLeast(1)
 
-    // MobileAds 未初期化（UMP 同意フロー完了前）のうちは広告を出さない。
-    val adView = BannerAdCache.getOrCreate("adaptive:$adUnitId:$adWidthDp") {
-        createAdView(context, ViewGroup.LayoutParams.WRAP_CONTENT, adUnitId) {
+    // MobileAds 未初期化（UMP 同意フロー完了前）のうちは広告を出さない。読み込み失敗時は枠ごと畳む。
+    val key = "adaptive:$adUnitId:$adWidthDp"
+    if (BannerAdCache.failed[key] == true) return
+    val adView = BannerAdCache.getOrCreate(key) {
+        createAdView(context, ViewGroup.LayoutParams.WRAP_CONTENT, adUnitId, onFailed = { BannerAdCache.failed[key] = true }) {
             AdSize.getCurrentOrientationInlineAdaptiveBannerAdSize(context, adWidthDp)
         }
     } ?: return
@@ -128,9 +137,14 @@ fun MediumRectangleAd(
 
     val context = LocalContext.current
 
-    // MobileAds 未初期化（UMP 同意フロー完了前）のうちは広告を出さない。
-    val adView = BannerAdCache.getOrCreate("mrec:$adUnitId") {
-        createAdView(context, ViewGroup.LayoutParams.MATCH_PARENT, adUnitId) { AdSize.MEDIUM_RECTANGLE }
+    // MobileAds 未初期化（UMP 同意フロー完了前）のうちは広告を出さない。読み込み失敗時は
+    // 300x250 の空枠を残さず畳む（iOS 版 MediumRectangleAdView の didFail）。
+    val key = "mrec:$adUnitId"
+    if (BannerAdCache.failed[key] == true) return
+    val adView = BannerAdCache.getOrCreate(key) {
+        createAdView(context, ViewGroup.LayoutParams.MATCH_PARENT, adUnitId, onFailed = { BannerAdCache.failed[key] = true }) {
+            AdSize.MEDIUM_RECTANGLE
+        }
     } ?: return
 
     Column(
@@ -161,6 +175,7 @@ private inline fun createAdView(
     context: Context,
     heightLayoutParam: Int,
     adUnitId: String,
+    noinline onFailed: () -> Unit,
     adSize: () -> AdSize,
 ): AdView = AdView(context.applicationContext).apply {
     layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, heightLayoutParam)
@@ -175,6 +190,8 @@ private inline fun createAdView(
 
             override fun onAdFailedToLoad(adError: LoadAdError) {
                 Log.w(TAG, "バナーの読み込みに失敗: ${adError.message}")
+                // コールバックはバックグラウンドスレッドから来ることがあるため、状態更新はメインへ。
+                android.os.Handler(android.os.Looper.getMainLooper()).post(onFailed)
             }
         },
     )

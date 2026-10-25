@@ -276,5 +276,15 @@ object GeoProjection {
         "残波岬" to Offset(43f, 478f),
         "万座毛" to Offset(44f, 477f),
         "辺戸岬" to Offset(47f, 473f),
+        // ビーチ（ホームの「有名なビーチ」テーマと共通）。九十九里浜・白良浜は既存の海スポットと
+        // 同名のため上の座標を共用する（iOS はキー別に約 5pt ずらしているだけ）。
+        "浄土ヶ浜" to Offset(382f, 205f),
+        "由比ヶ浜" to Offset(316f, 345f),
+        "水晶浜" to Offset(238f, 330f),
+        "高浜（五島）" to Offset(70f, 405f),
+        "エメラルドビーチ" to Offset(40f, 478f),
+        "ニシ浜（波照間）" to Offset(25f, 490f),
+        "伊豆白浜" to Offset(305f, 355f),
+        "竹野浜" to Offset(205f, 340f),
     )
 }

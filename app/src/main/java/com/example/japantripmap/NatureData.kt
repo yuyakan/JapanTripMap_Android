@@ -34,6 +34,7 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
     ),
     Prefecture.IWATE to listOf(
         NatureSpot("三陸海岸", "岩手県・宮城県の美しいリアス式海岸", "sea", 4, 39.6439, 141.9439),
+        NatureSpot("浄土ヶ浜", "白い岩と松、澄んだ海が美しい三陸の景勝地", "sea", 4, 39.6389, 141.97),
     ),
     Prefecture.MIYAGI to listOf(
         NatureSpot("松島", "宮城県の日本三景の一つ", "sea", 5, 38.3739, 141.0639),
@@ -48,6 +49,7 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
     ),
     Prefecture.CHIBA to listOf(
         NatureSpot("九十九里浜", "千葉県の長大な砂浜海岸", "sea", 3, 35.5539, 140.4239),
+        NatureSpot("九十九里浜", "太平洋に面した全長約60kmの雄大な砂浜海岸", "sea", 4, 35.53, 140.42),
     ),
     Prefecture.TOCHIGI to listOf(
         NatureSpot("那須高原キャンプ場", "栃木県の高原リゾートでのキャンプ", "camping", 4, 37.1439, 140.0239),
@@ -68,6 +70,7 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
         NatureSpot("湘南海岸", "神奈川県の代表的な海岸リゾート", "sea", 4, 35.3139, 139.4819),
         NatureSpot("城ヶ島", "神奈川県三浦半島の景勝地", "sea", 3, 35.1339, 139.6139),
         NatureSpot("江の島", "湘南を代表する海のリゾート", "sea", 4, 35.2989, 139.4819),
+        NatureSpot("由比ヶ浜", "鎌倉を代表する海水浴場", "sea", 4, 35.308, 139.549),
     ),
     Prefecture.NAGANO to listOf(
         NatureSpot("阿智村", "日本一の星空の村として認定された長野県の星空観測地", "starry_sky", 5, 35.4539, 137.6539),
@@ -87,12 +90,16 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
     Prefecture.SHIZUOKA to listOf(
         NatureSpot("伊豆・白浜海岸", "静岡県の美しい白砂のビーチ", "sea", 4, 34.6639, 138.9439),
         NatureSpot("熱海海岸", "静岡県の温泉リゾート海岸", "sea", 3, 35.0939, 139.0639),
+        NatureSpot("伊豆白浜", "伊豆半島を代表する白砂と青い海の海水浴場", "sea", 4, 34.682, 138.966),
     ),
     Prefecture.MIE to listOf(
         NatureSpot("伊勢志摩", "三重県の美しい海岸とリアス式地形", "sea", 4, 34.3239, 136.8239),
     ),
     Prefecture.ISHIKAWA to listOf(
         NatureSpot("能登半島・千里浜なぎさドライブウェイ", "車で走れる日本唯一の砂浜", "sea", 4, 36.8839, 136.6439),
+    ),
+    Prefecture.FUKUI to listOf(
+        NatureSpot("水晶浜", "透明度の高い水と白い砂浜が人気の海水浴場", "sea", 4, 35.652, 136.04),
     ),
     Prefecture.SHIGA to listOf(
         NatureSpot("琵琶湖畔キャンプ場", "滋賀県の日本最大の湖でのキャンプ", "camping", 4, 35.3717, 136.1069),
@@ -104,6 +111,7 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
         NatureSpot("摩耶山掬星台", "神戸の街並みと大阪湾を一望できる関西屈指の夜景スポット", "night_view", 5, 34.7622, 135.2358),
         NatureSpot("六甲山", "1000万ドルの夜景と称される関西随一の夜景スポット", "night_view", 5, 34.7622, 135.2358),
         NatureSpot("竹野海岸", "兵庫県の美しい海岸線", "sea", 4, 35.6339, 134.7239),
+        NatureSpot("竹野浜", "山陰海岸の透明度が高い遠浅の海水浴場", "sea", 4, 35.636, 134.77),
     ),
     Prefecture.NARA to listOf(
         NatureSpot("若草山", "奈良盆地の夜景を一望できる古都の夜景スポット", "night_view", 4, 34.6839, 135.8539),
@@ -112,6 +120,7 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
     ),
     Prefecture.WAKAYAMA to listOf(
         NatureSpot("白良浜", "和歌山県の白砂の美しいビーチ", "sea", 4, 33.6859, 135.3439),
+        NatureSpot("白良浜", "真っ白な砂浜が続く南紀白浜の名ビーチ", "sea", 4, 33.684, 135.339),
     ),
     Prefecture.OSAKA to listOf(
         NatureSpot("天保山", "大阪港の夜景を楽しめるベイエリアスポット", "night_view", 3, 34.6539, 135.4339),
@@ -158,6 +167,7 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
     Prefecture.NAGASAKI to listOf(
         NatureSpot("稲佐山", "世界新三大夜景に選ばれた長崎の美しい夜景", "night_view", 5, 32.7645, 129.8608),
         NatureSpot("壱岐・対馬", "長崎県の歴史ある離島", "sea", 4, 34.1439, 129.2839),
+        NatureSpot("高浜（五島）", "五島列島の白砂とエメラルドの海が広がるビーチ", "sea", 4, 32.698, 128.839),
     ),
     Prefecture.OKINAWA to listOf(
         NatureSpot("石垣島", "南十字星も見える沖縄県の星空観測スポット", "starry_sky", 5, 24.3439, 124.1569),
@@ -169,5 +179,7 @@ val NATURE_INFO: Map<Prefecture, List<NatureSpot>> = mapOf(
         NatureSpot("残波岬", "沖縄本島の絶景岬", "sea", 4, 26.4339, 127.7439),
         NatureSpot("万座毛", "沖縄本島の象の鼻の形をした絶景岬", "sea", 4, 26.4939, 127.8539),
         NatureSpot("辺戸岬", "沖縄本島最北端の岬", "sea", 4, 26.8639, 128.2539),
+        NatureSpot("エメラルドビーチ", "本部の国営公園にある人工ビーチ", "sea", 4, 26.694, 127.878),
+        NatureSpot("ニシ浜（波照間）", "波照間島の「波照間ブルー」で知られる白砂のビーチ", "sea", 4, 24.056, 123.781),
     ),
 )

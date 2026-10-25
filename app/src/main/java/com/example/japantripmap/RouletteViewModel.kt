@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -31,7 +32,14 @@ enum class RouletteMode {
  *
  * @param mode 全国モードか温泉モードか。温泉モードでは温泉がある県のみを対象にする。
  */
-class RouletteViewModel(val mode: RouletteMode = RouletteMode.TOURISM) : ViewModel() {
+class RouletteViewModel(
+    val mode: RouletteMode = RouletteMode.TOURISM,
+    /**
+     * 有効県・重みの保存先。iOS 版 RouletteSettingsStore / WeightManager の永続化に対応。
+     * null なら保存しない（テスト等）。
+     */
+    private val prefs: SharedPreferences? = null,
+) : ViewModel() {
 
     /** このモードで選択肢になりうる県の母集団。 */
     val availablePrefectures: List<Prefecture> = when (mode) {
@@ -105,7 +113,7 @@ class RouletteViewModel(val mode: RouletteMode = RouletteMode.TOURISM) : ViewMod
         private set
 
     /** ルーレット対象として有効な都道府県。初期はこのモードの母集団すべて。 */
-    var enabledPrefectures by mutableStateOf(availablePrefectures.toSet())
+    var enabledPrefectures by mutableStateOf(loadEnabled())
         private set
 
     private var spinJob: Job? = null
@@ -125,26 +133,66 @@ class RouletteViewModel(val mode: RouletteMode = RouletteMode.TOURISM) : ViewMod
         } else {
             enabledPrefectures + prefecture
         }
+        saveEnabled()
     }
 
     /** このモードの全都道府県を対象にする。 */
     fun selectAllPrefectures() {
         enabledPrefectures = availablePrefectures.toSet()
+        saveEnabled()
     }
 
     /** すべての都道府県を対象外にする。 */
     fun deselectAllPrefectures() {
         enabledPrefectures = emptySet()
+        saveEnabled()
     }
 
     /** 指定県の重みを更新する。 */
     fun setWeight(prefecture: Prefecture, weight: Double) {
         weights[prefecture] = weight
+        saveWeights()
     }
 
     /** すべての重みを初期値（1.0）に戻す。 */
     fun resetWeights() {
         Prefecture.entries.forEach { weights[it] = WeightManager.DEFAULT_WEIGHT }
+        saveWeights()
+    }
+
+    // ---- 永続化（iOS: roulette.enabledPrefectures / roulette.weights） ----
+
+    private val enabledKey get() = "roulette.enabledPrefectures.${mode.name}"
+    private val weightsKey get() = "roulette.weights.${mode.name}"
+
+    /** 保存済みの有効県（保存が無ければこのモードの母集団すべて）。 */
+    private fun loadEnabled(): Set<Prefecture> {
+        val raw = prefs?.getString(enabledKey, null) ?: return availablePrefectures.toSet()
+        if (raw.isEmpty()) return emptySet()
+        return raw.split(",").mapNotNull { n -> Prefecture.entries.firstOrNull { it.name == n } }
+            .filter { it in availablePrefectures }
+            .toSet()
+    }
+
+    private fun saveEnabled() {
+        prefs?.edit()?.putString(enabledKey, enabledPrefectures.joinToString(",") { it.name })?.apply()
+    }
+
+    private fun loadWeights() {
+        val raw = prefs?.getString(weightsKey, null) ?: return
+        raw.split(",").forEach { entry ->
+            val (name, value) = entry.split("=").takeIf { it.size == 2 } ?: return@forEach
+            val pref = Prefecture.entries.firstOrNull { it.name == name } ?: return@forEach
+            value.toDoubleOrNull()?.let { weights[pref] = it }
+        }
+    }
+
+    private fun saveWeights() {
+        prefs?.edit()?.putString(weightsKey, weights.entries.joinToString(",") { "${it.key.name}=${it.value}" })?.apply()
+    }
+
+    init {
+        loadWeights()
     }
 
     /** 指定県が選ばれる確率（%）。 */
@@ -232,11 +280,11 @@ class RouletteViewModel(val mode: RouletteMode = RouletteMode.TOURISM) : ViewMod
         private const val RESULT_DELAY_MS = 500L
 
         /** モード指定で ViewModel を生成する Factory。 */
-        fun factory(mode: RouletteMode): ViewModelProvider.Factory =
+        fun factory(mode: RouletteMode, prefs: SharedPreferences? = null): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T =
-                    RouletteViewModel(mode) as T
+                    RouletteViewModel(mode, prefs) as T
             }
     }
 }

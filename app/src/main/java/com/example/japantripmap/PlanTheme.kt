@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.CurrencyYen
 import androidx.compose.material.icons.filled.DirectionsTransit
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Forest
@@ -62,6 +63,17 @@ internal object PlanTheme {
     /** シート・カード内で二次的に使う淡い面色（入力欄・行の地）。 */
     val Surface2 = Color(0xFFF3F3F6)
 
+    /** マイプラン配下の画面の最背面（白基調。カードは影・グレーで区別）。iOS pageBackground。 */
+    val pageBackground = Color.White
+
+    /** カード地（iOS secondarySystemGroupedBackground 相当。ライトでは白）。 */
+    val groupedSurface = Color.White
+
+    /** 一段沈んだ面（iOS tertiarySystemGroupedBackground 相当。ライトでは淡いグレー）。 */
+    val groupedSurface2 = Color(0xFFF2F2F7)
+
+    val cardShadow = Color(0x0F000000)
+
     val cardCorner = 20.dp
 }
 
@@ -76,6 +88,7 @@ internal fun planCategoryColor(c: PlanItemCategory): Color = when (c) {
     PlanItemCategory.HOTEL -> Color(0xFF7380D9)
     PlanItemCategory.TRANSPORT -> Color(0xFF4CA6B3)
     PlanItemCategory.OTHER -> Color(0xFF8C8C99)
+    PlanItemCategory.EXPENSE -> Color(0xFF66994D)
 }
 
 /** カテゴリ -> アイコン。iOS 版 PlanItemCategory.icon（SF Symbol）を Material で近似。 */
@@ -89,6 +102,7 @@ internal fun planCategoryIcon(c: PlanItemCategory): ImageVector = when (c) {
     PlanItemCategory.HOTEL -> Icons.Filled.Hotel
     PlanItemCategory.TRANSPORT -> Icons.Filled.DirectionsTransit
     PlanItemCategory.OTHER -> Icons.Filled.EditNote
+    PlanItemCategory.EXPENSE -> Icons.Filled.CurrencyYen
 }
 
 /**

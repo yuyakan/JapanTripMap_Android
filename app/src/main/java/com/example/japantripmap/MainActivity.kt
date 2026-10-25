@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Hotel
-import androidx.compose.material.icons.filled.Park
-import androidx.compose.material.icons.filled.Celebration
-import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Luggage
+import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.NearMe
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -54,6 +54,9 @@ class MainActivity : ComponentActivity() {
         // EEA 等では UMP の同意フォームを表示し、同意が済んで（または不要で）広告リクエストが
         // 許可されてから AdMob を初期化する。対象外の地域では即座に許可され従来どおり広告が出る。
         ConsentManager.gatherConsentThen(this) { initializeAds() }
+        // お気に入り・最近見た・訪問済みの県、トレンド動画キャッシュを使えるようにする。
+        PrefectureStores.init(this)
+        TrendRepository.init(this)
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = AppTheme.Background) {
@@ -104,43 +107,58 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** ボトムタブの定義。iOS 版 ContentView の 5 タブに対応。 */
-private enum class MainTab(val labelRes: Int, val icon: ImageVector) {
-    PREFECTURE(R.string.tab_prefecture, Icons.Filled.Map),
-    ONSEN(R.string.tab_onsen, Icons.Filled.Hotel),
-    NATURE(R.string.tab_nature, Icons.Filled.Park),
-    FESTIVAL(R.string.tab_festival, Icons.Filled.Celebration),
-    PLAN(R.string.tab_plan, Icons.Filled.Luggage),
-}
+/** 下タブのラベル・アイコン。並びは iOS 版 ContentView（0:マップ 1:近く 2:ホーム 3:祭 4:マイプラン）。 */
+private val MainTab.labelRes: Int
+    get() = when (this) {
+        MainTab.MAP -> R.string.tab_map
+        MainTab.NEARBY -> R.string.tab_nearby
+        MainTab.HOME -> R.string.tab_home
+        MainTab.FESTIVAL -> R.string.tab_festival
+        MainTab.PLAN -> R.string.tab_plan
+    }
 
-private val TabAccent = Color(0xFFFF9500)
+private val MainTab.icon: ImageVector
+    get() = when (this) {
+        MainTab.MAP -> Icons.Outlined.Map
+        MainTab.NEARBY -> Icons.Outlined.NearMe
+        MainTab.HOME -> Icons.Outlined.Home
+        MainTab.FESTIVAL -> Icons.Outlined.AutoAwesome
+        MainTab.PLAN -> Icons.Outlined.Luggage
+    }
+
+/** 全画面で開く県詳細。spot があれば県詳細の上にその詳細まで続けて開く（ホームのテーマカード）。 */
+private data class TourismTarget(val prefecture: Prefecture)
 
 /**
- * アプリのルート。5 タブ構成。
- * 観光詳細はタブの上に重ねて表示する（全画面）。
+ * アプリのルート。iOS 版 ContentView（3.0.0）に合わせた 5 タブ構成。
+ * 詳細（県詳細・単体詳細・県検索・ホームから開いたプラン）はタブの上に全画面で重ねる。
  */
-/** 全画面で開く詳細のたぐい。 */
-private sealed interface Detail {
-    data class Tourism(val prefecture: Prefecture) : Detail
-    data class Onsen(val prefecture: Prefecture) : Detail
-    data class Nature(val prefecture: Prefecture) : Detail
-}
-
 @Composable
 private fun AppRoot() {
-    var selectedTab by remember { mutableStateOf(MainTab.PREFECTURE) }
-    // 表示中の全画面詳細（県別の一覧詳細）。null ならタブ画面。
-    var detail by remember { mutableStateOf<Detail?>(null) }
-    // 個別スポット詳細（一覧詳細のさらに上に重ねる）。null なら非表示。
+    val context = LocalContext.current
+    val application = context.applicationContext as android.app.Application
+    // 表示中の県詳細。null ならタブ画面。
+    var tourism by remember { mutableStateOf<TourismTarget?>(null) }
+    // 個別スポット詳細（県詳細のさらに上に重ねる）。
     var spotDetail by remember { mutableStateOf<SpotDetail?>(null) }
+    // 県一覧・検索（マップタブ右上の🔍）。
+    var showPrefectureSearch by remember { mutableStateOf(false) }
+    // ホームの「次の旅」から開いたプラン詳細。
+    var homePlanId by remember { mutableStateOf<String?>(null) }
+    // ホームから開いた Shorts フィード（下タブも覆う全画面）。
+    var shortsFeed by remember { mutableStateOf<ShortsFeedRequest?>(null) }
+    // 統合マップタブで表示中のマップ（タブを離れても保持する）。
+    var mapMode by remember { mutableStateOf(MapMode.PREFECTURE) }
 
-    // 都道府県ルーレット（全国モード）。
+    // 都道府県ルーレット（全国モード）。有効県・重みは端末に保存する。
     val tourismViewModel: RouletteViewModel = viewModel(
         key = "tourism",
-        factory = RouletteViewModel.factory(RouletteMode.TOURISM),
+        factory = RouletteViewModel.factory(
+            RouletteMode.TOURISM,
+            application.getSharedPreferences("roulette_settings", android.content.Context.MODE_PRIVATE),
+        ),
     )
     // 温泉・自然はスポット単位ルーレット（設定・重みを端末に永続化）。
-    val application = LocalContext.current.applicationContext as android.app.Application
     val onsenViewModel: SpotRouletteViewModel = viewModel(
         key = "onsen_spot",
         factory = SpotRouletteViewModel.factory(application, SpotKind.ONSEN),
@@ -150,6 +168,13 @@ private fun AppRoot() {
         factory = SpotRouletteViewModel.factory(application, SpotKind.NATURE),
     )
     val planStore: TravelPlanStore = viewModel()
+
+    val openSpot: (SpotDetail) -> Unit = { spotDetail = it }
+
+    shortsFeed?.let { feed ->
+        ShortsFeedScreen(request = feed, onClose = { shortsFeed = null })
+        return
+    }
 
     // 最前面：個別スポット詳細。
     spotDetail?.let { sd ->
@@ -164,63 +189,70 @@ private fun AppRoot() {
         return
     }
 
-    // 県別の一覧詳細。各カードタップで spotDetail を開く。
-    when (val d = detail) {
-        is Detail.Tourism -> {
-            TourismDetailScreen(
-                prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it },
-                onBack = {
-                    InterstitialAdManager.addDetailPoints()
-                    detail = null
-                },
-            )
-            return
-        }
-        is Detail.Onsen -> {
-            OnsenDetailScreen(
-                prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it },
-                onBack = {
-                    InterstitialAdManager.addDetailPoints()
-                    detail = null
-                },
-            )
-            return
-        }
-        is Detail.Nature -> {
-            NatureDetailScreen(
-                prefecture = d.prefecture, store = planStore,
-                onOpenSpot = { spotDetail = it },
-                onBack = {
-                    InterstitialAdManager.addDetailPoints()
-                    detail = null
-                },
-            )
-            return
-        }
-        null -> Unit
+    // 県詳細。各カードタップで spotDetail を開く。
+    tourism?.let { t ->
+        TourismDetailScreen(
+            prefecture = t.prefecture, store = planStore,
+            onOpenSpot = openSpot,
+            onBack = {
+                InterstitialAdManager.addDetailPoints()
+                tourism = null
+            },
+        )
+        return
     }
 
+    if (showPrefectureSearch) {
+        PrefectureSearchScreen(
+            onSelect = { tourism = TourismTarget(it) },
+            onClose = { showPrefectureSearch = false },
+        )
+        return
+    }
+
+    homePlanId?.let { id ->
+        PlanScreen(store = planStore, fixedPlanId = id, onExitFixedPlan = { homePlanId = null })
+        return
+    }
+
+    val selectedTab = AppRouter.selectedTab
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
-                MainTab.PREFECTURE -> JapanMapScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = tourismViewModel,
-                    onOpenTourism = { detail = Detail.Tourism(it) },
+                MainTab.MAP -> MapTabScreen(
+                    mapMode = mapMode,
+                    onModeChange = { mapMode = it },
+                ) { mode ->
+                    when (mode) {
+                        MapMode.PREFECTURE -> JapanMapScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = tourismViewModel,
+                            onOpenTourism = { tourism = TourismTarget(it) },
+                            onOpenSearch = { showPrefectureSearch = true },
+                        )
+                        MapMode.ONSEN -> SpotRouletteScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = onsenViewModel,
+                            onOpenSpot = { spotDetail = it.toSpotDetail() },
+                        )
+                        MapMode.NATURE -> SpotRouletteScreen(
+                            modifier = Modifier.fillMaxSize(),
+                            viewModel = natureViewModel,
+                            onOpenSpot = { spotDetail = it.toSpotDetail() },
+                        )
+                    }
+                }
+                MainTab.NEARBY -> NearbyScreen(onOpenSpot = openSpot)
+                MainTab.HOME -> HomeScreen(
+                    store = planStore,
+                    onOpenPrefecture = { pref, spot ->
+                        tourism = TourismTarget(pref)
+                        spotDetail = spot
+                    },
+                    onOpenPlan = { homePlanId = it },
+                    onOpenShorts = { shortsFeed = it },
                 )
-                MainTab.ONSEN -> SpotRouletteScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = onsenViewModel,
-                    onOpenSpot = { spotDetail = it.toSpotDetail() },
-                )
-                MainTab.NATURE -> SpotRouletteScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    viewModel = natureViewModel,
-                    onOpenSpot = { spotDetail = it.toSpotDetail() },
-                )
-                MainTab.FESTIVAL -> FestivalScreen(onOpenSpot = { spotDetail = it })
+                MainTab.FESTIVAL -> FestivalScreen(onOpenSpot = openSpot)
                 MainTab.PLAN -> PlanScreen(store = planStore)
             }
         }
@@ -235,7 +267,7 @@ private fun AppRoot() {
                 val tabLabel = stringResource(tab.labelRes)
                 NavigationBarItem(
                     selected = selectedTab == tab,
-                    onClick = { selectedTab = tab },
+                    onClick = { AppRouter.selectedTab = tab },
                     icon = { Icon(tab.icon, contentDescription = tabLabel) },
                     label = {
                         // ラベルは常に 1 行。英語などで長くなっても折り返して崩れないようにする。
@@ -248,20 +280,12 @@ private fun AppRoot() {
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = TabAccent,
-                        selectedTextColor = TabAccent,
-                        indicatorColor = TabAccent.copy(alpha = 0.12f),
+                        selectedIconColor = PlanTheme.Primary,
+                        selectedTextColor = PlanTheme.Primary,
+                        indicatorColor = PlanTheme.Primary.copy(alpha = 0.12f),
                     ),
                 )
             }
         }
-    }
-}
-
-/** 未実装タブの仮表示。 */
-@Composable
-private fun PlaceholderTab(name: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-        Text(stringResource(R.string.placeholder_preparing, name), color = Color.Gray)
     }
 }

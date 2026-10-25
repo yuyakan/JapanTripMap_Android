@@ -3,6 +3,7 @@ package com.example.japantripmap
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EditLocation
+import androidx.compose.material.icons.filled.EditNote
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.HorizontalDivider
@@ -79,6 +82,11 @@ data class SpotDetail(
      * null なら title を使う。
      */
     val searchQuery: String? = null,
+    /**
+     * 写真が無くても「写真あり」と同じ本文スタイル（白背景＋カード枠線・アイコン丸なし）にするか。
+     * iOS では観光スポット詳細だけが常にこの見た目（AttractionDetailView）。
+     */
+    val alwaysPhotoStyle: Boolean = false,
 )
 
 /**
@@ -119,6 +127,7 @@ fun SpotDetailScreen(
         }
     }
     var showLocationPicker by remember { mutableStateOf(false) }
+    var showMemoEditor by remember { mutableStateOf(false) }
 
     // 位置ピッカー表示中は最前面に全画面で出す（ボトムシートと違い確実に前面へ）。
     if (showLocationPicker && currentItem != null && planContext != null) {
@@ -161,6 +170,13 @@ fun SpotDetailScreen(
 
     // 地図ドラッグ中は本文スクロールを止め、地図のパンを親に横取りされないようにする。
     var mapTouched by remember { mutableStateOf(false) }
+    // 写真ありの見た目（iOS PhotoHeaderStyle）: 本文は白・カードに枠線。写真なしはブランドの淡いグラデーション。
+    val photoStyle = detail.hasPhoto(context) || detail.alwaysPhotoStyle
+    val cardModifier = if (photoStyle) {
+        Modifier.border(1.dp, AppTheme.TextPrimary, RoundedCornerShape(AppTheme.CardCorner))
+    } else {
+        Modifier
+    }
     Box(modifier = Modifier.fillMaxSize().background(detail.accent)) {
         Column(
             modifier = Modifier
@@ -174,7 +190,10 @@ fun SpotDetailScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(AppTheme.Background)
+                    .then(
+                        if (photoStyle) Modifier.background(AppTheme.Background)
+                        else Modifier.background(PlanTheme.backgroundGradient),
+                    )
                     .padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),
             ) {
@@ -183,6 +202,7 @@ fun SpotDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .appCard()
+                        .then(cardModifier)
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
@@ -211,7 +231,7 @@ fun SpotDetailScreen(
 
                 // 説明カード。
                 if (detail.description.isNotBlank()) {
-                    DetailCard {
+                    DetailCard(cardModifier) {
                         SectionHeader(Icons.Filled.LocationOn, stringResource(R.string.detail_more_info), detail.accent)
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(localizeData(detail.description), fontSize = 14.sp, color = Color(0xFF444444), lineHeight = 22.sp)
@@ -220,7 +240,7 @@ fun SpotDetailScreen(
 
                 // 基本情報カード。
                 if (detail.infoRows.isNotEmpty()) {
-                    DetailCard {
+                    DetailCard(cardModifier) {
                         SectionHeader(Icons.Filled.Star, stringResource(R.string.detail_basic_info), detail.accent)
                         Spacer(modifier = Modifier.height(6.dp))
                         detail.infoRows.forEachIndexed { i, (label, value) ->
@@ -241,7 +261,7 @@ fun SpotDetailScreen(
 
                 // 特徴タグ（祭り）。
                 if (detail.features.isNotEmpty()) {
-                    DetailCard {
+                    DetailCard(cardModifier) {
                         SectionHeader(Icons.Filled.Star, stringResource(R.string.detail_features), detail.accent)
                         Spacer(modifier = Modifier.height(10.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -281,27 +301,40 @@ fun SpotDetailScreen(
             Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = detail.accent, modifier = Modifier.size(18.dp))
         }
 
-        // 位置を追加/変更ボタン（右下フローティング・グルメ/お土産のみ）。
-        // iOS 版 PlanLocatableDetailView の circleButton（56pt）に対応。
-        if (allowsLocation) {
-            val hasLocation = currentItem?.hasCoordinate == true
-            Box(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(detail.accent)
-                    .clickable { showLocationPicker = true },
-                contentAlignment = Alignment.Center,
+        // プラン経由で開いたときの右下フローティング（iOS 版 PlanLocatableDetailView）。
+        // 上から「位置」（グルメ・お土産のみ）→「メモ」（全カテゴリ）。
+        if (planContext != null && currentItem != null) {
+            Column(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(
-                    if (hasLocation) Icons.Filled.EditLocation else Icons.Filled.AddLocationAlt,
-                    contentDescription = stringResource(if (hasLocation) R.string.detail_change_location else R.string.detail_add_location),
-                    tint = Color.White,
-                    modifier = Modifier.size(24.dp),
-                )
+                if (allowsLocation) {
+                    val hasLocation = currentItem.hasCoordinate
+                    PlanFab(
+                        if (hasLocation) Icons.Filled.EditLocation else Icons.Filled.AddLocationAlt,
+                        stringResource(if (hasLocation) R.string.detail_change_location else R.string.detail_add_location),
+                    ) { showLocationPicker = true }
+                }
+                val hasMemo = !currentItem.memo.isNullOrEmpty()
+                PlanFab(
+                    if (hasMemo) Icons.Filled.EditNote else Icons.AutoMirrored.Filled.Notes,
+                    stringResource(if (hasMemo) R.string.plan_item_editmemo else R.string.plan_item_addmemo),
+                ) { showMemoEditor = true }
             }
+        }
+    }
+
+    if (showMemoEditor && planContext != null && currentItem != null) {
+        FullScreenSheet(onDismiss = { showMemoEditor = false }) {
+            PlanMemoEditorScreen(
+                initial = currentItem.memo.orEmpty(),
+                title = stringResource(R.string.plan_item_memo_title),
+                onDismiss = { showMemoEditor = false },
+                onSave = { text ->
+                    store.updateItem(planContext.planId, currentItem.copy(memo = text.takeIf { it.isNotBlank() }))
+                    showMemoEditor = false
+                },
+            )
         }
     }
 }
@@ -343,16 +376,25 @@ private fun HeroHeader(detail: SpotDetail) {
             )
         }
 
-        HeroContent(detail, showIconCircle = photoId == 0)
+        // 写真ありは iOS PhotoHeaderStyle.topPadding（150pt）でタイトルを下寄せにし、アイコン丸は出さない。
+        HeroContent(
+            detail,
+            showIconCircle = photoId == 0 && !detail.alwaysPhotoStyle,
+            topPadding = if (photoId != 0 || detail.alwaysPhotoStyle) 150 else 90,
+        )
     }
 }
 
+/** この詳細に表示できる写真があるか。 */
+fun SpotDetail.hasPhoto(context: android.content.Context): Boolean =
+    (photoResName?.let { context.resources.getIdentifier(it, "drawable", context.packageName) } ?: 0) != 0
+
 @Composable
-private fun HeroContent(detail: SpotDetail, showIconCircle: Boolean) {
+private fun HeroContent(detail: SpotDetail, showIconCircle: Boolean, topPadding: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 22.dp, end = 22.dp, top = 90.dp, bottom = 24.dp),
+            .padding(start = 22.dp, end = 22.dp, top = topPadding.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         // 写真がないときだけアイコン丸を出す（写真時は写真が主役）。
@@ -409,11 +451,15 @@ private fun HeroContent(detail: SpotDetail, showIconCircle: Boolean) {
 }
 
 @Composable
-private fun DetailCard(content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit) {
+private fun DetailCard(
+    extra: Modifier = Modifier,
+    content: @Composable androidx.compose.foundation.layout.ColumnScope.() -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .appCard()
+            .then(extra)
             .padding(16.dp),
         content = content,
     )

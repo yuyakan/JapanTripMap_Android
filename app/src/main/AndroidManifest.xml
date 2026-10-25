@@ -2,6 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- ホームのトレンド動画（Firestore 読み取り・YouTube 埋め込み再生）に使う。 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Shorts をオフラインで開いたときに案内を出すための接続状態の監視。 -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- 「近く」タブの現在地（おおよその位置で十分なので粗い精度のみ）。 -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

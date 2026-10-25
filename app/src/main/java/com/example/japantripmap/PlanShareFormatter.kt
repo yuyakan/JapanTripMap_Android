@@ -20,6 +20,7 @@ object PlanShareFormatter {
         PlanItemCategory.HOTEL -> "🏨"
         PlanItemCategory.TRANSPORT -> "🚉"
         PlanItemCategory.OTHER -> "📝"
+        PlanItemCategory.EXPENSE -> "💴"
     }
 
     fun text(context: Context, plan: TravelPlan): String {
@@ -38,9 +39,10 @@ object PlanShareFormatter {
                 lines.add("──── $heading ────")
                 appendItems(dayItems, lines)
             }
-        } else if (plan.items.isNotEmpty()) {
+        } else if (plan.itineraryItems.isNotEmpty()) {
+            // 費用専用項目は旅程の共有テキストには含めない（iOS 版と同じ）。
             lines.add("")
-            appendItems(plan.items, lines)
+            appendItems(plan.itineraryItems, lines)
         }
         return lines.joinToString("\n")
     }
