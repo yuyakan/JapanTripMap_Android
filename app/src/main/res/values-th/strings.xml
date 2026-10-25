@@ -363,4 +363,26 @@
     <string name="tab_band_nature">ธรรมชาติ</string>
     <string name="plan_item_addmemo">เพิ่มบันทึกย่อ</string>
     <string name="plan_item_memo_title">บันทึกย่อ</string>
+    <string name="gourmet_recommended_enjoyment">วิธีเพลิดเพลิน</string>
+    <string name="ramen_tip_1">ลิ้มรสชาติต้นตำรับที่ร้านดั้งเดิมในท้องถิ่น</string>
+    <string name="ramen_tip_2">อร่อยที่สุดตอนร้อนๆ</string>
+    <string name="ramen_tip_3">มองหาร้านที่คนท้องถิ่นนิยม</string>
+    <string name="seafood_tip_1">ลิ้มรสอาหารทะเลสดตามฤดูกาล</string>
+    <string name="seafood_tip_2">ซื้อได้ที่ท่าเรือประมงหรือตลาดท้องถิ่น</string>
+    <string name="seafood_tip_3">เพลิดเพลินกับหลากวิธีปรุง เช่น ซาชิมิหรือย่าง</string>
+    <string name="meat_tip_1">ลิ้มรสคุณภาพสูงสุดที่ร้านเฉพาะทาง</string>
+    <string name="meat_tip_2">เพลิดเพลินกับวิธีปรุงและซอสแบบท้องถิ่น</string>
+    <string name="meat_tip_3">เพลิดเพลินแบบสบายๆ ที่เทศกาลหรือแผงลอย</string>
+    <string name="sweets_tip_1">ซื้อกลับเป็นของฝาก</string>
+    <string name="sweets_tip_2">ค่อยๆ ลิ้มรสพร้อมชา</string>
+    <string name="sweets_tip_3">ลิ้มรสขนมทำสดใหม่ที่ร้านดั้งเดิม</string>
+    <string name="local_tip_1">สัมผัสรสชาติแท้ที่ร้านอาหารบ้านๆ ในท้องถิ่น</string>
+    <string name="local_tip_2">เรียนรู้ประวัติและวัฒนธรรมของอาหารท้องถิ่น</string>
+    <string name="local_tip_3">เลือกร้านที่ใส่ใจวัตถุดิบท้องถิ่น</string>
+    <string name="drinks_tip_1">เพลิดเพลินกับทัวร์โรงบ่มและการชิม</string>
+    <string name="drinks_tip_2">จับคู่กับอาหารท้องถิ่น</string>
+    <string name="drinks_tip_3">ซื้อกลับเป็นของฝาก</string>
+    <string name="vegetables_tip_1">ซื้อผักผลไม้สดที่ฟาร์มหรือร้านขายตรง</string>
+    <string name="vegetables_tip_2">ลิ้มรสในช่วงที่อร่อยที่สุดในท้องถิ่น</string>
+    <string name="vegetables_tip_3">เพลิดเพลินในรูปแบบแปรรูปหรือขนมได้ด้วย</string>
 </resources>

@@ -27,6 +27,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EditLocation
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material.icons.filled.LocationOn
@@ -88,6 +90,8 @@ data class SpotDetail(
      * iOS では観光スポット詳細だけが常にこの見た目（AttractionDetailView）。
      */
     val alwaysPhotoStyle: Boolean = false,
+    /** 「おすすめの楽しみ方」の文言リソース（グルメのみ。カテゴリごとに 3 つ）。 */
+    val tipResIds: List<Int> = emptyList(),
 )
 
 /**
@@ -222,14 +226,6 @@ fun SpotDetailScreen(
                     )
                 }
 
-                detail.mapPlace()?.let { place ->
-                    PlacesMapSection(
-                        title = stringResource(R.string.common_map),
-                        places = listOf(place),
-                        onMapTouch = { mapTouched = it },
-                    )
-                }
-
                 // プランで位置を設定したグルメ・お土産は、その位置を地図カードで表示する
                 // （iOS 版 PlanItemPlaceMap 相当）。
                 if (allowsLocation && currentItem?.hasCoordinate == true) {
@@ -244,6 +240,9 @@ fun SpotDetailScreen(
                         Text(localizeData(detail.description), fontSize = 14.sp, color = Color(0xFF444444), lineHeight = 22.sp)
                     }
                 }
+
+                // 説明の下にレクタングル(300x250)（iOS 版の各詳細ビューと同じ位置）。
+                MediumRectangleAd(adUnitId = AdConfig.detailBannerUnitId)
 
                 // 基本情報カード。
                 if (detail.infoRows.isNotEmpty()) {
@@ -261,6 +260,23 @@ fun SpotDetailScreen(
                                 Text(localizeInfoLabel(label), fontSize = 14.sp, color = Color.Gray)
                                 Spacer(modifier = Modifier.weight(1f))
                                 Text(localizeData(value), fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            }
+                        }
+                    }
+                }
+
+                // おすすめの楽しみ方（グルメ。iOS GourmetDetailView.recommendationsCard）。
+                if (detail.tipResIds.isNotEmpty()) {
+                    DetailCard(cardModifier) {
+                        SectionHeader(Icons.Filled.Lightbulb, stringResource(R.string.gourmet_recommended_enjoyment), detail.accent)
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            detail.tipResIds.forEach { res ->
+                                Row(verticalAlignment = Alignment.Top) {
+                                    Icon(Icons.Filled.CheckCircle, contentDescription = null, tint = detail.accent, modifier = Modifier.padding(top = 2.dp).size(14.dp))
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(stringResource(res), fontSize = 14.sp, color = Color(0xFF444444))
+                                }
                             }
                         }
                     }
@@ -287,8 +303,14 @@ fun SpotDetailScreen(
                     }
                 }
 
-                // 本文の下にレクタングル(300x250)（iOS 版の各詳細ビューと同じ位置）。
-                MediumRectangleAd(adUnitId = AdConfig.detailBannerUnitId)
+                // 地図（iOS: 観光・温泉・自然は広告の直下、祭りは見どころの後＝情報カード類の後ろ）。
+                detail.mapPlace()?.let { place ->
+                    PlacesMapSection(
+                        title = stringResource(R.string.common_map),
+                        places = listOf(place),
+                        onMapTouch = { mapTouched = it },
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(20.dp))
             }

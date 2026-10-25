@@ -363,4 +363,26 @@
     <string name="tab_band_nature">Thiên nhiên</string>
     <string name="plan_item_addmemo">Thêm ghi chú</string>
     <string name="plan_item_memo_title">Ghi chú</string>
+    <string name="gourmet_recommended_enjoyment">Cách thưởng thức</string>
+    <string name="ramen_tip_1">Thưởng thức hương vị chính gốc tại các quán truyền thống địa phương</string>
+    <string name="ramen_tip_2">Ngon nhất khi còn nóng</string>
+    <string name="ramen_tip_3">Tìm những quán được người địa phương ưa chuộng</string>
+    <string name="seafood_tip_1">Thưởng thức hải sản tươi theo mùa</string>
+    <string name="seafood_tip_2">Mua tại cảng cá hoặc chợ địa phương</string>
+    <string name="seafood_tip_3">Thưởng thức nhiều cách chế biến như sashimi hay nướng</string>
+    <string name="meat_tip_1">Thưởng thức chất lượng thượng hạng tại nhà hàng chuyên</string>
+    <string name="meat_tip_2">Thưởng thức cùng cách chế biến và nước sốt địa phương</string>
+    <string name="meat_tip_3">Thưởng thức thoải mái tại lễ hội hoặc quầy hàng</string>
+    <string name="sweets_tip_1">Mua về làm quà</string>
+    <string name="sweets_tip_2">Nhâm nhi cùng trà</string>
+    <string name="sweets_tip_3">Thưởng thức bánh làm tươi tại tiệm truyền thống</string>
+    <string name="local_tip_1">Trải nghiệm hương vị chính gốc tại quán ăn gia đình địa phương</string>
+    <string name="local_tip_2">Tìm hiểu lịch sử và văn hóa của món ăn vùng miền</string>
+    <string name="local_tip_3">Chọn quán chú trọng nguyên liệu địa phương</string>
+    <string name="drinks_tip_1">Tham quan xưởng ủ và nếm thử</string>
+    <string name="drinks_tip_2">Kết hợp cùng ẩm thực địa phương</string>
+    <string name="drinks_tip_3">Mua về làm quà</string>
+    <string name="vegetables_tip_1">Mua nông sản tươi tại nông trại hoặc cửa hàng bán trực tiếp</string>
+    <string name="vegetables_tip_2">Thưởng thức đúng mùa ngon nhất tại địa phương</string>
+    <string name="vegetables_tip_3">Cũng có thể thưởng thức dưới dạng chế biến hoặc bánh</string>
 </resources>

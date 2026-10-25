@@ -90,7 +90,7 @@ fun RouletteSpot.toSpotDetail(): SpotDetail = SpotDetail(
     photoResName = if (kind == SpotKind.NATURE) NATURE_PHOTOS[name] else null,
     badge = localizeTypeLabel(typeMeta.name),
     popularity = popularity,
-    infoRows = listOf((if (kind == SpotKind.ONSEN) "泉質タイプ" else "種別") to localizeTypeLabel(typeMeta.name)),
+    // iOS の温泉・自然スポット詳細には基本情報カードが無い（種別はヘッダーのバッジで示す）。
 )
 
 private val MapFillStart = Color(0x6633C481)

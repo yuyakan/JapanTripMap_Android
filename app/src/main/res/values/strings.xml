@@ -363,4 +363,26 @@
     <string name="tab_band_nature">自然</string>
     <string name="plan_item_addmemo">メモを追加</string>
     <string name="plan_item_memo_title">メモ</string>
+    <string name="gourmet_recommended_enjoyment">おすすめの楽しみ方</string>
+    <string name="ramen_tip_1">地元の老舗店で本格的な味を楽しむ</string>
+    <string name="ramen_tip_2">温かいうちに食べるのがおすすめ</string>
+    <string name="ramen_tip_3">地元の人に人気の店を探してみて</string>
+    <string name="seafood_tip_1">旬の時期に新鮮なものを味わう</string>
+    <string name="seafood_tip_2">地元の漁港や市場で購入する</string>
+    <string name="seafood_tip_3">刺身や焼きなど様々な調理法で楽しむ</string>
+    <string name="meat_tip_1">専門店で最高品質のものを味わう</string>
+    <string name="meat_tip_2">地元の調理法やタレで楽しむ</string>
+    <string name="meat_tip_3">お祭りや屋台でカジュアルに楽しむ</string>
+    <string name="sweets_tip_1">お土産として持ち帰る</string>
+    <string name="sweets_tip_2">お茶と一緒にゆっくり味わう</string>
+    <string name="sweets_tip_3">老舗和菓子店で作りたてを楽しむ</string>
+    <string name="local_tip_1">地元の家庭料理店で本場の味を体験</string>
+    <string name="local_tip_2">郷土料理の歴史や文化も一緒に学ぶ</string>
+    <string name="local_tip_3">地元の食材にもこだわったお店選び</string>
+    <string name="drinks_tip_1">酒蔵見学と試飲を楽しむ</string>
+    <string name="drinks_tip_2">地元の料理と合わせて味わう</string>
+    <string name="drinks_tip_3">お土産として持ち帰る</string>
+    <string name="vegetables_tip_1">農園や直売所で新鮮なものを購入</string>
+    <string name="vegetables_tip_2">旬の時期に現地で味わう</string>
+    <string name="vegetables_tip_3">加工品やスイーツでも楽しむ</string>
 </resources>

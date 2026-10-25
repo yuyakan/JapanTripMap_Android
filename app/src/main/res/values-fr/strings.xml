@@ -363,4 +363,26 @@
     <string name="tab_band_nature">Nature</string>
     <string name="plan_item_addmemo">Ajouter une note</string>
     <string name="plan_item_memo_title">Note</string>
+    <string name="gourmet_recommended_enjoyment">Comment en profiter</string>
+    <string name="ramen_tip_1">Savourez les saveurs authentiques dans les restaurants traditionnels locaux</string>
+    <string name="ramen_tip_2">À déguster bien chaud</string>
+    <string name="ramen_tip_3">Repérez les enseignes prisées des habitants</string>
+    <string name="seafood_tip_1">Dégustez des fruits de mer frais de saison</string>
+    <string name="seafood_tip_2">Achetez-en aux ports de pêche ou marchés locaux</string>
+    <string name="seafood_tip_3">Profitez de diverses préparations comme le sashimi ou le grillé</string>
+    <string name="meat_tip_1">Savourez la meilleure qualité dans les restaurants spécialisés</string>
+    <string name="meat_tip_2">Appréciez-la avec les préparations et sauces locales</string>
+    <string name="meat_tip_3">Dégustez-la simplement lors de festivals ou dans les stands</string>
+    <string name="sweets_tip_1">À rapporter en souvenir</string>
+    <string name="sweets_tip_2">Savourez-les tranquillement avec du thé</string>
+    <string name="sweets_tip_3">Dégustez des douceurs fraîches dans les boutiques traditionnelles</string>
+    <string name="local_tip_1">Découvrez les saveurs authentiques dans les auberges familiales locales</string>
+    <string name="local_tip_2">Découvrez l\'histoire et la culture des plats régionaux</string>
+    <string name="local_tip_3">Choisissez des restaurants axés sur les produits locaux</string>
+    <string name="drinks_tip_1">Profitez des visites de brasseries et des dégustations</string>
+    <string name="drinks_tip_2">Accordez-les avec la cuisine locale</string>
+    <string name="drinks_tip_3">À rapporter en souvenir</string>
+    <string name="vegetables_tip_1">Achetez des produits frais à la ferme ou en vente directe</string>
+    <string name="vegetables_tip_2">Dégustez-les à leur pleine saison sur place</string>
+    <string name="vegetables_tip_3">À apprécier aussi en produits transformés ou en confiseries</string>
 </resources>

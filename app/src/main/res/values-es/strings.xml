@@ -363,4 +363,26 @@
     <string name="tab_band_nature">Naturaleza</string>
     <string name="plan_item_addmemo">Añadir nota</string>
     <string name="plan_item_memo_title">Nota</string>
+    <string name="gourmet_recommended_enjoyment">Cómo disfrutarlo</string>
+    <string name="ramen_tip_1">Disfruta los sabores auténticos en los restaurantes tradicionales locales</string>
+    <string name="ramen_tip_2">Se disfruta mejor caliente</string>
+    <string name="ramen_tip_3">Busca los locales populares entre los lugareños</string>
+    <string name="seafood_tip_1">Prueba mariscos frescos de temporada</string>
+    <string name="seafood_tip_2">Cómpralos en puertos pesqueros o mercados locales</string>
+    <string name="seafood_tip_3">Disfruta distintas preparaciones como sashimi o a la parrilla</string>
+    <string name="meat_tip_1">Saborea la máxima calidad en restaurantes especializados</string>
+    <string name="meat_tip_2">Disfrútala con las preparaciones y salsas locales</string>
+    <string name="meat_tip_3">Disfrútala de forma casual en festivales o puestos</string>
+    <string name="sweets_tip_1">Llévalos como recuerdo</string>
+    <string name="sweets_tip_2">Saboréalos con calma acompañados de té</string>
+    <string name="sweets_tip_3">Prueba dulces recién hechos en tiendas tradicionales</string>
+    <string name="local_tip_1">Vive los sabores auténticos en los restaurantes caseros locales</string>
+    <string name="local_tip_2">Conoce la historia y la cultura de los platos regionales</string>
+    <string name="local_tip_3">Elige restaurantes que apuesten por los ingredientes locales</string>
+    <string name="drinks_tip_1">Disfruta visitas a fábricas y catas</string>
+    <string name="drinks_tip_2">Combínalas con la gastronomía local</string>
+    <string name="drinks_tip_3">Llévalas como recuerdo</string>
+    <string name="vegetables_tip_1">Compra productos frescos en granjas o tiendas de venta directa</string>
+    <string name="vegetables_tip_2">Pruébalos en su mejor temporada en el lugar</string>
+    <string name="vegetables_tip_3">Disfrútalos también como productos procesados o dulces</string>
 </resources>

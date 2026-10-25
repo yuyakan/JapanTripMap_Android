@@ -363,4 +363,26 @@
     <string name="tab_band_nature">Alam</string>
     <string name="plan_item_addmemo">Tambah catatan</string>
     <string name="plan_item_memo_title">Catatan</string>
+    <string name="gourmet_recommended_enjoyment">Cara menikmati</string>
+    <string name="ramen_tip_1">Nikmati rasa autentik di kedai tradisional setempat</string>
+    <string name="ramen_tip_2">Paling enak saat masih panas</string>
+    <string name="ramen_tip_3">Cari kedai yang digemari warga lokal</string>
+    <string name="seafood_tip_1">Cicipi makanan laut segar musiman</string>
+    <string name="seafood_tip_2">Beli di pelabuhan ikan atau pasar setempat</string>
+    <string name="seafood_tip_3">Nikmati beragam olahan seperti sashimi atau bakar</string>
+    <string name="meat_tip_1">Nikmati kualitas terbaik di restoran khusus</string>
+    <string name="meat_tip_2">Nikmati dengan olahan dan saus khas daerah</string>
+    <string name="meat_tip_3">Nikmati santai di festival atau warung kaki lima</string>
+    <string name="sweets_tip_1">Bawa pulang sebagai oleh-oleh</string>
+    <string name="sweets_tip_2">Nikmati perlahan bersama teh</string>
+    <string name="sweets_tip_3">Cicipi kudapan segar di toko tradisional</string>
+    <string name="local_tip_1">Rasakan cita rasa autentik di rumah makan setempat</string>
+    <string name="local_tip_2">Pelajari sejarah dan budaya masakan daerah</string>
+    <string name="local_tip_3">Pilih restoran yang mengutamakan bahan lokal</string>
+    <string name="drinks_tip_1">Nikmati tur tempat penyulingan dan cicip rasa</string>
+    <string name="drinks_tip_2">Padukan dengan kuliner setempat</string>
+    <string name="drinks_tip_3">Bawa pulang sebagai oleh-oleh</string>
+    <string name="vegetables_tip_1">Beli hasil segar di kebun atau toko penjualan langsung</string>
+    <string name="vegetables_tip_2">Cicipi saat puncak musimnya di daerah asal</string>
+    <string name="vegetables_tip_3">Nikmati juga sebagai produk olahan atau kudapan</string>
 </resources>

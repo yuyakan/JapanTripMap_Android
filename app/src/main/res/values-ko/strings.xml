@@ -363,4 +363,26 @@
     <string name="tab_band_nature">자연</string>
     <string name="plan_item_addmemo">메모 추가</string>
     <string name="plan_item_memo_title">메모</string>
+    <string name="gourmet_recommended_enjoyment">추천 즐기는 방법</string>
+    <string name="ramen_tip_1">지역의 노포에서 정통 맛을 즐기기</string>
+    <string name="ramen_tip_2">뜨거울 때 먹는 것이 추천</string>
+    <string name="ramen_tip_3">지역 사람들에게 인기 있는 가게를 찾아보기</string>
+    <string name="seafood_tip_1">제철에 신선한 것을 맛보기</string>
+    <string name="seafood_tip_2">지역의 어항이나 시장에서 구입하기</string>
+    <string name="seafood_tip_3">회나 구이 등 다양한 조리법으로 즐기기</string>
+    <string name="meat_tip_1">전문점에서 최고 품질의 것을 맛보기</string>
+    <string name="meat_tip_2">지역의 조리법이나 양념으로 즐기기</string>
+    <string name="meat_tip_3">축제나 포장마차에서 캐주얼하게 즐기기</string>
+    <string name="sweets_tip_1">선물로 가져가기</string>
+    <string name="sweets_tip_2">차와 함께 천천히 맛보기</string>
+    <string name="sweets_tip_3">노포 화과자점에서 갓 만든 것을 즐기기</string>
+    <string name="local_tip_1">지역의 가정요리점에서 본고장 맛을 체험</string>
+    <string name="local_tip_2">향토요리의 역사나 문화도 함께 배우기</string>
+    <string name="local_tip_3">지역 식재료에도 신경 쓴 가게 선택</string>
+    <string name="drinks_tip_1">양조장 견학과 시음을 즐기기</string>
+    <string name="drinks_tip_2">지역 요리와 함께 맛보기</string>
+    <string name="drinks_tip_3">선물로 가져가기</string>
+    <string name="vegetables_tip_1">농원이나 직매장에서 신선한 것을 구입</string>
+    <string name="vegetables_tip_2">제철에 현지에서 맛보기</string>
+    <string name="vegetables_tip_3">가공품이나 스위트로도 즐기기</string>
 </resources>

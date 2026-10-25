@@ -47,7 +47,20 @@ fun gourmetSpotDetail(prefecture: Prefecture, g: Gourmet): SpotDetail = SpotDeta
         "カテゴリ" to categoryLabel(g.category),
     ),
     tabelogKeyword = g.name,
+    tipResIds = gourmetTipResIds(g.category),
 )
+
+/** グルメのカテゴリ別「おすすめの楽しみ方」（iOS getRecommendations と同じ 3 文）。 */
+private fun gourmetTipResIds(category: String): List<Int> = when (category) {
+    "ramen" -> listOf(R.string.ramen_tip_1, R.string.ramen_tip_2, R.string.ramen_tip_3)
+    "seafood" -> listOf(R.string.seafood_tip_1, R.string.seafood_tip_2, R.string.seafood_tip_3)
+    "meat" -> listOf(R.string.meat_tip_1, R.string.meat_tip_2, R.string.meat_tip_3)
+    "sweets" -> listOf(R.string.sweets_tip_1, R.string.sweets_tip_2, R.string.sweets_tip_3)
+    "local" -> listOf(R.string.local_tip_1, R.string.local_tip_2, R.string.local_tip_3)
+    "drinks" -> listOf(R.string.drinks_tip_1, R.string.drinks_tip_2, R.string.drinks_tip_3)
+    "vegetables" -> listOf(R.string.vegetables_tip_1, R.string.vegetables_tip_2, R.string.vegetables_tip_3)
+    else -> emptyList()
+}
 
 fun souvenirSpotDetail(prefecture: Prefecture, s: Souvenir): SpotDetail = SpotDetail(
     title = s.name,

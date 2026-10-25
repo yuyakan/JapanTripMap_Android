@@ -363,4 +363,26 @@
     <string name="tab_band_nature">自然</string>
     <string name="plan_item_addmemo">加入備註</string>
     <string name="plan_item_memo_title">備註</string>
+    <string name="gourmet_recommended_enjoyment">推荐的享用方法</string>
+    <string name="ramen_tip_1">在当地老字号店享受正宗味道</string>
+    <string name="ramen_tip_2">建议趁热食用</string>
+    <string name="ramen_tip_3">寻找当地人喜爱的店铺</string>
+    <string name="seafood_tip_1">在旺季品尝新鲜食材</string>
+    <string name="seafood_tip_2">在当地渔港或市场购买</string>
+    <string name="seafood_tip_3">以刺身或烧烤等各种烹饪方式享用</string>
+    <string name="meat_tip_1">在专门店品尝最高品质</string>
+    <string name="meat_tip_2">用当地的烹饪方法和调料享用</string>
+    <string name="meat_tip_3">在祭典或路边摊随意享用</string>
+    <string name="sweets_tip_1">作为伴手礼带回</string>
+    <string name="sweets_tip_2">配茶慢慢品味</string>
+    <string name="sweets_tip_3">在老字号和果子店享用现做的</string>
+    <string name="local_tip_1">在当地家庭料理店体验正宗味道</string>
+    <string name="local_tip_2">一起学习乡土料理的历史和文化</string>
+    <string name="local_tip_3">选择讲究当地食材的店铺</string>
+    <string name="drinks_tip_1">享受酒厂参观和试饮</string>
+    <string name="drinks_tip_2">配合当地料理品味</string>
+    <string name="drinks_tip_3">作为伴手礼带回</string>
+    <string name="vegetables_tip_1">在农场或直销所购买新鲜产品</string>
+    <string name="vegetables_tip_2">在旺季当地品尝</string>
+    <string name="vegetables_tip_3">也可以享受加工品或甜点</string>
 </resources>

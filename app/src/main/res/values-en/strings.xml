@@ -363,4 +363,26 @@
     <string name="tab_band_nature">Nature</string>
     <string name="plan_item_addmemo">Add memo</string>
     <string name="plan_item_memo_title">Memo</string>
+    <string name="gourmet_recommended_enjoyment">How to Enjoy</string>
+    <string name="ramen_tip_1">Enjoy authentic flavors at local traditional restaurants</string>
+    <string name="ramen_tip_2">Best enjoyed while hot</string>
+    <string name="ramen_tip_3">Look for shops popular with locals</string>
+    <string name="seafood_tip_1">Taste fresh seasonal seafood</string>
+    <string name="seafood_tip_2">Purchase at local fishing ports or markets</string>
+    <string name="seafood_tip_3">Enjoy various cooking methods like sashimi or grilled</string>
+    <string name="meat_tip_1">Taste the highest quality at specialty restaurants</string>
+    <string name="meat_tip_2">Enjoy with local cooking methods and sauces</string>
+    <string name="meat_tip_3">Enjoy casually at festivals or food stalls</string>
+    <string name="sweets_tip_1">Take home as souvenirs</string>
+    <string name="sweets_tip_2">Savor slowly with tea</string>
+    <string name="sweets_tip_3">Enjoy fresh-made sweets at traditional shops</string>
+    <string name="local_tip_1">Experience authentic flavors at local home-style restaurants</string>
+    <string name="local_tip_2">Learn about the history and culture of regional dishes</string>
+    <string name="local_tip_3">Choose restaurants that focus on local ingredients</string>
+    <string name="drinks_tip_1">Enjoy brewery tours and tastings</string>
+    <string name="drinks_tip_2">Pair with local cuisine</string>
+    <string name="drinks_tip_3">Take home as souvenirs</string>
+    <string name="vegetables_tip_1">Buy fresh produce at farms or direct sales stores</string>
+    <string name="vegetables_tip_2">Taste at their peak season locally</string>
+    <string name="vegetables_tip_3">Also enjoy as processed products or sweets</string>
 </resources>

@@ -363,4 +363,26 @@
     <string name="tab_band_nature">Natur</string>
     <string name="plan_item_addmemo">Notiz hinzufügen</string>
     <string name="plan_item_memo_title">Notiz</string>
+    <string name="gourmet_recommended_enjoyment">So genießt man es</string>
+    <string name="ramen_tip_1">Genießen Sie authentische Aromen in lokalen Traditionslokalen</string>
+    <string name="ramen_tip_2">Am besten heiß genießen</string>
+    <string name="ramen_tip_3">Halten Sie nach bei Einheimischen beliebten Lokalen Ausschau</string>
+    <string name="seafood_tip_1">Frische saisonale Meeresfrüchte probieren</string>
+    <string name="seafood_tip_2">An lokalen Fischerhäfen oder Märkten kaufen</string>
+    <string name="seafood_tip_3">Verschiedene Zubereitungen wie Sashimi oder gegrillt genießen</string>
+    <string name="meat_tip_1">Höchste Qualität in Spezialrestaurants genießen</string>
+    <string name="meat_tip_2">Mit lokalen Zubereitungen und Saucen genießen</string>
+    <string name="meat_tip_3">Ungezwungen bei Festen oder an Ständen genießen</string>
+    <string name="sweets_tip_1">Als Mitbringsel mitnehmen</string>
+    <string name="sweets_tip_2">In Ruhe mit Tee genießen</string>
+    <string name="sweets_tip_3">Frisch zubereitete Süßigkeiten in Traditionsläden genießen</string>
+    <string name="local_tip_1">Authentische Aromen in lokalen Familienlokalen erleben</string>
+    <string name="local_tip_2">Geschichte und Kultur regionaler Gerichte kennenlernen</string>
+    <string name="local_tip_3">Restaurants wählen, die auf lokale Zutaten setzen</string>
+    <string name="drinks_tip_1">Brauerei-Touren und Verkostungen genießen</string>
+    <string name="drinks_tip_2">Mit der lokalen Küche kombinieren</string>
+    <string name="drinks_tip_3">Als Mitbringsel mitnehmen</string>
+    <string name="vegetables_tip_1">Frische Erzeugnisse auf Höfen oder in Hofläden kaufen</string>
+    <string name="vegetables_tip_2">Vor Ort zur Hauptsaison genießen</string>
+    <string name="vegetables_tip_3">Auch als verarbeitete Produkte oder Süßigkeiten genießen</string>
 </resources>
