@@ -9,6 +9,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CurrencyYen
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Park
@@ -176,9 +179,6 @@ fun TourismDetailScreen(
     val seasonalSubtitle = stringResource(R.string.tourism_section_seasons_subtitle, prefecture.localizedName())
     val loadMoreText = stringResource(R.string.tourism_load_more)
 
-    val context = LocalContext.current
-    // 「プランに追加」対象の項目。null なら未選択。
-    var pendingItem by remember { mutableStateOf<PlanItem?>(null) }
     // 全画面で開く Shorts フィード / 写真ビューア。
     var shortsFeed by remember { mutableStateOf<ShortsFeedRequest?>(null) }
     var photoViewerStart by remember { mutableStateOf<Int?>(null) }
@@ -212,18 +212,6 @@ fun TourismDetailScreen(
             onClose = { photoViewerStart = null },
         )
         return
-    }
-
-    pendingItem?.let { item ->
-        AddToPlanDialog(
-            store = store,
-            item = item,
-            onDismiss = { pendingItem = null },
-            onAdded = { planTitle ->
-                pendingItem = null
-                Toast.makeText(context, context.getString(R.string.added_to_plan, planTitle), Toast.LENGTH_SHORT).show()
-            },
-        )
     }
 
     // トレンド（カテゴリごとに対応セクションへ分散配置）。
@@ -313,6 +301,7 @@ fun TourismDetailScreen(
                     loadMoreText = loadMoreText,
                 ) { index ->
                     val g = gourmets[index]
+                    // iOS GourmetItemCard（プランへの追加は詳細画面から。カードに「＋」は置かない）。
                     RichItemCard(
                         name = g.name,
                         description = g.description,
@@ -322,15 +311,8 @@ fun TourismDetailScreen(
                         popularity = g.popularity,
                         price = g.price,
                         season = g.bestSeason,
+                        height = 224,
                         onClick = { onOpenSpot(gourmetSpotDetail(prefecture, g)) },
-                        onAdd = {
-                            pendingItem = PlanItem(
-                                category = PlanItemCategory.GOURMET,
-                                prefectureName = prefecture.displayName,
-                                name = g.name,
-                                detail = g.description,
-                            )
-                        },
                     )
                 }
             }
@@ -349,6 +331,7 @@ fun TourismDetailScreen(
                     loadMoreText = loadMoreText,
                 ) { index ->
                     val s = souvenirs[index]
+                    // iOS SouvenirItemCard（時期＋カテゴリタグのみ。価格はカードに出さない）。
                     RichItemCard(
                         name = s.name,
                         description = s.description,
@@ -358,15 +341,8 @@ fun TourismDetailScreen(
                         popularity = s.popularity,
                         price = null,
                         season = s.bestSeason,
+                        height = 200,
                         onClick = { onOpenSpot(souvenirSpotDetail(prefecture, s)) },
-                        onAdd = {
-                            pendingItem = PlanItem(
-                                category = PlanItemCategory.SOUVENIR,
-                                prefectureName = prefecture.displayName,
-                                name = s.name,
-                                detail = s.description,
-                            )
-                        },
                     )
                 }
             }
@@ -388,24 +364,16 @@ fun TourismDetailScreen(
                 }
                 gridItems(onsens.size) { index ->
                     val o = onsens[index]
-                    RichItemCard(
+                    // iOS OnsenCard（名前→タイプタグ→説明。自然セクションのカードと同じ構成）。
+                    val meta = SpotKind.ONSEN.typeMeta(o.type)
+                    SpotSectionCard(
                         name = o.name,
                         description = o.description,
-                        accent = onsenColor(o.type),
-                        icon = Icons.Filled.Hotel,
-                        tagLabel = onsenLabel(o.type),
+                        color = meta.color,
+                        icon = meta.icon,
+                        tagLabel = localizeTypeLabel(meta.tagName),
                         popularity = o.popularity,
-                        price = null,
-                        season = null,
                         onClick = { onsenSpotDetail(prefecture, o.name)?.let(onOpenSpot) },
-                        onAdd = {
-                            pendingItem = PlanItem(
-                                category = PlanItemCategory.ONSEN,
-                                prefectureName = prefecture.displayName,
-                                name = o.name,
-                                detail = o.description,
-                            )
-                        },
                     )
                 }
             }
@@ -421,7 +389,15 @@ fun TourismDetailScreen(
                     loadMoreText = loadMoreText,
                 ) { index ->
                     val spot = natureSpots[index]
-                    NatureSectionCard(spot = spot, onClick = { onOpenSpot(spot.toSpotDetail()) })
+                    SpotSectionCard(
+                        name = spot.name,
+                        description = spot.description,
+                        color = spot.typeMeta.color,
+                        icon = spot.typeMeta.icon,
+                        tagLabel = localizeTypeLabel(spot.typeMeta.name),
+                        popularity = spot.popularity,
+                        onClick = { onOpenSpot(spot.toSpotDetail()) },
+                    )
                 }
             }
 
@@ -534,14 +510,25 @@ private fun TrendCategoryRow(group: TrendGroup, onOpen: (List<TrendVideo>, Int) 
     }
 }
 
-/** 県詳細の自然セクションのカード（iOS NatureSectionCard: アイコン丸＋星＋名前＋種別タグ＋説明）。 */
+/**
+ * 県詳細の温泉・自然セクションのカード（iOS OnsenCard / NatureSectionCard）。
+ * アイコン丸＋星 → 名前 → タイプのタグ → 説明。
+ */
 @Composable
-private fun NatureSectionCard(spot: RouletteSpot, onClick: () -> Unit) {
-    val color = spot.typeMeta.color
+private fun SpotSectionCard(
+    name: String,
+    description: String,
+    color: Color,
+    icon: ImageVector,
+    tagLabel: String,
+    popularity: Int,
+    onClick: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
+            .heightIn(min = 180.dp)
+            .fillMaxHeight()
             .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0x14000000))
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
@@ -558,13 +545,13 @@ private fun NatureSectionCard(spot: RouletteSpot, onClick: () -> Unit) {
                     .background(Brush.linearGradient(listOf(color.copy(alpha = 0.8f), color))),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(spot.typeMeta.icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
             }
             Spacer(modifier = Modifier.weight(1f))
-            StarRow(spot.popularity, Color(0xFFFFCC00))
+            StarRow(popularity, Color(0xFFFFCC00))
         }
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text(localizeData(spot.name), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(localizeData(name), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Row(
                 modifier = Modifier
                     .clip(RoundedCornerShape(50))
@@ -572,12 +559,12 @@ private fun NatureSectionCard(spot: RouletteSpot, onClick: () -> Unit) {
                     .padding(horizontal = 8.dp, vertical = 3.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(spot.typeMeta.icon, contentDescription = null, tint = color, modifier = Modifier.size(11.dp))
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(11.dp))
                 Spacer(modifier = Modifier.width(3.dp))
-                Text(localizeTypeLabel(spot.typeMeta.name), fontSize = 11.sp, color = color, maxLines = 1)
+                Text(tagLabel, fontSize = 11.sp, color = color, maxLines = 1)
             }
         }
-        Text(localizeData(spot.description), fontSize = 12.sp, color = Color.Gray, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(localizeData(description), fontSize = 12.sp, color = Color.Gray, maxLines = 2, overflow = TextOverflow.Ellipsis)
     }
 }
 
@@ -588,7 +575,8 @@ private fun FestivalSectionCard(festival: Festival, onClick: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .height(244.dp)
+            .heightIn(min = 224.dp)
+            .fillMaxHeight()
             .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0x1A000000))
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
@@ -712,9 +700,13 @@ private fun androidx.compose.foundation.lazy.LazyListScope.richGridSection(
             while (row * 2 < visible) {
                 val left = row * 2
                 val right = left + 1
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f)) { card(left) }
-                    Box(modifier = Modifier.weight(1f)) {
+                // 同じ行の 2 枚は高さを揃える（中身の多い方に合わせる）。
+                Row(
+                    modifier = Modifier.height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight()) { card(left) }
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                         if (right < visible) card(right)
                     }
                 }
@@ -740,9 +732,12 @@ private fun androidx.compose.foundation.lazy.LazyListScope.gridItems(
     items(rows) { row ->
         val left = row * 2
         val right = left + 1
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(modifier = Modifier.weight(1f)) { card(left) }
-            Box(modifier = Modifier.weight(1f)) {
+        Row(
+            modifier = Modifier.height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(modifier = Modifier.weight(1f).fillMaxHeight()) { card(left) }
+            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 if (right < count) card(right)
             }
         }
@@ -857,9 +852,9 @@ private fun AttractionMiniCard(name: String, description: String, onClick: () ->
 }
 
 /**
- * グルメ／温泉／お土産で共通の 2列リッチカード。
- * グラデーション円アイコン + 5つ星 + タイトル + 説明 + 価格/時期/カテゴリタグ + グラデーション枠。
- * iOS 版 GourmetItemCard / OnsenCard / SouvenirItemCard を再現。
+ * グルメ／お土産の 2列リッチカード。iOS 版 GourmetItemCard / SouvenirItemCard と同じ構成:
+ * グラデーション円アイコン＋星 → 名前・説明 → 下部に「¥ 価格」（グルメのみ）と「📅 時期＋カテゴリタグ」。
+ * プランへの追加は詳細画面から行う（iOS と同じく、カードに「＋」は置かない）。
  */
 @Composable
 private fun RichItemCard(
@@ -871,13 +866,16 @@ private fun RichItemCard(
     popularity: Int,
     price: String?,
     season: String?,
+    height: Int,
     onClick: () -> Unit,
-    onAdd: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 200.dp)
+            // iOS の固定高さを最小値にし、Android の文字メトリクスで溢れるときは伸ばす（下部の文字が切れないように）。
+            .heightIn(min = height.dp)
+            .fillMaxHeight()
+            .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0x1A000000))
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .border(
@@ -889,84 +887,63 @@ private fun RichItemCard(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // トップ: グラデーション円アイコン + 星 + 追加ボタン
+        // トップ: グラデーション円アイコン + 星
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(listOf(accent.copy(alpha = 0.8f), accent)),
-                    ),
+                    .background(Brush.linearGradient(listOf(accent.copy(alpha = 0.8f), accent))),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.weight(1f))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                repeat(5) { i ->
-                    Icon(
-                        Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = if (i < popularity) Color(0xFFFFC107) else Color(0x4D9E9E9E),
-                        modifier = Modifier.size(11.dp),
-                    )
-                }
-            }
+            StarRow(popularity, Color(0xFFFFCC00))
         }
 
-        // タイトル + 説明
-        Text(
-            localizeData(name),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            localizeData(description),
-            fontSize = 12.sp,
-            color = Color.Gray,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        // 名前 + 説明
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(localizeData(name), fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(localizeData(description), fontSize = 12.sp, color = Color.Gray, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // ボトム: 価格 / 時期 + カテゴリタグ
+        // 下部: 価格（グルメ）/ 時期 + カテゴリタグ
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (!price.isNullOrBlank()) {
-                Text("💰 ${localizeData(price)}", fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.CurrencyYen, contentDescription = null, tint = Color(0xFF34C759), modifier = Modifier.size(12.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(localizeData(price), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = AppTheme.TextPrimary, maxLines = 1)
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!season.isNullOrBlank()) {
+                    Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color(0xFF007AFF), modifier = Modifier.size(12.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        "📅 ${localizeData(season)}",
-                        fontSize = 11.sp,
+                        localizeData(season),
+                        fontSize = 12.sp,
                         color = Color.Gray,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
+                        modifier = Modifier.weight(1f),
                     )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                // カテゴリ/タイプ タグ（カプセル）
-                Box(
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    tagLabel,
+                    fontSize = 11.sp,
+                    color = accent,
+                    maxLines = 1,
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .background(accent.copy(alpha = 0.2f))
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                ) {
-                    Text(tagLabel, fontSize = 11.sp, color = accent, maxLines = 1)
-                }
-                Spacer(modifier = Modifier.width(6.dp))
-                Icon(
-                    Icons.Filled.AddCircle,
-                    contentDescription = stringResource(R.string.common_add_to_plan),
-                    tint = accent,
-                    modifier = Modifier
-                        .size(22.dp)
-                        .clickable(onClick = onAdd),
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
                 )
             }
         }
