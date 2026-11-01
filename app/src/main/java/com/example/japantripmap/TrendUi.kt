@@ -276,12 +276,32 @@ fun ShortsFeedScreen(request: ShortsFeedRequest, onClose: () -> Unit) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    // 閉じるボタンはプレイヤーの外（上部の帯）に置く。要件B: プレイヤーの一部・機能を覆わない。
+    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .height(52.dp),
+        ) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .padding(start = 12.dp)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f))
+                    .clickable(onClick = onClose),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = Color.White)
+            }
+        }
         VerticalPager(
             state = pagerState,
             beyondViewportPageCount = 1,
             key = { it },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.weight(1f).fillMaxWidth(),
         ) { page ->
             val video = videos[page]
             val active = page == pagerState.currentPage && !pagerState.isScrollInProgress ||
@@ -292,19 +312,6 @@ fun ShortsFeedScreen(request: ShortsFeedRequest, onClose: () -> Unit) {
                 isPreloaded = video.videoId in materialized ||
                     kotlin.math.abs(page - pagerState.currentPage) <= PRELOAD_RADIUS,
             )
-        }
-
-        Box(
-            modifier = Modifier
-                .statusBarsPadding()
-                .padding(start = 16.dp, top = 8.dp)
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.4f))
-                .clickable(onClick = onClose),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = Color.White)
         }
     }
 
@@ -326,30 +333,34 @@ private const val EVICT_RADIUS = 4
 /** 1 本分のページ。プレイヤー（または未生成時のサムネ）＋下部の出典オーバーレイ。 */
 @Composable
 private fun ShortsPage(video: TrendVideo, isActive: Boolean, isPreloaded: Boolean) {
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-        if (isPreloaded) {
-            ShortPlayer(
-                videoId = video.videoId,
-                isActive = isActive,
-                thumbnailUrl = video.thumbnailUrl,
-                modifier = Modifier.fillMaxWidth().aspectRatio(9f / 16f),
-            )
-        } else {
-            AsyncImage(
-                model = video.thumbnailUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxWidth().aspectRatio(9f / 16f),
-            )
+    // プレイヤー（9:16）と出典（タイトル・チャンネル名）を縦に分けて並べ、
+    // 出典の帯がプレイヤーの再生バー・ボタンに重ならないようにする（要件B）。
+    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+            val playerModifier = Modifier.aspectRatio(9f / 16f, matchHeightConstraintsFirst = true)
+            if (isPreloaded) {
+                ShortPlayer(
+                    videoId = video.videoId,
+                    isActive = isActive,
+                    thumbnailUrl = video.thumbnailUrl,
+                    modifier = playerModifier,
+                )
+            } else {
+                AsyncImage(
+                    model = video.thumbnailUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = playerModifier,
+                )
+            }
         }
 
+        // 要件D: 出典（タイトル・チャンネル名）。
         Column(
             modifier = Modifier
-                .align(Alignment.BottomStart)
                 .fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.55f))))
                 .navigationBarsPadding()
-                .padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 40.dp),
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
