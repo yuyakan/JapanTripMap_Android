@@ -56,6 +56,8 @@ class MainActivity : ComponentActivity() {
         // 許可されてから AdMob を初期化する。対象外の地域では即座に許可され従来どおり広告が出る。
         ConsentManager.gatherConsentThen(this) { initializeAds() }
         // お気に入り・最近見た・訪問済みの県、トレンド動画キャッシュを使えるようにする。
+        // ストア用スクショの撮影モード（デバッグ版で --ez screenshot_mode true のときだけ有効）。
+        ScreenshotMode.init(intent)
         PrefectureStores.init(this)
         TrendRepository.init(this)
         setContent {

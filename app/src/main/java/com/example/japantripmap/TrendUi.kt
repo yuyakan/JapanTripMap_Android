@@ -119,6 +119,28 @@ fun prefetchThumbnails(context: Context, urls: List<String>) {
     urls.forEach { loader.enqueue(ImageRequest.Builder(context).data(it).build()) }
 }
 
+// MARK: - サムネイル（撮影モード対応）
+
+/**
+ * 動画サムネ。撮影モード（[ScreenshotMode]・デバッグ版のみ）では他人のサムネの代わりに
+ * 自前のモック画像を出す。ホーム・県詳細・Shorts のサムネはすべてここを通す（iOS CachedThumbnail と同じ）。
+ */
+@Composable
+fun TrendThumbnail(
+    url: String,
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    shelf: String? = null,
+    position: Int? = null,
+) {
+    val mock = ScreenshotMode.mockThumbnail(url, shelf, position)
+    if (mock != 0) {
+        Image(painterResource(mock), contentDescription = null, contentScale = contentScale, modifier = modifier)
+    } else {
+        AsyncImage(model = url, contentDescription = null, contentScale = contentScale, modifier = modifier)
+    }
+}
+
 // MARK: - トレンドカード
 
 /**
@@ -126,7 +148,7 @@ fun prefetchThumbnails(context: Context, urls: List<String>) {
  * 要件D: チャンネル名を必ず表示して出典を明示する（画面全体の出典は Developed with YouTube ロゴ）。
  */
 @Composable
-fun TrendCard(video: TrendVideo, onClick: () -> Unit) {
+fun TrendCard(video: TrendVideo, onClick: () -> Unit, shelf: String? = null, position: Int? = null) {
     val width = 132.dp
     Column(
         modifier = Modifier
@@ -147,12 +169,7 @@ fun TrendCard(video: TrendVideo, onClick: () -> Unit) {
                 tint = Color.Gray,
                 modifier = Modifier.align(Alignment.Center).size(28.dp),
             )
-            AsyncImage(
-                model = video.thumbnailUrl,
-                contentDescription = video.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize(),
-            )
+            TrendThumbnail(video.thumbnailUrl, Modifier.fillMaxSize(), shelf = shelf, position = position)
             Text(
                 video.durationText,
                 fontSize = 10.sp,
@@ -167,7 +184,7 @@ fun TrendCard(video: TrendVideo, onClick: () -> Unit) {
             )
         }
         Text(
-            video.title,
+            ScreenshotMode.title(video),
             fontSize = 12.sp,
             fontWeight = FontWeight.SemiBold,
             color = AppTheme.TextPrimary,
@@ -177,7 +194,7 @@ fun TrendCard(video: TrendVideo, onClick: () -> Unit) {
             modifier = Modifier.height(32.dp),
         )
         Text(
-            video.channelTitle,
+            ScreenshotMode.channel(video),
             fontSize = 10.sp,
             color = AppTheme.TextSecondary,
             maxLines = 1,
@@ -203,7 +220,7 @@ fun TrendScrollRow(
         contentPadding = PaddingValues(horizontal = horizontalPadding.dp, vertical = 8.dp),
     ) {
         itemsIndexed(group.videos, key = { _, v -> v.videoId }) { index, video ->
-            TrendCard(video = video, onClick = { onOpen(group.videos, index) })
+            TrendCard(video = video, onClick = { onOpen(group.videos, index) }, shelf = group.categoryKey, position = index)
         }
     }
 }
@@ -346,12 +363,7 @@ private fun ShortsPage(video: TrendVideo, isActive: Boolean, isPreloaded: Boolea
                     modifier = playerModifier,
                 )
             } else {
-                AsyncImage(
-                    model = video.thumbnailUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Fit,
-                    modifier = playerModifier,
-                )
+                TrendThumbnail(video.thumbnailUrl, playerModifier, contentScale = ContentScale.Fit)
             }
         }
 
@@ -364,7 +376,7 @@ private fun ShortsPage(video: TrendVideo, isActive: Boolean, isPreloaded: Boolea
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                video.title,
+                ScreenshotMode.title(video),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White,
@@ -374,7 +386,7 @@ private fun ShortsPage(video: TrendVideo, isActive: Boolean, isPreloaded: Boolea
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.AccountCircle, contentDescription = null, tint = Color.White.copy(alpha = 0.9f), modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(video.channelTitle, fontSize = 13.sp, color = Color.White.copy(alpha = 0.9f), maxLines = 1)
+                Text(ScreenshotMode.channel(video), fontSize = 13.sp, color = Color.White.copy(alpha = 0.9f), maxLines = 1)
             }
         }
     }
@@ -466,12 +478,7 @@ private fun ShortPlayer(videoId: String, isActive: Boolean, thumbnailUrl: String
     Box(modifier = modifier) {
         AndroidView(factory = { playerView }, modifier = Modifier.fillMaxSize())
         if (!started) {
-            AsyncImage(
-                model = thumbnailUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
-                modifier = Modifier.fillMaxSize().background(Color.Black),
-            )
+            TrendThumbnail(thumbnailUrl, Modifier.fillMaxSize().background(Color.Black), contentScale = ContentScale.Fit)
         }
     }
 }
