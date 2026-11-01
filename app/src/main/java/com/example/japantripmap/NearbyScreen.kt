@@ -156,6 +156,8 @@ fun NearbyScreen(onOpenSpot: (SpotDetail) -> Unit) {
     // 確定検索（現在地採用・ユーザー操作）が済んだか。済んだ後は現在地に自動追従しない。
     var committed by remember { mutableStateOf(false) }
     var showNoResults by remember { mutableStateOf(false) }
+    // GoogleMap の読み込みが完了したか（CameraUpdateFactory はこれ以降でないと使えない）。
+    var mapLoaded by remember { mutableStateOf(false) }
 
     val cameraState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(TOKYO_CENTER, DEFAULT_ZOOM)
@@ -164,7 +166,14 @@ fun NearbyScreen(onOpenSpot: (SpotDetail) -> Unit) {
     fun search(center: LatLng, isCommitted: Boolean = true) {
         if (isCommitted) committed = true
         sortedSpots = sortedByDistance(center)
-        scope.launch { cameraState.animate(CameraUpdateFactory.newLatLngZoom(center, DEFAULT_ZOOM), 400) }
+        // 地図の読み込み完了前に CameraUpdateFactory を使うと「not initialized」で落ちる
+        // （現在地が地図より先に届く端末がある）。完了前はカメラ位置を直接差し替え、
+        // 完了後だけアニメーションで寄せる。
+        if (mapLoaded) {
+            scope.launch { cameraState.animate(CameraUpdateFactory.newLatLngZoom(center, DEFAULT_ZOOM), 400) }
+        } else {
+            cameraState.position = CameraPosition.fromLatLngZoom(center, DEFAULT_ZOOM)
+        }
         if (isCommitted && sortedSpots.none { (it.distanceMeters ?: Float.MAX_VALUE) <= MAPPED_RADIUS_METERS }) {
             showNoResults = true
         }
@@ -199,6 +208,7 @@ fun NearbyScreen(onOpenSpot: (SpotDetail) -> Unit) {
         GoogleMap(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraState,
+            onMapLoaded = { mapLoaded = true },
             properties = MapProperties(isMyLocationEnabled = hasPermission && currentLocation != null),
             uiSettings = MapUiSettings(zoomControlsEnabled = false, myLocationButtonEnabled = false, mapToolbarEnabled = false),
         ) {
