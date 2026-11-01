@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import androidx.activity.compose.BackHandler
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -103,101 +104,32 @@ internal fun spotDetailForPlanItem(item: PlanItem): SpotDetail? {
     val pref = prefectureByName(item.prefectureName) ?: return fallbackSpotDetail(item)
 
     return when (item.category) {
-        PlanItemCategory.ATTRACTION -> {
-            val a = pref.tourismInfo?.attractions?.firstOrNull { it.name == item.name }
-                ?: return fallbackSpotDetail(item)
-            SpotDetail(
-                title = a.name,
-                prefecture = pref,
-                accent = AttractionAccentColor,
-                icon = Icons.Filled.LocationOn,
-                description = a.description,
-                planCategory = PlanItemCategory.ATTRACTION,
-                latitude = a.latitude,
-                longitude = a.longitude,
-                photoResName = ATTRACTION_PHOTOS[a.name],
-            )
-        }
-
-        PlanItemCategory.GOURMET -> {
-            val g = pref.gourmets.firstOrNull { it.name == item.name }
-                ?: return fallbackSpotDetail(item)
-            SpotDetail(
-                title = g.name,
-                prefecture = pref,
-                accent = categoryColor(g.category),
-                icon = Icons.Filled.Restaurant,
-                description = g.description,
-                planCategory = PlanItemCategory.GOURMET,
-                badge = categoryLabel(g.category),
-                popularity = g.popularity,
-                infoRows = listOf(
-                    "価格帯" to g.price,
-                    "おすすめ時期" to g.bestSeason,
-                    "カテゴリ" to categoryLabel(g.category),
-                ),
-                tabelogKeyword = g.name,
-            )
-        }
-
-        PlanItemCategory.SOUVENIR -> {
-            val s = pref.souvenirs.firstOrNull { it.name == item.name }
-                ?: return fallbackSpotDetail(item)
-            SpotDetail(
-                title = s.name,
-                prefecture = pref,
-                accent = categoryColor(s.category),
-                icon = Icons.Filled.CardGiftcard,
-                description = s.description,
-                planCategory = PlanItemCategory.SOUVENIR,
-                badge = categoryLabel(s.category),
-                popularity = s.popularity,
-                infoRows = listOf(
-                    "価格帯" to s.price,
-                    "おすすめ時期" to s.bestSeason,
-                    "カテゴリ" to categoryLabel(s.category),
-                ),
-            )
-        }
-
-        // 温泉・自然は RouletteSpot に既存の toSpotDetail() があるので再利用する。
-        PlanItemCategory.ONSEN ->
-            SpotRepository.all(SpotKind.ONSEN)
-                .firstOrNull { it.name == item.name && it.prefecture == pref }
-                ?.toSpotDetail()
+        PlanItemCategory.ATTRACTION ->
+            pref.tourismInfo?.attractions?.firstOrNull { it.name == item.name }
+                ?.let { attractionSpotDetail(pref, it) }
                 ?: fallbackSpotDetail(item)
 
-        PlanItemCategory.NATURE ->
-            SpotRepository.all(SpotKind.NATURE)
-                .firstOrNull { it.name == item.name && it.prefecture == pref }
-                ?.toSpotDetail()
+        PlanItemCategory.GOURMET ->
+            pref.gourmets.firstOrNull { it.name == item.name }
+                ?.let { gourmetSpotDetail(pref, it) }
                 ?: fallbackSpotDetail(item)
 
-        PlanItemCategory.FESTIVAL -> {
-            val f = pref.festivals.firstOrNull { it.name == item.name }
-                ?: return fallbackSpotDetail(item)
-            SpotDetail(
-                title = f.name,
-                prefecture = pref,
-                accent = festColor(f.category),
-                icon = festIcon(f.category),
-                description = f.description,
-                planCategory = PlanItemCategory.FESTIVAL,
-                latitude = f.latitude,
-                longitude = f.longitude,
-                badge = festLabel(f.category),
-                popularity = f.scale,
-                infoRows = listOf(
-                    "開催地" to "${pref.localizedName()}・${localizeData(f.location)}",
-                    "時期" to localizeData(f.month),
-                    "期間" to localizeData(f.duration),
-                ),
-                features = f.features,
-            )
-        }
+        PlanItemCategory.SOUVENIR ->
+            pref.souvenirs.firstOrNull { it.name == item.name }
+                ?.let { souvenirSpotDetail(pref, it) }
+                ?: fallbackSpotDetail(item)
+
+        PlanItemCategory.ONSEN -> onsenSpotDetail(pref, item.name) ?: fallbackSpotDetail(item)
+
+        PlanItemCategory.NATURE -> natureSpotDetail(pref, item.name) ?: fallbackSpotDetail(item)
+
+        PlanItemCategory.FESTIVAL ->
+            pref.festivals.firstOrNull { it.name == item.name }
+                ?.let { festivalSpotDetail(pref, it) }
+                ?: fallbackSpotDetail(item)
 
         // カスタムは上で早期 return 済み。網羅性のため。
-        PlanItemCategory.HOTEL, PlanItemCategory.TRANSPORT, PlanItemCategory.OTHER -> null
+        PlanItemCategory.HOTEL, PlanItemCategory.TRANSPORT, PlanItemCategory.OTHER, PlanItemCategory.EXPENSE -> null
     }
 }
 
@@ -250,9 +182,6 @@ internal fun coordinateForPlanItem(item: PlanItem): LatLng? {
     }
 }
 
-/** 観光アクセント（TourismDetailScreen の private 値と同一。ルーターでのみ使う）。 */
-private val AttractionAccentColor = Color(0xFF4C8CFA)
-
 // MARK: - カスタム項目の詳細画面（iOS 版 CustomPlanItemView 相当）
 
 /**
@@ -265,6 +194,7 @@ fun CustomPlanItemScreen(
     onEdit: () -> Unit,
     onClose: () -> Unit,
 ) {
+    BackHandler(onBack = onClose)
     val accent = planCategoryColor(item.category)
 
     Box(modifier = Modifier.fillMaxSize().background(accent)) {
@@ -521,10 +451,8 @@ fun CustomPlanItemSheet(
                 ),
             )
         },
-        // 下地に不透明色を敷いてから背景グラデーションを重ねる（下の画面が透けないように）。
-        modifier = Modifier
-            .background(AppTheme.Background)
-            .background(PlanTheme.backgroundGradient),
+        // iOS 3.0 でマイプラン配下は白基調（pageBackground）。下の画面が透けないよう不透明にする。
+        modifier = Modifier.background(PlanTheme.pageBackground),
     ) { padding ->
         Column(
             modifier = Modifier

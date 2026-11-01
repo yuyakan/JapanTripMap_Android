@@ -20,7 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
@@ -87,9 +86,11 @@ fun RouletteSpot.toSpotDetail(): SpotDetail = SpotDetail(
     planCategory = if (kind == SpotKind.ONSEN) PlanItemCategory.ONSEN else PlanItemCategory.NATURE,
     latitude = latitude,
     longitude = longitude,
+    // 自然スポットは iOS NaturePhoto と同じく写真があればヘッダーに敷く（温泉は写真なし）。
+    photoResName = if (kind == SpotKind.NATURE) NATURE_PHOTOS[name] else null,
     badge = localizeTypeLabel(typeMeta.name),
     popularity = popularity,
-    infoRows = listOf((if (kind == SpotKind.ONSEN) "泉質タイプ" else "種別") to localizeTypeLabel(typeMeta.name)),
+    // iOS の温泉・自然スポット詳細には基本情報カードが無い（種別はヘッダーのバッジで示す）。
 )
 
 private val MapFillStart = Color(0x6633C481)
@@ -128,8 +129,8 @@ fun SpotRouletteScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
+                // ステータスバーぶんの余白は統合マップタブの切替帯（MapTabScreen）が確保する。
+                .fillMaxSize(),
         ) {
             // 上部バー：設定（左）＋地図/リスト切替アイコン（右）。スピン中・結果表示中は隠す。
             // 隠すときは通常時ヘッダーと同じ高さの placeholder を出し、スピン開始で地図の縦位置が
@@ -149,7 +150,7 @@ fun SpotRouletteScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         // iOS: 設定はアイコン＋「設定」ラベルの白丸ボタン。
-                        PillButton(icon = Icons.Filled.Settings, label = stringResource(R.string.common_settings)) { showSettings = true }
+                        CircleIconButton(icon = Icons.Filled.Settings, contentDescription = stringResource(R.string.common_settings)) { showSettings = true }
                         Spacer(modifier = Modifier.weight(1f))
                         // iOS: 切替はアイコンのみ。
                         IconPillButton(
@@ -292,22 +293,6 @@ fun SpotRouletteScreen(
 }
 
 /** 白い角丸ピルボタン（設定 / 表示切替）。iOS のヘッダーボタンに対応。 */
-@Composable
-private fun PillButton(icon: ImageVector, label: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .appCard(corner = 20.dp)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = Color.Black, modifier = Modifier.size(18.dp))
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(label, fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.Black)
-    }
-}
-
-/** アイコンのみの白い角丸ボタン（地図/リスト切替）。iOS の切替ボタンに対応。 */
 @Composable
 private fun IconPillButton(icon: ImageVector, contentDescription: String, onClick: () -> Unit) {
     Box(

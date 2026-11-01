@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
@@ -24,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,7 +69,6 @@ private val PrefectureFillEnd = Color(0x8014B8A6)   // teal 0.5
 private val SelectedColor = Color(0xFFFF9500)
 private val SelectedShadow = Color(0xCC000000)
 private val StrokeColor = Color(0x66FFFFFF)
-private val AccentBlue = Color(0xFF4285F4)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +76,8 @@ fun JapanMapScreen(
     modifier: Modifier = Modifier,
     viewModel: RouletteViewModel = viewModel(),
     onOpenTourism: (Prefecture) -> Unit = {},
+    /** 県一覧・検索を開く（観光モードのみ。iOS 版の右上🔍）。 */
+    onOpenSearch: () -> Unit = {},
 ) {
     var showSettings by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -96,8 +97,8 @@ fun JapanMapScreen(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding(),
+                // ステータスバーぶんの余白は統合マップタブの切替帯（MapTabScreen）が確保する。
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // 上部バー：設定ボタン（左）＋対象県数（右）。結果表示中・スピン中は中身を隠すが、
@@ -121,25 +122,19 @@ fun JapanMapScreen(
                             .padding(horizontal = 16.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        SettingsChip(onClick = { showSettings = true })
+                        // iOS 3.0: 設定は歯車の丸ボタン、右に県検索の🔍（対象県数の表示は撤去）。
+                        CircleIconButton(
+                            icon = Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.common_settings),
+                            onClick = { showSettings = true },
+                        )
                         Spacer(modifier = Modifier.weight(1f))
-                        Column(horizontalAlignment = Alignment.End) {
-                            Text(
-                                text = stringResource(R.string.map_target_prefectures, viewModel.effectiveEnabled.size),
-                                fontSize = 13.sp,
-                                color = Color.Gray,
+                        if (viewModel.mode == RouletteMode.TOURISM) {
+                            CircleIconButton(
+                                icon = Icons.Filled.Search,
+                                contentDescription = stringResource(R.string.prefecture_search_placeholder),
+                                onClick = onOpenSearch,
                             )
-                            if (viewModel.hasCustomWeights) {
-                                Text(
-                                    text = stringResource(R.string.map_weighting_enabled),
-                                    fontSize = 11.sp,
-                                    color = AccentBlue,
-                                    modifier = Modifier
-                                        .padding(top = 2.dp)
-                                        .background(AccentBlue.copy(alpha = 0.1f), RoundedCornerShape(3.dp))
-                                        .padding(horizontal = 6.dp, vertical = 1.dp),
-                                )
-                            }
                         }
                     }
                 }
@@ -249,23 +244,22 @@ fun JapanMapScreen(
     }
 }
 
+/**
+ * マップ上部の丸ボタン（設定・検索）。iOS 版の regularMaterial の円ボタン（44pt）に対応。
+ * 温泉・自然タブの設定ボタンとも共用する。
+ */
 @Composable
-private fun SettingsChip(onClick: () -> Unit) {
-    Row(
+internal fun CircleIconButton(icon: androidx.compose.ui.graphics.vector.ImageVector, contentDescription: String, onClick: () -> Unit) {
+    Box(
         modifier = Modifier
-            .appCard(corner = 20.dp)
+            .shadow(3.dp, CircleShape)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.95f))
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(12.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            imageVector = Icons.Filled.Settings,
-            contentDescription = null,
-            tint = Color.Black,
-            modifier = Modifier.size(18.dp),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(text = stringResource(R.string.common_settings), fontSize = 15.sp, fontWeight = FontWeight.Medium, color = Color.Black)
+        Icon(imageVector = icon, contentDescription = contentDescription, tint = AppTheme.TextPrimary, modifier = Modifier.size(18.dp))
     }
 }
 

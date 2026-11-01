@@ -251,24 +251,7 @@ fun FestivalScreen(
             items(filtered) { fw ->
                 FestivalCard(fw, onClick = {
                     onOpenSpot(
-                        SpotDetail(
-                            title = fw.festival.name,
-                            prefecture = fw.prefecture,
-                            accent = festColor(fw.festival.category),
-                            icon = festIcon(fw.festival.category),
-                            description = fw.festival.description,
-                            planCategory = PlanItemCategory.FESTIVAL,
-                            latitude = fw.festival.latitude,
-                            longitude = fw.festival.longitude,
-                            badge = festLabel(fw.festival.category),
-                            popularity = fw.festival.scale,
-                            infoRows = listOf(
-                                "開催地" to "${fw.prefecture.localizedName()}・${localizeData(fw.festival.location)}",
-                                "時期" to localizeData(fw.festival.month),
-                                "期間" to localizeData(fw.festival.duration),
-                            ),
-                            features = fw.festival.features,
-                        ),
+                        festivalSpotDetail(fw.prefecture, fw.festival),
                     )
                 })
             }

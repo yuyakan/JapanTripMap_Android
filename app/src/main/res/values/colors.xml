@@ -9,4 +9,7 @@
     <color name="white">#FFFFFFFF</color>
     <!-- iOS 版 splashColor と同じ淡いティール。ランチャーアイコンの背景に使う。 -->
     <color name="ic_launcher_background">#C6E7E5</color>
+    <!-- スプラッシュ背景。splash_image.png に焼き込まれた背景色と一致させ、
+         システムスプラッシュ→Compose スプラッシュの切り替わりで境目を出さない。 -->
+    <color name="splash_background">#BEE8E4</color>
 </resources>

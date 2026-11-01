@@ -1,5 +1,13 @@
 package com.example.japantripmap
 
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SmartDisplay
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.platform.LocalContext
+import android.net.Uri
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -157,9 +165,59 @@ fun SettingsScreen(
                     )
                 }
             }
+
+            // ④ 規約・プライバシー（YouTube API Services の要件でアプリ内からの導線が必要）。
+            item(key = "legal") { LegalLinksSection() }
         }
     }
 }
+
+/**
+ * 規約・プライバシーへの導線。iOS 版 LegalLinksSection。
+ * YouTube API Services の開発者ポリシーは、自前のプライバシーポリシーの掲示と
+ * YouTube 利用規約・Google プライバシーポリシーへのリンクをアプリ内に求めている。
+ */
+@Composable
+private fun LegalLinksSection() {
+    val context = LocalContext.current
+    val links = listOf(
+        Triple(R.string.legal_privacy_policy, Icons.Filled.PrivacyTip, PRIVACY_POLICY_URL),
+        Triple(R.string.legal_youtube_terms, Icons.Filled.SmartDisplay, "https://www.youtube.com/t/terms"),
+        Triple(R.string.legal_google_privacy, Icons.Filled.Shield, "https://policies.google.com/privacy"),
+    )
+    Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
+        Text(
+            stringResource(R.string.legal),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = AppTheme.TextPrimary,
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+        )
+        Column(modifier = Modifier.fillMaxWidth().appCard(corner = 16.dp)) {
+            links.forEachIndexed { i, (titleRes, icon, url) ->
+                if (i > 0) HorizontalDivider(color = AppTheme.Hairline)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                        }
+                        .padding(horizontal = 14.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(icon, contentDescription = null, tint = Color(0xFF007AFF), modifier = Modifier.size(22.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(stringResource(titleRes), fontSize = 16.sp, fontWeight = FontWeight.Medium, color = AppTheme.TextPrimary, modifier = Modifier.weight(1f))
+                    // 外部ブラウザで開くことを示す（chevron だとアプリ内遷移に見える）。
+                    Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = null, tint = AppTheme.TextSecondary, modifier = Modifier.size(16.dp))
+                }
+            }
+        }
+    }
+}
+
+/** Android 版のプライバシーポリシー（iOS 版とは記載内容が異なるため別ページ）。 */
+private const val PRIVACY_POLICY_URL = "https://yuyakan.github.io/privacyPolicy/japantripmap/"
 
 /** 重み付け設定サブ画面へ進む行。SpotSettingsScreen の WeightSettingsRow と同一デザイン。 */
 @Composable

@@ -41,8 +41,8 @@ android {
         applicationId = "com.kanbe1365.japantripmap"
         minSdk = 24
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.1.1"
+        versionCode = 7
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -116,6 +116,9 @@ dependencies {
     implementation(libs.ads.mobile.sdk)
     // UMP（GDPR 同意フォーム）。EEA/英国/スイス向けに同意を取得してから広告を出す。
     implementation(libs.user.messaging.platform)
+    // ホームのトレンド動画（YouTube Shorts）: サムネのキャッシュ表示と公式埋め込みプレイヤー。
+    implementation(libs.coil.compose)
+    implementation(libs.android.youtube.player)
 
     debugImplementation(libs.androidx.ui.tooling)
 

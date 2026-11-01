@@ -124,10 +124,17 @@ object SpotRepository {
 
     /** 全自然スポット（NATURE_INFO をフラット化）。 */
     val allNatureSpots: List<RouletteSpot> by lazy {
+        // 同県・同名・同タイプのスポットが複数ある（例: 九十九里浜は海スポットとビーチの 2 件。
+        // iOS も同名で 2 件持つ）ため、2 件目以降は連番を付けて id を一意にする。
+        // 1 件目の id は従来どおりにして、保存済みの有効集合・重みを引き継ぐ。
+        val seen = HashMap<String, Int>()
         PREFECTURES_WITH_NATURE.flatMap { pref ->
             pref.natureSpots.map { s ->
+                val base = "nature-${pref.name}-${s.name}-${s.type}"
+                val n = (seen[base] ?: 0) + 1
+                seen[base] = n
                 RouletteSpot(
-                    id = "nature-${pref.name}-${s.name}-${s.type}",
+                    id = if (n == 1) base else "$base#$n",
                     name = s.name,
                     description = s.description,
                     typeKey = s.type,

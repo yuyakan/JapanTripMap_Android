@@ -16,10 +16,38 @@ enum class PlanItemCategory(val labelRes: Int) {
     SOUVENIR(R.string.plan_category_souvenir),
     HOTEL(R.string.plan_category_hotel),
     TRANSPORT(R.string.plan_category_transport),
-    OTHER(R.string.plan_category_memo);
+    OTHER(R.string.plan_category_memo),
+    /** 費用専用（場所・旅程を持たない出費項目。費用タブにのみ表示）。iOS 版 .expense。 */
+    EXPENSE(R.string.plan_category_expense);
 
     /** Context から解決したラベル（非 Composable な場所用）。 */
     fun label(context: android.content.Context): String = context.getString(labelRes)
+
+    /** ユーザーが手動で追加するカスタム項目か（元データ参照を持たない）。 */
+    val isCustom: Boolean get() = this == HOTEL || this == TRANSPORT || this == OTHER || this == EXPENSE
+
+    /** 費用専用か（旅程・地図・共有には出さず、費用タブにだけ出す）。 */
+    val isExpenseOnly: Boolean get() = this == EXPENSE
+}
+
+/** 旅行メンバー。割り勘で支払者・分担者を安定して参照するため id を持つ。iOS 版 PlanMember。 */
+@Serializable
+data class PlanMember(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+)
+
+/**
+ * 旅行プランの進行状態。iOS 版 PlanStatus。
+ * - UPCOMING: これから行く（既定）
+ * - ONGOING: 旅行中（ホーム最上部の帯カードに優先して出す）
+ * - COMPLETED: 旅行済み（その瞬間に県を訪問済みへ反映する）
+ */
+@Serializable
+enum class PlanStatus(val labelRes: Int) {
+    UPCOMING(R.string.plan_status_upcoming),
+    ONGOING(R.string.plan_status_ongoing),
+    COMPLETED(R.string.plan_status_completed),
 }
 
 /** プラン詳細の区切り方。iOS 版 PlanGroupingMode を移植。 */
@@ -81,7 +109,18 @@ data class PlanItem(
     val placeName: String? = null,
     /** 逆ジオ/検索由来の住所（表示・コピー用）。iOS 版 customAddress 相当。 */
     val address: String? = null,
+    /** 金額（円・整数）。null は未入力。費用タブで集計する（費用専用項目のみ）。 */
+    val cost: Int? = null,
+    /** 支払者（立て替えた人）のメンバー id。null は未指定。 */
+    val payerId: String? = null,
+    /** 分担者のメンバー id。null は「全メンバーで均等」（人数変動に追従）、空は割り勘対象外。 */
+    val splitMemberIds: List<String>? = null,
+    /** アプリ項目（観光・グルメ等）にユーザーが付けたメモ。iOS 版では customDetail に保存される値。 */
+    val memo: String? = null,
 ) {
+    /** 一覧に 1 行で出すユーザーのメモ（カスタム項目は detail、アプリ項目は memo）。 */
+    val userMemo: String get() = (if (category.isCustom) detail else memo.orEmpty()).trim()
+
     /** カスタム項目に位置が設定されているか。 */
     val hasCoordinate: Boolean get() = latitude != null && longitude != null
 }
@@ -101,9 +140,47 @@ data class TravelPlan(
     val dayCount: Int = 1,
     /** 日程内の時間ブロック定義（日程モードで使用）。 */
     val timeBlocks: List<TimeBlock> = emptyList(),
+    /** 旅行メンバー（登場順）。割り勘で項目の支払者・分担者を id 参照する。 */
+    val members: List<PlanMember> = emptyList(),
+    /** 進行状態（計画中 / 進行中 / 旅行済み）。 */
+    val status: PlanStatus = PlanStatus.UPCOMING,
+    /** 手動で「行き先候補」として登録した県（Prefecture の enum 名）。項目由来の県とは独立。 */
+    val plannedPrefectures: List<String> = emptyList(),
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
 ) {
+    /** 旅程・地図・共有が対象にする項目（費用専用項目を除く）。 */
+    val itineraryItems: List<PlanItem> get() = items.filterNot { it.category.isExpenseOnly }
+
+    /** 費用一覧・合計・精算の対象（費用専用項目のみ）。 */
+    val costItems: List<PlanItem> get() = items.filter { it.category.isExpenseOnly }
+
+    /** 手動登録した県（未知の名前は除く）。 */
+    val plannedPrefectureList: List<Prefecture>
+        get() = plannedPrefectures.mapNotNull { n -> Prefecture.entries.firstOrNull { it.name == n } }
+
+    /** 旅程項目から導かれる県（重複なし・登場順）。 */
+    val itemPrefectures: List<Prefecture>
+        get() = itineraryItems.mapNotNull { prefectureFromDisplayName(it.prefectureName) }.distinct()
+
+    /**
+     * プランに関わる県（重複なし）。手動登録した県を先に、続けて項目由来の県。
+     * 訪問済み反映・ホームの帯カード写真・県タイルで使う。iOS 版 TravelPlan.prefectures。
+     */
+    val prefectures: List<Prefecture> get() = (plannedPrefectureList + itemPrefectures).distinct()
+
+    /** 費用合計（未入力は 0 扱い）。 */
+    val totalCost: Int get() = costItems.sumOf { it.cost ?: 0 }
+
+    fun memberName(id: String): String? = members.firstOrNull { it.id == id }?.name
+
+    /** 項目の実効分担者 id（null=全員、それ以外は現存メンバーだけ）。 */
+    fun effectiveSplitMemberIds(item: PlanItem): List<String> {
+        val all = members.map { it.id }
+        val ids = item.splitMemberIds ?: return all
+        return ids.filter { it in all }
+    }
+
     /**
      * 日程モード用に、Day ごと（＋末尾に未割当）でグループ化して返す。
      * 各 day は 1..dayCount、未割当は day = null。項目が無い日も表示できるよう全 Day を含む。
@@ -111,10 +188,11 @@ data class TravelPlan(
     val itemsByDay: List<Pair<Int?, List<PlanItem>>>
         get() {
             val result = mutableListOf<Pair<Int?, List<PlanItem>>>()
+            val source = itineraryItems
             for (d in 1..dayCount) {
-                result.add(d to items.filter { it.dayNumber == d })
+                result.add(d to source.filter { it.dayNumber == d })
             }
-            val unassigned = items.filter { it.dayNumber == null || (it.dayNumber ?: 0) !in 1..dayCount }
+            val unassigned = source.filter { it.dayNumber == null || (it.dayNumber ?: 0) !in 1..dayCount }
             if (unassigned.isNotEmpty()) result.add(null to unassigned)
             return result
         }
@@ -124,8 +202,8 @@ data class TravelPlan(
      * block が null のセクションはブロック未割当項目。ブロックはあるが項目 0 のものも表示のため含める。
      */
     fun blockSections(day: Int): List<Pair<TimeBlock?, List<PlanItem>>> {
-        val dayItems = items.filter { it.dayNumber == day }
-        val blocks = timeBlocks.filter { it.dayNumber == day }.sortedBy { it.sortKey }
+        val dayItems = itineraryItems.filter { it.dayNumber == day }
+        val blocks = timeBlocks.filter { it.dayNumber == day }.sortedWith(compareBy({ it.sortKey }, { it.id }))
         val result = mutableListOf<Pair<TimeBlock?, List<PlanItem>>>()
         for (block in blocks) {
             result.add(block to dayItems.filter { it.timeBlockId == block.id })

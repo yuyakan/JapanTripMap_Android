@@ -1,5 +1,6 @@
 package com.example.japantripmap
 
+import androidx.activity.compose.BackHandler
 import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
@@ -8,6 +9,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +30,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CurrencyYen
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Park
+import androidx.compose.material.icons.filled.LocalCafe
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.AcUnit
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Hotel
@@ -62,7 +75,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // MARK: - セクションのアクセント色（iOS 版の各 Rich セクション accent に合わせる）
-private val AttractionAccent = Color(0xFF4C8CFA) // 観光: ブルー系
 private val GourmetAccent = Color(0xFFED7321) // グルメ: オレンジ (0.93,0.45,0.13)
 private val OnsenAccent = Color(0xFF2194A8) // 温泉: ティール (0.13,0.58,0.66)
 private val SouvenirAccent = Color(0xFFDB5994) // お土産: ピンク (0.86,0.35,0.58)
@@ -123,10 +135,22 @@ private fun onsenLabel(t: String) = localizeTypeLabel(ONSEN_TYPE_LABELS[t] ?: t)
 /** 最初に見せる件数（iOS 版の Array(items.prefix(4)) に合わせる）。 */
 private const val INITIAL_GRID_COUNT = 4
 
+// iOS 版の各 Rich セクションの accent。
+private val NatureSectionAccent = Color(0xFF338C5C) // (0.20, 0.55, 0.36)
+private val FestivalSectionAccent = Color(0xFF8C61C7) // (0.55, 0.38, 0.78)
+private val SeasonalSectionAccent = Color(0xFF2980D9) // (0.16, 0.50, 0.85)
+private val BrandAccent = PlanTheme.Primary
+
 /**
- * 観光詳細画面。iOS 版 TourismDetailView を移植し、見た目も iOS に寄せている。
- * グラデーション県名 → 観光地図 + 横スクロール観光カード → ご当地グルメ（2列リッチカード）
- * → 温泉 → お土産 → フォトギャラリー をリスト表示する。
+ * 県詳細画面。iOS 版 TourismDetailView（3.0.0）を移植。
+ *
+ * 並び（iOS と同一）: 県名 → 人気スポット動画 → 観光地マップ＋観光カード → レクタングル広告
+ * → ご当地グルメ → グルメ動画 → お土産 → バナー（温泉か自然がある県のみ）→ 温泉 → 自然
+ * → カフェ動画 → 夏祭り・花火大会 → 春・秋・冬の祭り → バナー → 写真カルーセル。
+ *
+ * - 開いた瞬間に「最近見た県」へ記録する（ホームの最近見た列の元データ）。
+ * - 右上のハートでお気に入りをトグル（ホームのお気に入り列）。
+ * - 動画（YouTube Shorts）はホームと同じ取得結果を共有し、未取得ならここで読み込む。
  */
 @Composable
 fun TourismDetailScreen(
@@ -139,6 +163,8 @@ fun TourismDetailScreen(
     val gourmets = prefecture.gourmets
     val souvenirs = prefecture.souvenirs
     val onsens = prefecture.onsens
+    val natureSpots = remember(prefecture) { SpotRepository.all(SpotKind.NATURE).filter { it.prefecture == prefecture } }
+    val (summerFestivals, seasonalFestivals) = remember(prefecture) { prefecture.splitFestivals() }
 
     // LazyListScope（非 Composable）内では stringResource を呼べないため、
     // セクション見出し類はここで先に解決しておく。
@@ -146,42 +172,73 @@ fun TourismDetailScreen(
     val gourmetSubtitle = stringResource(R.string.tourism_section_gourmet_subtitle, prefecture.localizedName())
     val souvenirTitle = stringResource(R.string.tourism_section_souvenir)
     val souvenirSubtitle = stringResource(R.string.tourism_section_souvenir_subtitle, prefecture.localizedName())
+    val natureTitle = stringResource(R.string.tourism_section_nature)
+    val festivalTitle = stringResource(R.string.tourism_section_festival)
+    val festivalSubtitle = stringResource(R.string.tourism_section_festival_subtitle, prefecture.localizedName())
+    val seasonalTitle = stringResource(R.string.tourism_section_seasons)
+    val seasonalSubtitle = stringResource(R.string.tourism_section_seasons_subtitle, prefecture.localizedName())
     val loadMoreText = stringResource(R.string.tourism_load_more)
 
-    val context = LocalContext.current
-    // 「プランに追加」対象の項目。null なら未選択。
-    var pendingItem by remember { mutableStateOf<PlanItem?>(null) }
+    // 全画面で開く Shorts フィード / 写真ビューア。
+    var shortsFeed by remember { mutableStateOf<ShortsFeedRequest?>(null) }
+    var photoViewerStart by remember { mutableStateOf<Int?>(null) }
 
-    pendingItem?.let { item ->
-        AddToPlanDialog(
-            store = store,
-            item = item,
-            onDismiss = { pendingItem = null },
-            onAdded = { planTitle ->
-                pendingItem = null
-                Toast.makeText(context, context.getString(R.string.added_to_plan, planTitle), Toast.LENGTH_SHORT).show()
-            },
-        )
+    // 戻ると広告カウントを +2（iOS TourismDetailView の戻るボタンと同じ）。
+    val back: () -> Unit = {
+        InterstitialAdManager.addDetailPoints()
+        onBack()
     }
+    BackHandler(onBack = back)
+
+    LaunchedEffect(prefecture) {
+        // ホームの「最近見た県」に記録する（マップ・検索・ホームのどこから来てもここを通る）。
+        RecentPrefectureStore.record(prefecture)
+        // ホームを経由せず直接来た場合でも動画を出せるよう読み込む（取得済みなら何もしない）。
+        TrendRepository.loadIfNeeded()
+    }
+
+    val photographed = remember(prefecture) {
+        info?.attractions?.filter { ATTRACTION_PHOTOS[it.name] != null } ?: emptyList()
+    }
+
+    shortsFeed?.let { feed ->
+        ShortsFeedScreen(request = feed, onClose = { shortsFeed = null })
+        return
+    }
+    photoViewerStart?.let { start ->
+        PhotoViewerScreen(
+            photos = photographed.map { ViewerPhoto(it.name, ATTRACTION_PHOTOS[it.name]!!) },
+            startIndex = start,
+            onClose = { photoViewerStart = null },
+        )
+        return
+    }
+
+    // トレンド（カテゴリごとに対応セクションへ分散配置）。
+    val spotTrend = TrendRepository.group(prefecture, "spot")
+    val gourmetTrend = TrendRepository.group(prefecture, "gourmet")
+    val cafeTrend = TrendRepository.group(prefecture, "cafe")
+    val openShorts: (List<TrendVideo>, Int) -> Unit = { videos, index -> shortsFeed = ShortsFeedRequest(videos, index) }
+    val isFavorite = FavoritePrefectureStore.isFavorite(prefecture)
 
     // 地図ドラッグ中はリストスクロールを止め、地図のパンを親に横取りされないようにする。
     var mapTouched by remember { mutableStateOf(false) }
-    // ヘッダーは持たず、戻るボタンを左上にフローティングで重ねる（iOS 版 TourismDetailView 準拠）。
+    // ヘッダーは持たず、戻るボタンを左上・お気に入りを右上にフローティングで重ねる（iOS 版準拠）。
     Box(modifier = Modifier.fillMaxSize().background(AppTheme.Background)) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp),
             userScrollEnabled = !mapTouched,
         ) {
             // 戻るボタン + 県名の分だけ上部に余白を確保する（ステータスバー + フローティング分）。
             item { Spacer(modifier = Modifier.statusBarsPadding().height(44.dp)) }
 
-            // 県名のグラデーション見出し（中央寄せ・コンパクト）。
+            // 県名のグラデーション見出し（中央寄せ）。
             item {
                 Text(
                     text = prefecture.localizedName(),
-                    fontSize = 24.sp,
+                    fontSize = 30.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     style = androidx.compose.ui.text.TextStyle(brush = HeaderGradient),
@@ -189,13 +246,16 @@ fun TourismDetailScreen(
                 )
             }
 
+            // 人気スポットの Shorts（県名の直下）。
+            spotTrend?.let { group -> item(key = "trend_spot") { TrendCategoryRow(group, openShorts) } }
+
             // 観光地図 + 横スクロールの観光カード。
             if (info != null && info.attractions.isNotEmpty()) {
                 item {
                     RichSectionHeader(
                         icon = Icons.Filled.Map,
                         title = stringResource(R.string.tourism_section_map),
-                        accent = AttractionAccent,
+                        accent = BrandAccent,
                     )
                 }
                 item {
@@ -220,30 +280,15 @@ fun TourismDetailScreen(
                             AttractionMiniCard(
                                 name = a.name,
                                 description = a.description,
-                                onClick = {
-                                    onOpenSpot(
-                                        SpotDetail(
-                                            title = a.name,
-                                            prefecture = prefecture,
-                                            accent = AttractionAccent,
-                                            icon = Icons.Filled.LocationOn,
-                                            description = a.description,
-                                            planCategory = PlanItemCategory.ATTRACTION,
-                                            latitude = a.latitude,
-                                            longitude = a.longitude,
-                                            photoResName = ATTRACTION_PHOTOS[a.name],
-                                        ),
-                                    )
-                                },
+                                onClick = { onOpenSpot(attractionSpotDetail(prefecture, a)) },
                             )
                         }
                     }
                 }
             }
 
-            // 観光セクションの下にアダプティブバナー（iOS 版 TourismDetailView と同じ位置・ID）。
-            // iOS の AdaptiveBannerAdView は既定のセクション間バナー（bannerUnitId）を使う。
-            item { AdaptiveBannerAd(adUnitId = AdConfig.bannerUnitId) }
+            // 観光地マップの下だけレクタングル(300x250)（iOS 版と同じ位置・セクション間ユニット）。
+            item { MediumRectangleAd(adUnitId = AdConfig.bannerUnitId) }
 
             // ご当地グルメ（2列リッチカード + もっと見る）。
             if (gourmets.isNotEmpty()) {
@@ -256,6 +301,7 @@ fun TourismDetailScreen(
                     loadMoreText = loadMoreText,
                 ) { index ->
                     val g = gourmets[index]
+                    // iOS GourmetItemCard（プランへの追加は詳細画面から。カードに「＋」は置かない）。
                     RichItemCard(
                         name = g.name,
                         description = g.description,
@@ -265,90 +311,14 @@ fun TourismDetailScreen(
                         popularity = g.popularity,
                         price = g.price,
                         season = g.bestSeason,
-                        onClick = {
-                            onOpenSpot(
-                                SpotDetail(
-                                    title = g.name,
-                                    prefecture = prefecture,
-                                    accent = categoryColor(g.category),
-                                    icon = Icons.Filled.Restaurant,
-                                    description = g.description,
-                                    planCategory = PlanItemCategory.GOURMET,
-                                    badge = categoryLabel(g.category),
-                                    popularity = g.popularity,
-                                    infoRows = listOf(
-                                        "価格帯" to g.price,
-                                        "おすすめ時期" to g.bestSeason,
-                                        "カテゴリ" to categoryLabel(g.category),
-                                    ),
-                                    tabelogKeyword = g.name,
-                                ),
-                            )
-                        },
-                        onAdd = {
-                            pendingItem = PlanItem(
-                                category = PlanItemCategory.GOURMET,
-                                prefectureName = prefecture.displayName,
-                                name = g.name,
-                                detail = g.description,
-                            )
-                        },
+                        height = 224,
+                        onClick = { onOpenSpot(gourmetSpotDetail(prefecture, g)) },
                     )
                 }
             }
 
-            // グルメの下だけレクタングル(300x250)。eCPM が高い傾向のため試験的に採用（iOS 版と同じ）。
-            // iOS の MediumRectangleAdView() は引数なし＝既定のセクション間バナー（bannerUnitId）。
-            item { MediumRectangleAd(adUnitId = AdConfig.bannerUnitId) }
-
-            // 温泉（2列リッチカード）。
-            if (onsens.isNotEmpty()) {
-                item {
-                    RichSectionHeader(
-                        icon = Icons.Filled.Spa,
-                        title = stringResource(R.string.tourism_section_onsen),
-                        accent = OnsenAccent,
-                    )
-                }
-                gridItems(onsens.size) { index ->
-                    val o = onsens[index]
-                    RichItemCard(
-                        name = o.name,
-                        description = o.description,
-                        accent = onsenColor(o.type),
-                        icon = Icons.Filled.Hotel,
-                        tagLabel = onsenLabel(o.type),
-                        popularity = o.popularity,
-                        price = null,
-                        season = null,
-                        onClick = {
-                            onOpenSpot(
-                                SpotDetail(
-                                    title = o.name,
-                                    prefecture = prefecture,
-                                    accent = onsenColor(o.type),
-                                    icon = Icons.Filled.Hotel,
-                                    description = o.description,
-                                    planCategory = PlanItemCategory.ONSEN,
-                                    latitude = o.latitude,
-                                    longitude = o.longitude,
-                                    badge = onsenLabel(o.type),
-                                    popularity = o.popularity,
-                                    infoRows = listOf("泉質タイプ" to onsenLabel(o.type)),
-                                ),
-                            )
-                        },
-                        onAdd = {
-                            pendingItem = PlanItem(
-                                category = PlanItemCategory.ONSEN,
-                                prefectureName = prefecture.displayName,
-                                name = o.name,
-                                detail = o.description,
-                            )
-                        },
-                    )
-                }
-            }
+            // グルメの Shorts（グルメセクションの一番下）。
+            gourmetTrend?.let { group -> item(key = "trend_gourmet") { TrendCategoryRow(group, openShorts) } }
 
             // お土産（2列リッチカード + もっと見る）。
             if (souvenirs.isNotEmpty()) {
@@ -361,6 +331,7 @@ fun TourismDetailScreen(
                     loadMoreText = loadMoreText,
                 ) { index ->
                     val s = souvenirs[index]
+                    // iOS SouvenirItemCard（時期＋カテゴリタグのみ。価格はカードに出さない）。
                     RichItemCard(
                         name = s.name,
                         description = s.description,
@@ -370,48 +341,115 @@ fun TourismDetailScreen(
                         popularity = s.popularity,
                         price = null,
                         season = s.bestSeason,
-                        onClick = {
-                            onOpenSpot(
-                                SpotDetail(
-                                    title = s.name,
-                                    prefecture = prefecture,
-                                    accent = categoryColor(s.category),
-                                    icon = Icons.Filled.CardGiftcard,
-                                    description = s.description,
-                                    planCategory = PlanItemCategory.SOUVENIR,
-                                    badge = categoryLabel(s.category),
-                                    popularity = s.popularity,
-                                    infoRows = listOf(
-                                        "価格帯" to s.price,
-                                        "おすすめ時期" to s.bestSeason,
-                                        "カテゴリ" to categoryLabel(s.category),
-                                    ),
-                                ),
-                            )
-                        },
-                        onAdd = {
-                            pendingItem = PlanItem(
-                                category = PlanItemCategory.SOUVENIR,
-                                prefectureName = prefecture.displayName,
-                                name = s.name,
-                                detail = s.description,
-                            )
-                        },
+                        height = 200,
+                        onClick = { onOpenSpot(souvenirSpotDetail(prefecture, s)) },
                     )
                 }
             }
 
-            // お土産の下にアダプティブバナー（iOS 版 TourismDetailView と同じ位置・ID＝セクション間バナー）。
+            // 温泉・自然がどちらも無い県では、この広告が直下のカフェ動画と隣り合ってしまうため出さない
+            // （iOS hasSectionBelowAd。広告と動画を隣接させない）。
+            if (onsens.isNotEmpty() || natureSpots.isNotEmpty()) {
+                item { AdaptiveBannerAd(adUnitId = AdConfig.bannerUnitId) }
+            }
+
+            // 温泉（2列リッチカード・全件）。
+            if (onsens.isNotEmpty()) {
+                item {
+                    RichSectionHeader(
+                        icon = Icons.Filled.Spa,
+                        title = stringResource(R.string.tourism_section_onsen),
+                        accent = OnsenAccent,
+                    )
+                }
+                gridItems(onsens.size) { index ->
+                    val o = onsens[index]
+                    // iOS OnsenCard（名前→タイプタグ→説明。自然セクションのカードと同じ構成）。
+                    val meta = SpotKind.ONSEN.typeMeta(o.type)
+                    SpotSectionCard(
+                        name = o.name,
+                        description = o.description,
+                        color = meta.color,
+                        icon = meta.icon,
+                        tagLabel = localizeTypeLabel(meta.tagName),
+                        popularity = o.popularity,
+                        onClick = { onsenSpotDetail(prefecture, o.name)?.let(onOpenSpot) },
+                    )
+                }
+            }
+
+            // 自然（自然タブと同じスポットを県で絞り込み。4件＋もっと見る）。
+            if (natureSpots.isNotEmpty()) {
+                richGridSection(
+                    icon = Icons.Filled.Park,
+                    title = natureTitle,
+                    subtitle = null,
+                    accent = NatureSectionAccent,
+                    count = natureSpots.size,
+                    loadMoreText = loadMoreText,
+                ) { index ->
+                    val spot = natureSpots[index]
+                    SpotSectionCard(
+                        name = spot.name,
+                        description = spot.description,
+                        color = spot.typeMeta.color,
+                        icon = spot.typeMeta.icon,
+                        tagLabel = localizeTypeLabel(spot.typeMeta.name),
+                        popularity = spot.popularity,
+                        onClick = { onOpenSpot(spot.toSpotDetail()) },
+                    )
+                }
+            }
+
+            // カフェの Shorts（自然セクションの下に独立セクション）。
+            cafeTrend?.let { group ->
+                item(key = "trend_cafe_header") {
+                    RichSectionHeader(icon = Icons.Filled.LocalCafe, title = trendCategoryName(group), accent = BrandAccent)
+                }
+                item(key = "trend_cafe_row") {
+                    TrendScrollRow(group = group, horizontalPadding = 20, onOpen = openShorts, modifier = Modifier.bleedHorizontally(16.dp))
+                }
+            }
+
+            // 夏祭り・花火大会（4件＋もっと見る）。
+            if (summerFestivals.isNotEmpty()) {
+                richGridSection(
+                    icon = Icons.Filled.Celebration,
+                    title = festivalTitle,
+                    subtitle = festivalSubtitle,
+                    accent = FestivalSectionAccent,
+                    count = summerFestivals.size,
+                    loadMoreText = loadMoreText,
+                ) { index ->
+                    val f = summerFestivals[index]
+                    FestivalSectionCard(f) { onOpenSpot(festivalSpotDetail(prefecture, f)) }
+                }
+            }
+
+            // 春・秋・冬の祭り（4件＋もっと見る）。
+            if (seasonalFestivals.isNotEmpty()) {
+                richGridSection(
+                    icon = Icons.Filled.AcUnit,
+                    title = seasonalTitle,
+                    subtitle = seasonalSubtitle,
+                    accent = SeasonalSectionAccent,
+                    count = seasonalFestivals.size,
+                    loadMoreText = loadMoreText,
+                ) { index ->
+                    val f = seasonalFestivals[index]
+                    FestivalSectionCard(f) { onOpenSpot(festivalSpotDetail(prefecture, f)) }
+                }
+            }
+
             item { AdaptiveBannerAd(adUnitId = AdConfig.bannerUnitId) }
 
-            // フォトギャラリー（写真を持つ観光スポットの横スクロール）。一番下に配置。
-            val photographed = info?.attractions?.filter { ATTRACTION_PHOTOS[it.name] != null } ?: emptyList()
+            // 実写フォトカルーセル（写真があるスポットのみ）。タップで全画面ビューア。
             if (photographed.isNotEmpty()) {
                 item {
                     RichSectionHeader(
                         icon = Icons.Filled.PhotoLibrary,
                         title = stringResource(R.string.tourism_section_photos),
-                        accent = AttractionAccent,
+                        accent = BrandAccent,
                     )
                 }
                 item {
@@ -421,21 +459,7 @@ fun TourismDetailScreen(
                             PhotoCard(
                                 spotName = a.name,
                                 resName = ATTRACTION_PHOTOS[a.name]!!,
-                                onClick = {
-                                    onOpenSpot(
-                                        SpotDetail(
-                                            title = a.name,
-                                            prefecture = prefecture,
-                                            accent = AttractionAccent,
-                                            icon = Icons.Filled.LocationOn,
-                                            description = a.description,
-                                            planCategory = PlanItemCategory.ATTRACTION,
-                                            latitude = a.latitude,
-                                            longitude = a.longitude,
-                                            photoResName = ATTRACTION_PHOTOS[a.name],
-                                        ),
-                                    )
-                                },
+                                onClick = { photoViewerStart = i },
                             )
                         }
                     }
@@ -443,17 +467,181 @@ fun TourismDetailScreen(
             }
 
             // 最下部の余白。
-            item { Spacer(modifier = Modifier.height(24.dp)) }
+            item { Spacer(modifier = Modifier.height(40.dp)) }
         }
 
-        // 戻るボタン（左上フローティング・白い角丸ピル）。iOS 版のフローティング戻るボタンを再現。
+        // 戻るボタン（左上フローティング・白い角丸ピル）。
         FloatingBackButton(
-            onBack = onBack,
+            onBack = back,
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .statusBarsPadding()
                 .padding(start = 16.dp, top = 10.dp),
         )
+
+        // お気に入りトグル（右上。ホームの「お気に入り」列に反映）。
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .statusBarsPadding()
+                .padding(end = 16.dp, top = 8.dp)
+                .shadow(3.dp, CircleShape)
+                .clip(CircleShape)
+                .background(Color.White)
+                .clickable { FavoritePrefectureStore.toggle(prefecture) }
+                .padding(10.dp),
+        ) {
+            Icon(
+                if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                contentDescription = stringResource(if (isFavorite) R.string.tourism_unfavorite else R.string.tourism_favorite),
+                tint = if (isFavorite) Color(0xFFFF2D55) else Color.Gray,
+                modifier = Modifier.size(20.dp),
+            )
+        }
+    }
+}
+
+/** カテゴリ名の見出し＋動画の横スクロール（画面先頭・グルメ末尾に差し込む用）。 */
+@Composable
+private fun TrendCategoryRow(group: TrendGroup, onOpen: (List<TrendVideo>, Int) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+        Text(trendCategoryName(group), fontSize = 15.sp, fontWeight = FontWeight.SemiBold, color = AppTheme.TextSecondary)
+        TrendScrollRow(group = group, horizontalPadding = 20, onOpen = onOpen, modifier = Modifier.bleedHorizontally(16.dp))
+    }
+}
+
+/**
+ * 県詳細の温泉・自然セクションのカード（iOS OnsenCard / NatureSectionCard）。
+ * アイコン丸＋星 → 名前 → タイプのタグ → 説明。
+ */
+@Composable
+private fun SpotSectionCard(
+    name: String,
+    description: String,
+    color: Color,
+    icon: ImageVector,
+    tagLabel: String,
+    popularity: Int,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 180.dp)
+            .fillMaxHeight()
+            .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0x14000000))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .border(1.dp, Brush.linearGradient(listOf(color.copy(alpha = 0.3f), color.copy(alpha = 0.1f))), RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(CircleShape)
+                    .background(Brush.linearGradient(listOf(color.copy(alpha = 0.8f), color))),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            StarRow(popularity, Color(0xFFFFCC00))
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(localizeData(name), fontSize = 16.sp, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Row(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(color.copy(alpha = 0.2f))
+                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(11.dp))
+                Spacer(modifier = Modifier.width(3.dp))
+                Text(tagLabel, fontSize = 11.sp, color = color, maxLines = 1)
+            }
+        }
+        Text(localizeData(description), fontSize = 12.sp, color = Color.Gray, maxLines = 2, overflow = TextOverflow.Ellipsis)
+    }
+}
+
+/** 県詳細の祭りセクションのカード（iOS FestivalItemCard: アイコン丸＋規模の星＋名前＋説明＋時期・期間・タグ）。 */
+@Composable
+private fun FestivalSectionCard(festival: Festival, onClick: () -> Unit) {
+    val color = festColor(festival.category)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 224.dp)
+            .fillMaxHeight()
+            .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0x1A000000))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White)
+            .border(1.dp, Brush.linearGradient(listOf(color.copy(alpha = 0.3f), color.copy(alpha = 0.1f))), RoundedCornerShape(16.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Brush.linearGradient(listOf(color.copy(alpha = 0.8f), color))),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(festIcon(festival.category), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            StarRow(festival.scale, Color(0xFFFF9500))
+        }
+        Text(localizeData(festival.name), fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(localizeData(festival.description), fontSize = 12.sp, color = Color.Gray, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Spacer(modifier = Modifier.weight(1f))
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color(0xFF007AFF), modifier = Modifier.size(12.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(localizeData(festival.month), fontSize = 12.sp, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Schedule, contentDescription = null, tint = Color(0xFF34C759), modifier = Modifier.size(12.dp))
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                localizeData(festival.duration),
+                fontSize = 12.sp,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                festLabel(festival.category),
+                fontSize = 11.sp,
+                color = color,
+                maxLines = 1,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(color.copy(alpha = 0.2f))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun StarRow(count: Int, color: Color) {
+    Row {
+        repeat(5) { i ->
+            Icon(
+                Icons.Filled.Star,
+                contentDescription = null,
+                tint = if (i < count) color else Color(0x4D9E9E9E),
+                modifier = Modifier.size(11.dp),
+            )
+        }
     }
 }
 
@@ -487,7 +675,7 @@ private fun FloatingBackButton(onBack: () -> Unit, modifier: Modifier = Modifier
 private fun androidx.compose.foundation.lazy.LazyListScope.richGridSection(
     icon: ImageVector,
     title: String,
-    subtitle: String,
+    subtitle: String?,
     accent: Color,
     count: Int,
     loadMoreText: String,
@@ -512,9 +700,13 @@ private fun androidx.compose.foundation.lazy.LazyListScope.richGridSection(
             while (row * 2 < visible) {
                 val left = row * 2
                 val right = left + 1
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Box(modifier = Modifier.weight(1f)) { card(left) }
-                    Box(modifier = Modifier.weight(1f)) {
+                // 同じ行の 2 枚は高さを揃える（中身の多い方に合わせる）。
+                Row(
+                    modifier = Modifier.height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight()) { card(left) }
+                    Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                         if (right < visible) card(right)
                     }
                 }
@@ -540,9 +732,12 @@ private fun androidx.compose.foundation.lazy.LazyListScope.gridItems(
     items(rows) { row ->
         val left = row * 2
         val right = left + 1
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Box(modifier = Modifier.weight(1f)) { card(left) }
-            Box(modifier = Modifier.weight(1f)) {
+        Row(
+            modifier = Modifier.height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(modifier = Modifier.weight(1f).fillMaxHeight()) { card(left) }
+            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
                 if (right < count) card(right)
             }
         }
@@ -657,9 +852,9 @@ private fun AttractionMiniCard(name: String, description: String, onClick: () ->
 }
 
 /**
- * グルメ／温泉／お土産で共通の 2列リッチカード。
- * グラデーション円アイコン + 5つ星 + タイトル + 説明 + 価格/時期/カテゴリタグ + グラデーション枠。
- * iOS 版 GourmetItemCard / OnsenCard / SouvenirItemCard を再現。
+ * グルメ／お土産の 2列リッチカード。iOS 版 GourmetItemCard / SouvenirItemCard と同じ構成:
+ * グラデーション円アイコン＋星 → 名前・説明 → 下部に「¥ 価格」（グルメのみ）と「📅 時期＋カテゴリタグ」。
+ * プランへの追加は詳細画面から行う（iOS と同じく、カードに「＋」は置かない）。
  */
 @Composable
 private fun RichItemCard(
@@ -671,13 +866,16 @@ private fun RichItemCard(
     popularity: Int,
     price: String?,
     season: String?,
+    height: Int,
     onClick: () -> Unit,
-    onAdd: () -> Unit,
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 200.dp)
+            // iOS の固定高さを最小値にし、Android の文字メトリクスで溢れるときは伸ばす（下部の文字が切れないように）。
+            .heightIn(min = height.dp)
+            .fillMaxHeight()
+            .shadow(4.dp, RoundedCornerShape(16.dp), spotColor = Color(0x1A000000))
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White)
             .border(
@@ -689,84 +887,63 @@ private fun RichItemCard(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        // トップ: グラデーション円アイコン + 星 + 追加ボタン
+        // トップ: グラデーション円アイコン + 星
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.linearGradient(listOf(accent.copy(alpha = 0.8f), accent)),
-                    ),
+                    .background(Brush.linearGradient(listOf(accent.copy(alpha = 0.8f), accent))),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.weight(1f))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                repeat(5) { i ->
-                    Icon(
-                        Icons.Filled.Star,
-                        contentDescription = null,
-                        tint = if (i < popularity) Color(0xFFFFC107) else Color(0x4D9E9E9E),
-                        modifier = Modifier.size(11.dp),
-                    )
-                }
-            }
+            StarRow(popularity, Color(0xFFFFCC00))
         }
 
-        // タイトル + 説明
-        Text(
-            localizeData(name),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Text(
-            localizeData(description),
-            fontSize = 12.sp,
-            color = Color.Gray,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        // 名前 + 説明
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(localizeData(name), fontSize = 16.sp, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(localizeData(description), fontSize = 12.sp, color = Color.Gray, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        // ボトム: 価格 / 時期 + カテゴリタグ
+        // 下部: 価格（グルメ）/ 時期 + カテゴリタグ
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             if (!price.isNullOrBlank()) {
-                Text("💰 ${localizeData(price)}", fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Filled.CurrencyYen, contentDescription = null, tint = Color(0xFF34C759), modifier = Modifier.size(12.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(localizeData(price), fontSize = 12.sp, fontWeight = FontWeight.Medium, color = AppTheme.TextPrimary, maxLines = 1)
+                }
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!season.isNullOrBlank()) {
+                    Icon(Icons.Filled.CalendarMonth, contentDescription = null, tint = Color(0xFF007AFF), modifier = Modifier.size(12.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        "📅 ${localizeData(season)}",
-                        fontSize = 11.sp,
+                        localizeData(season),
+                        fontSize = 12.sp,
                         color = Color.Gray,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false),
+                        modifier = Modifier.weight(1f),
                     )
+                } else {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                // カテゴリ/タイプ タグ（カプセル）
-                Box(
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    tagLabel,
+                    fontSize = 11.sp,
+                    color = accent,
+                    maxLines = 1,
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
                         .background(accent.copy(alpha = 0.2f))
-                        .padding(horizontal = 8.dp, vertical = 2.dp),
-                ) {
-                    Text(tagLabel, fontSize = 11.sp, color = accent, maxLines = 1)
-                }
-                Spacer(modifier = Modifier.width(6.dp))
-                Icon(
-                    Icons.Filled.AddCircle,
-                    contentDescription = stringResource(R.string.common_add_to_plan),
-                    tint = accent,
-                    modifier = Modifier
-                        .size(22.dp)
-                        .clickable(onClick = onAdd),
+                        .padding(horizontal = 6.dp, vertical = 2.dp),
                 )
             }
         }
