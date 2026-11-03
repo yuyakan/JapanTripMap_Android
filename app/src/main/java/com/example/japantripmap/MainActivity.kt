@@ -59,6 +59,7 @@ class MainActivity : ComponentActivity() {
         // ストア用スクショの撮影モード（デバッグ版で --ez screenshot_mode true のときだけ有効）。
         ScreenshotMode.init(intent)
         PrefectureStores.init(this)
+        UserCardStore.init(this)
         TrendRepository.init(this)
         setContent {
             MaterialTheme {

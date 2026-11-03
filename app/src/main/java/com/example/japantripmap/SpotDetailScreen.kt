@@ -26,16 +26,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddLocationAlt
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EditLocation
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,8 +61,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 
 /**
  * 単体詳細に渡す汎用データ。観光/グルメ/温泉/自然/祭りの各項目を共通表現にする。
@@ -92,6 +103,8 @@ data class SpotDetail(
     val alwaysPhotoStyle: Boolean = false,
     /** 「おすすめの楽しみ方」の文言リソース（グルメのみ。カテゴリごとに 3 つ）。 */
     val tipResIds: List<Int> = emptyList(),
+    /** ユーザーカードの id。写真・URL・編集/削除の表示に使い、広告は出さない（iOS UserCardDetailView）。 */
+    val userCardId: String? = null,
 )
 
 /**
@@ -109,6 +122,9 @@ data class SpotPlanContext(
  *
  * planContext が渡され、かつグルメ・お土産（元データに座標を持たない）の場合は、
  * iOS 版と同じく右下に「位置を追加」ボタンを出し、設定した位置を地図カードとして表示する。
+ *
+ * ユーザーカード（[SpotDetail.userCardId]）は編集がすぐ反映されるよう最新のカードから組み直す。
+ * 削除直後は開いた時点の値で表示を保つ。
  */
 @Composable
 fun SpotDetailScreen(
@@ -116,6 +132,18 @@ fun SpotDetailScreen(
     store: TravelPlanStore,
     onClose: () -> Unit,
     planContext: SpotPlanContext? = null,
+) {
+    val userCard = detail.userCardId?.let(UserCardStore::card)
+    SpotDetailContent(userCard?.toSpotDetail() ?: detail, userCard, store, onClose, planContext)
+}
+
+@Composable
+private fun SpotDetailContent(
+    detail: SpotDetail,
+    userCard: UserCard?,
+    store: TravelPlanStore,
+    onClose: () -> Unit,
+    planContext: SpotPlanContext?,
 ) {
     val context = LocalContext.current
     // 詳細を閉じたら広告カウントを +2（iOS 各詳細ビューの戻る処理と同じ。どこから開いても加算する）。
@@ -139,6 +167,9 @@ fun SpotDetailScreen(
     }
     var showLocationPicker by remember { mutableStateOf(false) }
     var showMemoEditor by remember { mutableStateOf(false) }
+    var showCardMenu by remember { mutableStateOf(false) }
+    var showCardEditor by remember { mutableStateOf(false) }
+    var showCardDeleteConfirm by remember { mutableStateOf(false) }
 
     // 位置ピッカー表示中は最前面に全画面で出す（ボトムシートと違い確実に前面へ）。
     if (showLocationPicker && currentItem != null && planContext != null) {
@@ -183,19 +214,22 @@ fun SpotDetailScreen(
     var mapTouched by remember { mutableStateOf(false) }
     // 写真ありの見た目（iOS PhotoHeaderStyle）: 本文は白・カードに枠線。写真なしはブランドの淡いグラデーション。
     val photoStyle = detail.hasPhoto(context) || detail.alwaysPhotoStyle
+    val cardLocation = userCard?.takeIf { it.hasCoordinate }?.toLocationItem()
     val cardModifier = if (photoStyle) {
         Modifier.border(1.dp, AppTheme.TextPrimary, RoundedCornerShape(AppTheme.CardCorner))
     } else {
         Modifier
     }
-    Box(modifier = Modifier.fillMaxSize().background(detail.accent)) {
+    // ユーザーカードは広告が無く本文が短いので、画面の余りに基調色が見えないよう背景を本文に揃える。
+    val pageBackground = if (detail.userCardId != null) AppTheme.Background else detail.accent
+    Box(modifier = Modifier.fillMaxSize().background(pageBackground)) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState(), enabled = !mapTouched),
         ) {
             // ヒーローヘッダー。
-            HeroHeader(detail)
+            HeroHeader(detail, userCard)
 
             // 本文（薄い背景の上にカードを重ねる）。
             Column(
@@ -218,6 +252,11 @@ fun SpotDetailScreen(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     AddToPlanButton(detail.accent) { showAddDialog = true }
+                    userCard?.openableUrl?.let { url ->
+                        WebsiteButton(label = userCard.url ?: url, accent = detail.accent) {
+                            ExternalLinks.openWebsite(context, url)
+                        }
+                    }
                     Text(stringResource(R.string.detail_more_search), fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
                     SocialSearchButtons(
                         query = detail.searchQuery ?: detail.title,
@@ -228,7 +267,7 @@ fun SpotDetailScreen(
 
                 // プランで位置を設定したグルメ・お土産は、その位置を地図カードで表示する
                 // （iOS 版 PlanItemPlaceMap 相当）。
-                if (allowsLocation && currentItem?.hasCoordinate == true) {
+                if (allowsLocation && currentItem?.hasCoordinate == true && cardLocation == null) {
                     PlanItemLocationCard(item = currentItem, accent = detail.accent, onMapTouch = { mapTouched = it })
                 }
 
@@ -242,7 +281,9 @@ fun SpotDetailScreen(
                 }
 
                 // 説明の下にレクタングル(300x250)（iOS 版の各詳細ビューと同じ位置）。
-                MediumRectangleAd(adUnitId = AdConfig.detailBannerUnitId)
+                if (detail.userCardId == null) {
+                    MediumRectangleAd(adUnitId = AdConfig.detailBannerUnitId)
+                }
 
                 // 基本情報カード。
                 if (detail.infoRows.isNotEmpty()) {
@@ -312,22 +353,46 @@ fun SpotDetailScreen(
                     )
                 }
 
+                // ユーザーカードに設定した位置。
+                cardLocation?.let { item ->
+                    PlanItemLocationCard(item = item, accent = detail.accent, onMapTouch = { mapTouched = it })
+                }
+
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
 
-        // 閉じるボタン（右上フローティング）。
-        Box(
+        // 右上フローティング（ユーザーカードのメニュー・閉じる）。
+        Row(
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = 44.dp, end = 18.dp)
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(Color.White)
-                .clickable(onClick = close),
-            contentAlignment = Alignment.Center,
+                .padding(top = 44.dp, end = 18.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.common_close), tint = detail.accent, modifier = Modifier.size(18.dp))
+            if (userCard != null) {
+                Box {
+                    TopCircleButton(Icons.Filled.MoreHoriz, stringResource(R.string.usercard_menu), detail.accent) { showCardMenu = true }
+                    DropdownMenu(expanded = showCardMenu, onDismissRequest = { showCardMenu = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.usercard_edit)) },
+                            leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
+                            onClick = {
+                                showCardMenu = false
+                                showCardEditor = true
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.usercard_delete), color = Color.Red) },
+                            leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = null, tint = Color.Red) },
+                            onClick = {
+                                showCardMenu = false
+                                showCardDeleteConfirm = true
+                            },
+                        )
+                    }
+                }
+            }
+            TopCircleButton(Icons.Filled.Close, stringResource(R.string.common_close), detail.accent, close)
         }
 
         // プラン経由で開いたときの右下フローティング（iOS 版 PlanLocatableDetailView）。
@@ -353,6 +418,38 @@ fun SpotDetailScreen(
         }
     }
 
+    if (userCard != null && showCardEditor) {
+        FullScreenSheet(onDismiss = { showCardEditor = false }) {
+            UserCardEditor(
+                prefecture = detail.prefecture,
+                kind = userCard.kind,
+                store = store,
+                editing = userCard,
+                onClose = { showCardEditor = false },
+            )
+        }
+    }
+
+    if (userCard != null && showCardDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showCardDeleteConfirm = false },
+            text = { Text(stringResource(R.string.usercard_delete_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    UserCardStore.delete(userCard)
+                    onClose()
+                }) {
+                    Text(stringResource(R.string.common_delete), color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCardDeleteConfirm = false }) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
+
     if (showMemoEditor && planContext != null && currentItem != null) {
         FullScreenSheet(onDismiss = { showMemoEditor = false }) {
             PlanMemoEditorScreen(
@@ -368,23 +465,84 @@ fun SpotDetailScreen(
     }
 }
 
+/** 右上に浮かぶ丸いボタン。 */
 @Composable
-private fun HeroHeader(detail: SpotDetail) {
+private fun TopCircleButton(icon: ImageVector, description: String, tint: Color, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(Color.White)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(icon, contentDescription = description, tint = tint, modifier = Modifier.size(18.dp))
+    }
+}
+
+/** ユーザーカードの Web サイトを開くボタン。 */
+@Composable
+private fun WebsiteButton(label: String, accent: Color, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(accent)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(Color.White),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(Icons.Filled.Language, contentDescription = null, tint = accent, modifier = Modifier.size(18.dp))
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(stringResource(R.string.usercard_url_open), fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            // 長い URL は途中を省略して、ドメインと末尾の両方を見せる。
+            Text(label, fontSize = 12.sp, color = Color.White.copy(alpha = 0.85f), maxLines = 1, overflow = TextOverflow.MiddleEllipsis)
+        }
+        Icon(
+            Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = Color.White.copy(alpha = 0.85f),
+            modifier = Modifier.size(20.dp),
+        )
+    }
+}
+
+@Composable
+private fun HeroHeader(detail: SpotDetail, userCard: UserCard?) {
     val context = LocalContext.current
     val photoId = detail.photoResName?.let {
         context.resources.getIdentifier(it, "drawable", context.packageName)
     } ?: 0
+    val cardPhoto = userCard?.let(UserCardStore::photoFile)
 
     Box(modifier = Modifier.fillMaxWidth()) {
         // 写真があれば背景に敷く。無ければアクセント色のグラデーション。
-        if (photoId != 0) {
-            Image(
-                painter = painterResource(id = photoId),
-                contentDescription = detail.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .matchParentSize(),
-            )
+        if (photoId != 0 || cardPhoto != null) {
+            if (cardPhoto != null) {
+                AsyncImage(
+                    model = cardPhoto,
+                    contentDescription = detail.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.matchParentSize(),
+                )
+            } else {
+                Image(
+                    painter = painterResource(id = photoId),
+                    contentDescription = detail.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .matchParentSize(),
+                )
+            }
             // 下部を暗くして文字を読みやすくするオーバーレイ。
             Box(
                 modifier = Modifier

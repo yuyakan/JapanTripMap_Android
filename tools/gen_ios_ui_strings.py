@@ -203,6 +203,23 @@ ENTRIES = [
     ("plan_settlement_transfers", "plan.settlement.transfers", "add"),
     ("plan_settlement_even", "plan.settlement.even", "add"),
     ("plan_settlement_empty", "plan.settlement.empty", "add"),
+    # 県詳細のユーザーカード
+    ("usercard_add", "usercard.add", "add"),
+    ("usercard_add_short", "usercard.add.short", "add"),
+    ("usercard_edit", "usercard.edit", "add"),
+    ("usercard_delete", "usercard.delete", "add"),
+    ("usercard_delete_confirm", "usercard.delete.confirm", "add"),
+    ("usercard_menu", "usercard.menu", "add"),
+    ("usercard_name_placeholder", "usercard.name.placeholder", "add"),
+    ("usercard_description_placeholder", "usercard.description.placeholder", "add"),
+    ("usercard_photo_add", "usercard.photo.add", "add"),
+    ("usercard_photo_change", "usercard.photo.change", "add"),
+    ("usercard_photo_remove", "usercard.photo.remove", "add"),
+    ("usercard_url_label", "usercard.url.label", "add"),
+    ("usercard_url_placeholder", "usercard.url.placeholder", "add"),
+    ("usercard_url_invalid", "usercard.url.invalid", "add"),
+    ("usercard_url_open", "usercard.url.open", "add"),
+    ("usercard_location_clear", "plan.custom.location.clear", "add"),
 ]
 
 

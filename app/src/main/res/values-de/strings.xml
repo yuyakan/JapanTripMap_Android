@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">Frische Erzeugnisse auf Höfen oder in Hofläden kaufen</string>
     <string name="vegetables_tip_2">Vor Ort zur Hauptsaison genießen</string>
     <string name="vegetables_tip_3">Auch als verarbeitete Produkte oder Süßigkeiten genießen</string>
+    <string name="usercard_add">Karte hinzufügen</string>
+    <string name="usercard_add_short">Hinzufügen</string>
+    <string name="usercard_edit">Karte bearbeiten</string>
+    <string name="usercard_delete">Karte löschen</string>
+    <string name="usercard_delete_confirm">Diese Karte löschen?</string>
+    <string name="usercard_menu">Kartenmenü</string>
+    <string name="usercard_name_placeholder">Titel</string>
+    <string name="usercard_description_placeholder">Beschreibung oder Notiz hinzufügen</string>
+    <string name="usercard_photo_add">Titelfoto hinzufügen</string>
+    <string name="usercard_photo_change">Foto ändern</string>
+    <string name="usercard_photo_remove">Foto entfernen</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">Diese URL ist ungültig</string>
+    <string name="usercard_url_open">Website öffnen</string>
+    <string name="usercard_location_clear">Ort entfernen</string>
 </resources>

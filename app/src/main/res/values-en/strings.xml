@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">Buy fresh produce at farms or direct sales stores</string>
     <string name="vegetables_tip_2">Taste at their peak season locally</string>
     <string name="vegetables_tip_3">Also enjoy as processed products or sweets</string>
+    <string name="usercard_add">Add Card</string>
+    <string name="usercard_add_short">Add</string>
+    <string name="usercard_edit">Edit Card</string>
+    <string name="usercard_delete">Delete Card</string>
+    <string name="usercard_delete_confirm">Delete this card?</string>
+    <string name="usercard_menu">Card menu</string>
+    <string name="usercard_name_placeholder">Title</string>
+    <string name="usercard_description_placeholder">Add a description or note</string>
+    <string name="usercard_photo_add">Add Cover Photo</string>
+    <string name="usercard_photo_change">Change Photo</string>
+    <string name="usercard_photo_remove">Remove Photo</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">This URL isn\'t valid</string>
+    <string name="usercard_url_open">Open Website</string>
+    <string name="usercard_location_clear">Remove location</string>
 </resources>

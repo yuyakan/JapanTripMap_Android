@@ -25,6 +25,11 @@ object ExternalLinks {
         }
     }
 
+    /** ユーザーカードの Web サイトを開く。 */
+    fun openWebsite(context: Context, url: String) {
+        open(context, url)
+    }
+
     /** Google マップを施設名で検索して開く。 */
     fun openMap(context: Context, query: String) {
         open(context, "https://www.google.com/maps/search/?api=1&query=${enc(query)}")

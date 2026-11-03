@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">Compra productos frescos en granjas o tiendas de venta directa</string>
     <string name="vegetables_tip_2">Pruébalos en su mejor temporada en el lugar</string>
     <string name="vegetables_tip_3">Disfrútalos también como productos procesados o dulces</string>
+    <string name="usercard_add">Añadir tarjeta</string>
+    <string name="usercard_add_short">Añadir</string>
+    <string name="usercard_edit">Editar tarjeta</string>
+    <string name="usercard_delete">Eliminar tarjeta</string>
+    <string name="usercard_delete_confirm">¿Eliminar esta tarjeta?</string>
+    <string name="usercard_menu">Menú de la tarjeta</string>
+    <string name="usercard_name_placeholder">Título</string>
+    <string name="usercard_description_placeholder">Añade una descripción o nota</string>
+    <string name="usercard_photo_add">Añadir foto de portada</string>
+    <string name="usercard_photo_change">Cambiar foto</string>
+    <string name="usercard_photo_remove">Eliminar foto</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">Esta URL no es válida</string>
+    <string name="usercard_url_open">Abrir sitio web</string>
+    <string name="usercard_location_clear">Quitar ubicación</string>
 </resources>

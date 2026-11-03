@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">農園や直売所で新鮮なものを購入</string>
     <string name="vegetables_tip_2">旬の時期に現地で味わう</string>
     <string name="vegetables_tip_3">加工品やスイーツでも楽しむ</string>
+    <string name="usercard_add">カードを追加</string>
+    <string name="usercard_add_short">追加</string>
+    <string name="usercard_edit">カードを編集</string>
+    <string name="usercard_delete">カードを削除</string>
+    <string name="usercard_delete_confirm">このカードを削除しますか？</string>
+    <string name="usercard_menu">カードのメニュー</string>
+    <string name="usercard_name_placeholder">タイトル</string>
+    <string name="usercard_description_placeholder">説明やメモを入力</string>
+    <string name="usercard_photo_add">表紙の写真を追加</string>
+    <string name="usercard_photo_change">写真を変更</string>
+    <string name="usercard_photo_remove">写真を削除</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">URLの形式が正しくありません</string>
+    <string name="usercard_url_open">Webサイトを開く</string>
+    <string name="usercard_location_clear">位置を削除</string>
 </resources>

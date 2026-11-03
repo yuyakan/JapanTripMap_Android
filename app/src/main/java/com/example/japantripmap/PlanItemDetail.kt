@@ -102,6 +102,8 @@ private fun prefectureByName(name: String): Prefecture? =
 internal fun spotDetailForPlanItem(item: PlanItem): SpotDetail? {
     if (item.category in CUSTOM_PLAN_CATEGORIES) return null
     val pref = prefectureByName(item.prefectureName) ?: return fallbackSpotDetail(item)
+    // ユーザーが作成したカードは、カードの詳細を開く。
+    UserCardStore.card(item.category, pref, item.name)?.let { return it.toSpotDetail() }
 
     return when (item.category) {
         PlanItemCategory.ATTRACTION ->
@@ -153,6 +155,7 @@ internal val CUSTOM_PLAN_CATEGORIES = setOf(
  * - カスタム項目（宿泊/交通/メモ）: 自身が保持する座標（未設定なら null）。
  * - グルメ/お土産: 元データに座標が無いため、ユーザーが手動で設定した座標（未設定なら null）。
  * - 観光/温泉/自然/祭: 元データから引き当て（祭は座標を持たない項目もある）。
+ * - ユーザーカード: 元データの代わりにカードの座標を使う（プラン項目に設定した座標が優先）。
  */
 internal fun coordinateForPlanItem(item: PlanItem): LatLng? {
     // カスタム項目・グルメ・お土産は、自身が保持するユーザー設定座標を使う。
@@ -160,11 +163,15 @@ internal fun coordinateForPlanItem(item: PlanItem): LatLng? {
         item.category == PlanItemCategory.GOURMET ||
         item.category == PlanItemCategory.SOUVENIR
     ) {
-        val lat = item.latitude ?: return null
-        val lng = item.longitude ?: return null
-        return LatLng(lat, lng)
+        val lat = item.latitude
+        val lng = item.longitude
+        if (lat != null && lng != null) return LatLng(lat, lng)
     }
+    if (item.category in CUSTOM_PLAN_CATEGORIES) return null
     val pref = prefectureByName(item.prefectureName) ?: return null
+    UserCardStore.card(item.category, pref, item.name)?.let { card ->
+        return card.latitude?.let { la -> card.longitude?.let { lo -> LatLng(la, lo) } }
+    }
     return when (item.category) {
         PlanItemCategory.ATTRACTION ->
             pref.tourismInfo?.attractions?.firstOrNull { it.name == item.name }

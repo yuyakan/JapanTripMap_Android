@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">Beli hasil segar di kebun atau toko penjualan langsung</string>
     <string name="vegetables_tip_2">Cicipi saat puncak musimnya di daerah asal</string>
     <string name="vegetables_tip_3">Nikmati juga sebagai produk olahan atau kudapan</string>
+    <string name="usercard_add">Tambah Kartu</string>
+    <string name="usercard_add_short">Tambah</string>
+    <string name="usercard_edit">Edit Kartu</string>
+    <string name="usercard_delete">Hapus Kartu</string>
+    <string name="usercard_delete_confirm">Hapus kartu ini?</string>
+    <string name="usercard_menu">Menu kartu</string>
+    <string name="usercard_name_placeholder">Judul</string>
+    <string name="usercard_description_placeholder">Tambahkan deskripsi atau catatan</string>
+    <string name="usercard_photo_add">Tambah Foto Sampul</string>
+    <string name="usercard_photo_change">Ganti Foto</string>
+    <string name="usercard_photo_remove">Hapus Foto</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">URL ini tidak valid</string>
+    <string name="usercard_url_open">Buka Situs Web</string>
+    <string name="usercard_location_clear">Hapus lokasi</string>
 </resources>

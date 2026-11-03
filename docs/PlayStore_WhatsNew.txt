@@ -1,0 +1,74 @@
+# Google Play「リリースノート」（v2.1.0 / versionCode 8）。全 12 言語。
+# Play Console の「リリースノート」欄へ <タグ> ごとそのまま貼り付ける（各言語 500 文字以内）。
+
+<ja-JP>
+・県の詳細画面に、自分だけのカードを追加できるようになりました。観光地、グルメ、カフェ、お土産、温泉、自然、祭りの各セクションに追加できます。
+・カードには表紙の写真、説明、URL、位置を登録できます。
+・作ったカードは旅行プランにも追加できます。
+</ja-JP>
+
+<en-US>
+- You can now add your own cards to prefecture pages: sights, food, cafes, souvenirs, hot springs, nature, and festivals.
+- Each card can have a cover photo, description, URL, and location.
+- Add the cards you create to your travel plans.
+</en-US>
+
+<zh-CN>
+・现在可以在都道府县详情页添加自己的卡片，支持景点、美食、咖啡馆、伴手礼、温泉、自然和祭典等版块。
+・卡片可设置封面照片、说明、URL 和位置。
+・创建的卡片也可以加入旅行计划。
+</zh-CN>
+
+<zh-TW>
+・現在可以在都道府縣詳細頁面新增自己的卡片，支援景點、美食、咖啡廳、伴手禮、溫泉、自然和祭典等區塊。
+・卡片可設定封面照片、說明、URL 和位置。
+・建立的卡片也可以加入旅行計畫。
+</zh-TW>
+
+<zh-HK>
+・依家可以喺都道府縣詳細頁面加入自己嘅卡片，支援景點、美食、咖啡店、手信、溫泉、自然同祭典等部分。
+・卡片可以設定封面相片、說明、URL 同位置。
+・建立嘅卡片亦可以加入旅行計劃。
+</zh-HK>
+
+<ko-KR>
+・지역 상세 화면에 나만의 카드를 추가할 수 있습니다. 관광지, 맛집, 카페, 기념품, 온천, 자연, 축제 섹션에 추가할 수 있습니다.
+・카드에 표지 사진, 설명, URL, 위치를 등록할 수 있습니다.
+・만든 카드는 여행 플랜에도 추가할 수 있습니다.
+</ko-KR>
+
+<th>
+- ตอนนี้เพิ่มการ์ดของคุณเองในหน้ารายละเอียดจังหวัดได้แล้ว ทั้งสถานที่ท่องเที่ยว อาหาร คาเฟ่ ของฝาก ออนเซ็น ธรรมชาติ และเทศกาล
+- การ์ดแต่ละใบใส่รูปปก คำอธิบาย URL และตำแหน่งได้
+- เพิ่มการ์ดที่สร้างไว้ลงในแผนการเดินทางได้
+</th>
+
+<vi>
+- Giờ đây bạn có thể thêm thẻ của riêng mình vào trang chi tiết tỉnh: điểm tham quan, ẩm thực, quán cà phê, quà lưu niệm, suối nước nóng, thiên nhiên và lễ hội.
+- Mỗi thẻ có thể có ảnh bìa, mô tả, URL và vị trí.
+- Thêm các thẻ bạn tạo vào kế hoạch du lịch.
+</vi>
+
+<fr-FR>
+- Vous pouvez désormais ajouter vos propres cartes aux pages des préfectures : sites, cuisine, cafés, souvenirs, sources chaudes, nature et festivals.
+- Chaque carte peut contenir une photo de couverture, une description, une URL et un emplacement.
+- Ajoutez les cartes que vous créez à vos plans de voyage.
+</fr-FR>
+
+<es-ES>
+- Ahora puedes añadir tus propias tarjetas a las páginas de las prefecturas: lugares, comida, cafeterías, recuerdos, aguas termales, naturaleza y festivales.
+- Cada tarjeta puede incluir foto de portada, descripción, URL y ubicación.
+- Añade las tarjetas que crees a tus planes de viaje.
+</es-ES>
+
+<de-DE>
+- Du kannst jetzt eigene Karten zu den Präfekturseiten hinzufügen: Sehenswürdigkeiten, Essen, Cafés, Souvenirs, heiße Quellen, Natur und Feste.
+- Jede Karte kann ein Titelfoto, eine Beschreibung, eine URL und einen Standort enthalten.
+- Füge deine Karten zu deinen Reiseplänen hinzu.
+</de-DE>
+
+<id>
+- Kini Anda dapat menambahkan kartu sendiri ke halaman prefektur: tempat wisata, kuliner, kafe, oleh-oleh, onsen, alam, dan festival.
+- Setiap kartu dapat memiliki foto sampul, deskripsi, URL, dan lokasi.
+- Tambahkan kartu yang Anda buat ke rencana perjalanan.
+</id>
