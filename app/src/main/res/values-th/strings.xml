@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">ซื้อผักผลไม้สดที่ฟาร์มหรือร้านขายตรง</string>
     <string name="vegetables_tip_2">ลิ้มรสในช่วงที่อร่อยที่สุดในท้องถิ่น</string>
     <string name="vegetables_tip_3">เพลิดเพลินในรูปแบบแปรรูปหรือขนมได้ด้วย</string>
+    <string name="usercard_add">เพิ่มการ์ด</string>
+    <string name="usercard_add_short">เพิ่ม</string>
+    <string name="usercard_edit">แก้ไขการ์ด</string>
+    <string name="usercard_delete">ลบการ์ด</string>
+    <string name="usercard_delete_confirm">ลบการ์ดนี้หรือไม่</string>
+    <string name="usercard_menu">เมนูการ์ด</string>
+    <string name="usercard_name_placeholder">ชื่อเรื่อง</string>
+    <string name="usercard_description_placeholder">เพิ่มคำอธิบายหรือบันทึก</string>
+    <string name="usercard_photo_add">เพิ่มรูปปก</string>
+    <string name="usercard_photo_change">เปลี่ยนรูป</string>
+    <string name="usercard_photo_remove">ลบรูป</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">รูปแบบ URL ไม่ถูกต้อง</string>
+    <string name="usercard_url_open">เปิดเว็บไซต์</string>
+    <string name="usercard_location_clear">ลบตำแหน่ง</string>
 </resources>

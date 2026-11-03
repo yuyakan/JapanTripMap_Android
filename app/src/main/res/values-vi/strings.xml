@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">Mua nông sản tươi tại nông trại hoặc cửa hàng bán trực tiếp</string>
     <string name="vegetables_tip_2">Thưởng thức đúng mùa ngon nhất tại địa phương</string>
     <string name="vegetables_tip_3">Cũng có thể thưởng thức dưới dạng chế biến hoặc bánh</string>
+    <string name="usercard_add">Thêm thẻ</string>
+    <string name="usercard_add_short">Thêm</string>
+    <string name="usercard_edit">Sửa thẻ</string>
+    <string name="usercard_delete">Xóa thẻ</string>
+    <string name="usercard_delete_confirm">Xóa thẻ này?</string>
+    <string name="usercard_menu">Menu thẻ</string>
+    <string name="usercard_name_placeholder">Tiêu đề</string>
+    <string name="usercard_description_placeholder">Thêm mô tả hoặc ghi chú</string>
+    <string name="usercard_photo_add">Thêm ảnh bìa</string>
+    <string name="usercard_photo_change">Đổi ảnh</string>
+    <string name="usercard_photo_remove">Xóa ảnh</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">URL này không hợp lệ</string>
+    <string name="usercard_url_open">Mở trang web</string>
+    <string name="usercard_location_clear">Xóa vị trí</string>
 </resources>

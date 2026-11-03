@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">농원이나 직매장에서 신선한 것을 구입</string>
     <string name="vegetables_tip_2">제철에 현지에서 맛보기</string>
     <string name="vegetables_tip_3">가공품이나 스위트로도 즐기기</string>
+    <string name="usercard_add">카드 추가</string>
+    <string name="usercard_add_short">추가</string>
+    <string name="usercard_edit">카드 편집</string>
+    <string name="usercard_delete">카드 삭제</string>
+    <string name="usercard_delete_confirm">이 카드를 삭제할까요?</string>
+    <string name="usercard_menu">카드 메뉴</string>
+    <string name="usercard_name_placeholder">제목</string>
+    <string name="usercard_description_placeholder">설명이나 메모 입력</string>
+    <string name="usercard_photo_add">표지 사진 추가</string>
+    <string name="usercard_photo_change">사진 변경</string>
+    <string name="usercard_photo_remove">사진 삭제</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">URL 형식이 올바르지 않습니다</string>
+    <string name="usercard_url_open">웹사이트 열기</string>
+    <string name="usercard_location_clear">위치 삭제</string>
 </resources>

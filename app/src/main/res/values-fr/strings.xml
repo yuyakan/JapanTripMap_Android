@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">Achetez des produits frais à la ferme ou en vente directe</string>
     <string name="vegetables_tip_2">Dégustez-les à leur pleine saison sur place</string>
     <string name="vegetables_tip_3">À apprécier aussi en produits transformés ou en confiseries</string>
+    <string name="usercard_add">Ajouter une carte</string>
+    <string name="usercard_add_short">Ajouter</string>
+    <string name="usercard_edit">Modifier la carte</string>
+    <string name="usercard_delete">Supprimer la carte</string>
+    <string name="usercard_delete_confirm">Supprimer cette carte ?</string>
+    <string name="usercard_menu">Menu de la carte</string>
+    <string name="usercard_name_placeholder">Titre</string>
+    <string name="usercard_description_placeholder">Ajoutez une description ou une note</string>
+    <string name="usercard_photo_add">Ajouter une photo de couverture</string>
+    <string name="usercard_photo_change">Changer la photo</string>
+    <string name="usercard_photo_remove">Supprimer la photo</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">Cette URL n’est pas valide</string>
+    <string name="usercard_url_open">Ouvrir le site web</string>
+    <string name="usercard_location_clear">Supprimer le lieu</string>
 </resources>

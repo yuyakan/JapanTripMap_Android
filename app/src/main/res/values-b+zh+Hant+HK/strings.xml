@@ -385,4 +385,20 @@
     <string name="vegetables_tip_1">在农场或直销所购买新鲜产品</string>
     <string name="vegetables_tip_2">在旺季当地品尝</string>
     <string name="vegetables_tip_3">也可以享受加工品或甜点</string>
+    <string name="usercard_add">新增卡片</string>
+    <string name="usercard_add_short">新增</string>
+    <string name="usercard_edit">編輯卡片</string>
+    <string name="usercard_delete">刪除卡片</string>
+    <string name="usercard_delete_confirm">要刪除此卡片嗎？</string>
+    <string name="usercard_menu">卡片選單</string>
+    <string name="usercard_name_placeholder">標題</string>
+    <string name="usercard_description_placeholder">新增說明或備註</string>
+    <string name="usercard_photo_add">新增封面相片</string>
+    <string name="usercard_photo_change">更換相片</string>
+    <string name="usercard_photo_remove">刪除相片</string>
+    <string name="usercard_url_label">URL</string>
+    <string name="usercard_url_placeholder">https://example.com</string>
+    <string name="usercard_url_invalid">URL 格式不正確</string>
+    <string name="usercard_url_open">開啟網站</string>
+    <string name="usercard_location_clear">刪除位置</string>
 </resources>

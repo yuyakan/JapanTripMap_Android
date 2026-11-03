@@ -181,6 +181,14 @@ class TravelPlanStore(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** ユーザーカードの編集に合わせて、全プランの該当項目を更新する。iOS 版 renameItems 相当。 */
+    fun syncUserCard(previous: UserCard, updated: UserCard) {
+        val synced = plans.withUserCardSynced(previous, updated)
+        if (synced == plans) return
+        plans = synced
+        persist()
+    }
+
     /**
      * 項目を items 配列内で targetId の直前へ移動する（ドラッグ&ドロップの並べ替え用）。
      * targetId が null / 見つからない場合は末尾へ移動する。日/ブロック跨ぎの移動時は
